@@ -1,0 +1,140 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+import 'package:get/get_utils/src/extensions/export.dart';
+
+import 'package:flutter/gestures.dart';
+import 'package:final_year_project_frontend/common_widgets/coustom_%20gradient_text.dart';
+import 'package:final_year_project_frontend/common_widgets/customs_button.dart';
+import 'package:final_year_project_frontend/constants/text_font_style.dart';
+import 'package:final_year_project_frontend/features/sign_In/widgets/custom_otp_field_widget.dart';
+
+import 'package:final_year_project_frontend/gen/assets.gen.dart';
+import 'package:final_year_project_frontend/gen/colors.gen.dart';
+
+import 'package:final_year_project_frontend/helpers/all_routes.dart';
+import 'package:final_year_project_frontend/helpers/navigation_service.dart';
+import 'package:final_year_project_frontend/helpers/ui_helpers.dart';
+
+class OtpVerificationScreen extends StatefulWidget {
+  const OtpVerificationScreen({super.key});
+
+  @override
+  State<OtpVerificationScreen> createState() => _OtpVerificationScreenState();
+}
+
+class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      child: Container(
+        decoration: BoxDecoration(color: AppColors.c050915),
+        child: SafeArea(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20.w),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                UIHelper.verticalSpace(40.h),
+                Image(image: AssetImage(Assets.images.justlogoPng.path)),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Aura',
+                      style: TextFontStyle.textStyle18c231F20poppins700
+                          .copyWith(fontSize: 24.sp),
+                    ),
+                    GradientText(
+                      text: 'Forge',
+                      gradient: LinearGradient(
+                        colors: [AppColors.c8B3AFF, AppColors.cD020FF],
+                      ),
+                      style: TextFontStyle.textStyle18c231F20poppins700
+                          .copyWith(fontSize: 24.sp),
+                    ),
+                  ],
+                ),
+                UIHelper.verticalSpace(40.h),
+
+                Align(
+                  alignment: Alignment.topCenter,
+                  child: Text(
+                    "OTP Verification".tr,
+                    style: TextFontStyle.textStyle18c231F20poppins700.copyWith(
+                      fontSize: 24.sp,
+                      height: 1.6.h,
+                    ),
+                    textAlign: TextAlign.start,
+                  ),
+                ),
+                UIHelper.verticalSpace(15.h),
+                Align(
+                  alignment: Alignment.topCenter,
+                  child: Text(
+                    "Enter the verification code we send you on: Alberts******@gmail.com",
+                    style: TextFontStyle.textStyle12c7E7E7Epoppins400.copyWith(
+                      fontSize: 14.sp,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                UIHelper.verticalSpace(40.h),
+                Align(
+                  alignment: Alignment.bottomLeft,
+                  child: CustomOtpPinField(onSubmit: (String ) {  }, onChange: (String ) {  },),
+                ),
+
+                UIHelper.verticalSpace(60.h),
+                                  GestureDetector(
+                    onTap: () {
+                      NavigationService.navigateToReplacement(Routes.signinScreen);
+                    },
+                     child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Don’t receive the code? ",
+                          style: TextFontStyle.textStyle18c231F20poppins700
+                              .copyWith(fontSize: 12.sp,fontWeight: FontWeight.w400),
+                        ),
+                        GradientText(
+                          text: 'Click to resend code',
+                          gradient: LinearGradient(
+                            colors: [AppColors.c8B3AFF, AppColors.cD020FF],
+                          ),
+                          style: TextFontStyle.textStyle18c231F20poppins700
+                              .copyWith(fontSize: 12.sp,fontWeight: FontWeight.w600,decoration: TextDecoration.underline),
+                        ),
+                      ],
+                                     ),
+                   ),
+                
+
+                UIHelper.verticalSpace(120.h),
+                SizedBox(
+                  height: 48.h,
+                  width: double.infinity,
+                  child: CustomsButton(
+                    name: 'Confirm'.tr,
+                    callback: () {
+                      NavigationService.navigateToWithArgs(
+                        Routes.mainNavigationBar,
+                        {
+                          'pageNum': 0,
+                        }
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
