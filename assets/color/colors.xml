@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<colors>
+
+<color name="cF8F3DD">#F8F3DD</color>
+<color name="c73010B">#73010B</color>
+<color name="c420106">#420106</color>
+<color name="c13BD5C">#13BD5C</color>
+<color name="cBF3D4A">#BF3D4A</color>
+<color name="c06EC4B1A">#06EC4B1A</color>
+<color name="c05B83A">#05B83A</color>
+<color name="c8993A4">#8993A4</color>
+<color name="c3D4040">#3D4040</color>
+<color name="c8993A433">#8993A433</color>
+<color name="c8F8F8F">#8F8F8F</color>
+<color name="c003181">#003181</color>
+<color name="cFFFFFF">#FFFFFF</color>
+<color name="cC8C8C8">#C8C8C8</color>
+<color name="cABB7C2">#ABB7C2</color>
+<color name="c8A6A00">#8A6A00</color>
+<color name="cF4BB00">#F4BB00</color>
+<color name="c73010B1A">#73010B1A</color>
+<color name="c8993A480">#8993A480</color>
+<color name="c059988">#059988</color>
+<color name="c73010B33">#73010B33</color>
+<color name="cFF4842">#FF4842</color>
+<color name="c108DF0">#108DF0</color>
+<color name="c4CA0FF">#4CA0FF</color>
+<color name="cFFC107">#FFC107</color>
+<color name="c00D050">#00D050</color>
+<color name="c006A29">#006A29</color>
+
+
+
+
+<color name="cFFFFFF">#FFFFFF</color>
+<color name="c050915">#050915</color>
+<color name="c1F1538">#1F1538</color>
+<color name="c3366FF">#3366FF</color>
+<color name="cD020FF">#D020FF</color>
+<color name="c8B3AFF">#8B3AFF</color>
+<color name="cD5D5D5">#D5D5D5</color>
+<color name="c28B446">#28B446</color>
+<color name="c7E7E7E">#7E7E7E</color>
+<color name="cA1A1AA">#A1A1AA</color>
+<color name="c161C2D">#161C2D</color>
+<color name="cF2F0F0">#F2F0F0</color>
+<color name="c1E1E24">#1E1E24</color>
+<color name="c2F3956">#2F3956</color>
+// New colors added for Krishi App
+
+
+<color name="button">#0B7F22</color>
+
+
+</colors>
