@@ -14,6 +14,9 @@ import 'package:flutter/material.dart';
 class AppColors {
   AppColors._();
 
+  /// Color: #0B7F22
+  static const Color button = Color(0xFF0B7F22);
+
   /// Color: #003181
   static const Color c003181 = Color(0xFF003181);
 

@@ -28,9 +28,9 @@ class _SplashScreenState extends State<SplashScreen> {
     return Material(
       
       child: Container(
-        decoration: BoxDecoration(color: AppColors.c050915),
+        decoration: BoxDecoration(color: AppColors.cFFFFFF),
         child: Center(
-          child: Image(image: AssetImage(Assets.images.splashLogo.path)),
+          child: Image(image: AssetImage(Assets.images.splashicom.path)),
         ),
       ),
     );

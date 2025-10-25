@@ -8,16 +8,16 @@ final sharedDecoration = InputDecoration(
   filled: true,
   fillColor: Colors.transparent,
   border: OutlineInputBorder(
-    borderSide: BorderSide(color: AppColors.cF2F0F0, width: 1.0),
+    borderSide: BorderSide(color: Colors.black, width: 1.0),
     borderRadius: BorderRadius.all(Radius.circular(8.r)),
   ),
   enabledBorder: OutlineInputBorder(
-    borderSide: BorderSide(color: AppColors.cF2F0F0, width: 1.0),
+    borderSide: BorderSide(color: Colors.black, width: 1.0),
     borderRadius: BorderRadius.all(Radius.circular(8.r)),
   ),
   focusedBorder: OutlineInputBorder(
     borderRadius: BorderRadius.circular(8.r),
-    borderSide: BorderSide(color: AppColors.cF2F0F0, width: 1.0),
+    borderSide: BorderSide(color: Colors.black, width: 1.0),
   ),
   hintStyle: TextFontStyle.textStyle16c8993A4EurostileW400,
 );
@@ -86,6 +86,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
               )
             : null,
       ),
+      
     );
   }
 }

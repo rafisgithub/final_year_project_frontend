@@ -17,9 +17,9 @@ class $AssetsColorGen {
   /// File path: assets/color/colors.xml
   String get colors => 'assets/color/colors.xml';
 
-  /// File path: assets/color/final_year_project_frontend.code-workspace
+  /// File path: assets/color/sheikhfahmidisl_flutter.code-workspace
   String get sheikhfahmidislFlutter =>
-      'assets/color/final_year_project_frontend.code-workspace';
+      'assets/color/sheikhfahmidisl_flutter.code-workspace';
 
   /// List of all assets
   List<String> get values => [colors, sheikhfahmidislFlutter];
@@ -153,63 +153,12 @@ class $AssetsIconsGen {
 class $AssetsImagesGen {
   const $AssetsImagesGen();
 
-  /// File path: assets/images/ai_maskot.svg
-  String get aiMaskot => 'assets/images/ai_maskot.svg';
-
-  /// File path: assets/images/cardbg1.png
-  AssetGenImage get cardbg1 => const AssetGenImage('assets/images/cardbg1.png');
-
-  /// File path: assets/images/cardbg2.png
-  AssetGenImage get cardbg2 => const AssetGenImage('assets/images/cardbg2.png');
-
-  /// File path: assets/images/justlogo.png
-  AssetGenImage get justlogoPng =>
-      const AssetGenImage('assets/images/justlogo.png');
-
-  /// File path: assets/images/justlogo.svg
-  String get justlogoSvg => 'assets/images/justlogo.svg';
-
-  /// File path: assets/images/maskot.png
-  AssetGenImage get maskot => const AssetGenImage('assets/images/maskot.png');
-
-  /// File path: assets/images/maskotBG.png
-  AssetGenImage get maskotBG =>
-      const AssetGenImage('assets/images/maskotBG.png');
-
-  /// File path: assets/images/onbordingLogo.png
-  AssetGenImage get onbordingLogoPng =>
-      const AssetGenImage('assets/images/onbordingLogo.png');
-
-  /// File path: assets/images/onbordingLogo.svg
-  String get onbordingLogoSvg => 'assets/images/onbordingLogo.svg';
-
-  /// File path: assets/images/onbordingsenterlogo.png
-  AssetGenImage get onbordingsenterlogo =>
-      const AssetGenImage('assets/images/onbordingsenterlogo.png');
-
-  /// File path: assets/images/splashLogo.png
-  AssetGenImage get splashLogo =>
-      const AssetGenImage('assets/images/splashLogo.png');
-
-  /// File path: assets/images/succestickmark.png
-  AssetGenImage get succestickmark =>
-      const AssetGenImage('assets/images/succestickmark.png');
+  /// File path: assets/images/splashicom.png
+  AssetGenImage get splashicom =>
+      const AssetGenImage('assets/images/splashicom.png');
 
   /// List of all assets
-  List<dynamic> get values => [
-    aiMaskot,
-    cardbg1,
-    cardbg2,
-    justlogoPng,
-    justlogoSvg,
-    maskot,
-    maskotBG,
-    onbordingLogoPng,
-    onbordingLogoSvg,
-    onbordingsenterlogo,
-    splashLogo,
-    succestickmark,
-  ];
+  List<AssetGenImage> get values => [splashicom];
 }
 
 class Assets {

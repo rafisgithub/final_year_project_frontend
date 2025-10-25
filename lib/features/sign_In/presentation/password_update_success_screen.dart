@@ -37,7 +37,7 @@ class _PasswordUpdateSuccessScreenState extends State<PasswordUpdateSuccessScree
                Container(
                 child: Column(
                   children: [
-                    Image(image: AssetImage(Assets.images.succestickmark.path)),
+                    
                 UIHelper.verticalSpace(40.h),
                 Text(
                   "Password updated".tr,

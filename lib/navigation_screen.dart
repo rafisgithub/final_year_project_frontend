@@ -2,16 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:final_year_project_frontend/constants/text_font_style.dart';
-import 'package:final_year_project_frontend/features/agents/presentation/agents_screen.dart';
 import 'package:final_year_project_frontend/features/home/presentation/home.dart';
-import 'package:final_year_project_frontend/features/job_List/presentation/job_list_screen.dart';
-import 'package:final_year_project_frontend/features/messageing/chating_screen.dart';
-import 'package:final_year_project_frontend/features/profile_settings/presentation/profile_seting_screen.dart';
 import 'package:final_year_project_frontend/gen/assets.gen.dart';
 import 'package:final_year_project_frontend/gen/colors.gen.dart';
 import 'package:final_year_project_frontend/provider/main_page_view_provider.dart';
 import 'package:provider/provider.dart';
-
 class MainNavigationBar extends StatefulWidget {
   final int pageNum;
   const MainNavigationBar({Key? key, required this.pageNum}) : super(key: key);
@@ -24,9 +19,10 @@ class _MainNavigationBarState extends State<MainNavigationBar> {
   late int currentTab;
   final List<Widget> screens = [
     HomeScreen(),
-    AgentsScreen(),
-    JobListScreen(),
-    MyChatPage(),
+    HomeScreen(),
+    HomeScreen(),
+    HomeScreen(),
+
   ];
 
   @override

@@ -34,7 +34,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 UIHelper.verticalSpace(40.h),
-                Image(image: AssetImage(Assets.images.justlogoPng.path)),
+               
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,

@@ -184,7 +184,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           onButtonPressed: () {
                             // Handle button press
                           },
-                          backgroundImagePath: Assets.images.cardbg1.path,
+                          backgroundImagePath: Assets.images.splashicom.path,
                         ),
                       );
                     },

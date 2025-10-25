@@ -13,16 +13,17 @@ import 'package:final_year_project_frontend/helpers/navigation_service.dart';
 import 'package:final_year_project_frontend/helpers/ui_helpers.dart';
 import 'package:get/get_utils/src/extensions/export.dart';
 
-class OnbordingScreens extends StatefulWidget {
+class LanguageScreen extends StatefulWidget {
   
   // ignore: use_super_parameters
-  const OnbordingScreens({super.key});
+  const LanguageScreen({super.key});
 
   @override
-  State<OnbordingScreens> createState() => _OnbordingScreensState();
+  State<LanguageScreen> createState() => _LanguageScreenState();
 }
 
-class _OnbordingScreensState extends State<OnbordingScreens> {
+class _LanguageScreenState extends State<LanguageScreen> {
+  String? _selectedLanguage;
   @override
   void dispose() {
     super.dispose();
@@ -59,11 +60,66 @@ class _OnbordingScreensState extends State<OnbordingScreens> {
                   
                   UIHelper.verticalSpace(63.h),
                   //image
-                  Center(
-                    child: Image(
-                      image: AssetImage(Assets.images.splashicom.path),
+                Container(
+                  
+                  padding: EdgeInsets.symmetric(horizontal: 16.w),
+                  height: 48.h,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(100.r),
+                    border: Border.all(color: AppColors.cA1A1AA, width: 1.w),
+                  ),
+                  child: DropdownButton<String>(
+                    value: _selectedLanguage,
+                    isExpanded: true,
+                    items: [
+                      DropdownMenuItem(
+
+                        value: 'English',
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.language,
+                              size: 20.sp,
+                              color: AppColors.cA1A1AA,
+                            ),
+                           const SizedBox(width: 10,),
+                            Text('English'),
+                          ],
+                        ),
+                      ),
+                      DropdownMenuItem(
+                        value: 'Bangla',
+                        child: Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 10.r,
+                            backgroundColor: AppColors.button,
+                            child: CircleAvatar(
+                              radius: 5.r,
+                              backgroundColor: Colors.red,
+                            ),
+                            ),
+                           const SizedBox(width: 10,),
+                            Text('Bangla'),
+                          ],
+                        ),
+                      ),
+                    ],
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedLanguage = value;
+                      });
+                    },
+                    hint:const Row(
+                      children: [
+                        Icon(Icons.language),
+                         SizedBox(width: 10,),
+                        Text('Select Language'),
+                      ],
                     ),
                   ),
+                ),
                   UIHelper.verticalSpace(150.h),
                  
                   //button
@@ -74,7 +130,7 @@ class _OnbordingScreensState extends State<OnbordingScreens> {
                       bgColor2: AppColors.button,
                       name: 'Continue'.tr,
                       callback: () {
-                        NavigationService.navigateToReplacement(Routes.languageScreen);
+                        NavigationService.navigateToReplacement(Routes.signinScreen);
                       },
                       textStyle: TextFontStyle.textStyle18c231F20poppins700
                           .copyWith(fontSize: 15.sp),

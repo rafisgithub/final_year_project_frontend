@@ -3,6 +3,7 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  animated_item
   file_selector_windows
   flutter_localization
   geolocator_windows

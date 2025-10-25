@@ -3,6 +3,7 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  animated_item
   file_selector_linux
   flutter_localization
   syncfusion_pdfviewer_linux

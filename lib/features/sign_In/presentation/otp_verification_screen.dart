@@ -28,7 +28,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   Widget build(BuildContext context) {
     return Material(
       child: Container(
-        decoration: BoxDecoration(color: AppColors.c050915),
+        decoration: BoxDecoration(color: AppColors.cFFFFFF),
         child: SafeArea(
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 20.w),
@@ -37,23 +37,15 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 UIHelper.verticalSpace(40.h),
-                Image(image: AssetImage(Assets.images.justlogoPng.path)),
+               
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Aura',
+                      'Krishi App',
                       style: TextFontStyle.textStyle18c231F20poppins700
-                          .copyWith(fontSize: 24.sp),
-                    ),
-                    GradientText(
-                      text: 'Forge',
-                      gradient: LinearGradient(
-                        colors: [AppColors.c8B3AFF, AppColors.cD020FF],
-                      ),
-                      style: TextFontStyle.textStyle18c231F20poppins700
-                          .copyWith(fontSize: 24.sp),
+                          .copyWith(fontSize: 24.sp, color: Colors.black),
                     ),
                   ],
                 ),
@@ -99,12 +91,12 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                         Text(
                           "Don’t receive the code? ",
                           style: TextFontStyle.textStyle18c231F20poppins700
-                              .copyWith(fontSize: 12.sp,fontWeight: FontWeight.w400),
+                              .copyWith(fontSize: 12.sp,fontWeight: FontWeight.w400,color: Colors.black),
                         ),
                         GradientText(
                           text: 'Click to resend code',
                           gradient: LinearGradient(
-                            colors: [AppColors.c8B3AFF, AppColors.cD020FF],
+                            colors: [Colors.black, Colors.black],
                           ),
                           style: TextFontStyle.textStyle18c231F20poppins700
                               .copyWith(fontSize: 12.sp,fontWeight: FontWeight.w600,decoration: TextDecoration.underline),
@@ -119,6 +111,8 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                   height: 48.h,
                   width: double.infinity,
                   child: CustomsButton(
+                    bgColor1: AppColors.button,
+                    bgColor2: AppColors.button,
                     name: 'Confirm'.tr,
                     callback: () {
                       NavigationService.navigateToWithArgs(

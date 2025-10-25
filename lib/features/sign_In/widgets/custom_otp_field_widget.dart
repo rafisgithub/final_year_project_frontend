@@ -103,17 +103,17 @@ class _CustomOtpPinFieldState extends State<CustomOtpPinField> {
           otpPinFieldStyle: OtpPinFieldStyle(
             textStyle: TextFontStyle.textStyle18c231F20poppins700,
             activeFieldBorderGradient: const LinearGradient(
-              colors: [AppColors.c8B3AFF, AppColors.cD020FF],
+              colors: [Colors.black, Colors.black],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             filledFieldBorderGradient: const LinearGradient(
-              colors: [AppColors.c8B3AFF, AppColors.cD020FF],
+              colors: [Colors.black, Colors.black],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             defaultFieldBorderGradient: const LinearGradient(
-              colors: [AppColors.c8B3AFF, AppColors.cD020FF],
+              colors: [Colors.black, Colors.black],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),

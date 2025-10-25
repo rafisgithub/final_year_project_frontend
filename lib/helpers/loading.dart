@@ -12,7 +12,7 @@ Widget loadingIndicatorCircle({
   double? size,
 }) {
   double loaderSize = 100.sp;
-  return DotLottieLoader.fromAsset(Assets.images.splashLogo.path,
+  return DotLottieLoader.fromAsset(Assets.images.splashicom.path,
       frameBuilder: (BuildContext ctx, DotLottie? dotlottie) {
     if (dotlottie != null) {
       return Center(

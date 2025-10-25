@@ -43,7 +43,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   Widget build(BuildContext context) {
     return Material(
       child: Container(
-        decoration: BoxDecoration(color: AppColors.c050915),
+        decoration: BoxDecoration(color: AppColors.cFFFFFF),
         child: SafeArea(
           child: SingleChildScrollView(
             child: Padding(
@@ -53,23 +53,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   UIHelper.verticalSpace(40.h),
-                  Image(image: AssetImage(Assets.images.justlogoPng.path)),
+                 
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        'Aura',
+                        'Krishi App',
                         style: TextFontStyle.textStyle18c231F20poppins700
-                            .copyWith(fontSize: 24.sp),
-                      ),
-                      GradientText(
-                        text: 'Forge',
-                        gradient: LinearGradient(
-                          colors: [AppColors.c8B3AFF, AppColors.cD020FF],
-                        ),
-                        style: TextFontStyle.textStyle18c231F20poppins700
-                            .copyWith(fontSize: 24.sp),
+                            .copyWith(fontSize: 24.sp, color: Colors.black),
                       ),
                     ],
                   ),
@@ -166,74 +158,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     textColor: AppColors.cFFFFFF,
                   ),
                  
-                  UIHelper.verticalSpace(20.h),
-                  Row(
-                    spacing: 5.h,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Flexible(
-                        child: Divider(
-                          color: AppColors.cD5D5D5, // line color
-                          thickness: 1, // line thickness
-                        ),
-                      ),
-                      Flexible(
-                        child: Text(
-                          'Or'.tr,
-                          style: TextFontStyle.textStyle14cFFFFFFpoppinw400,
-                        ),
-                      ),
-                      Flexible(
-                        child: Divider(
-                          color: AppColors.cD5D5D5, // line color
-                          thickness: 1, // line thickness
-                        ),
-                      ),
-                    ],
-                  ),
-                  UIHelper.verticalSpace(12.h),
-                  GestureDetector(
-                    onTap: () {},
-                    child: Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: AppColors.cF2F0F0, // border color
-                          width: 1.0, // border thickness
-                        ),
-                        borderRadius: BorderRadius.circular(8.r),
-                      ),
-                      height: 56.h,
-                      width: double.infinity,
-                      child: Row(
-                        children: [
-                          // Icon aligned to start
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: Image.asset(
-                              Assets.icons.googleicon.path,
-                              height: 30,
-                              width: 30,
-                            ),
-                          ),
-                          // Use Expanded so text takes remaining space and centers itself
-                          Expanded(
-                            child: Text(
-                              'Continue with Google'.tr,
-                              style: TextFontStyle.textStyle14cFFFFFFpoppinw400,
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-            
+
                   UIHelper.verticalSpace(40.h),
                   Container(
+                    
                     height: 56.h,
                     width: double.infinity,
                     child: CustomsButton(
+                      bgColor1: AppColors.button,
+                      bgColor2: AppColors.button,
                       name: 'Sign Up'.tr,
                       textStyle: TextFontStyle.textStyle18c231F20poppins700
                           .copyWith(fontSize: 15.sp),
@@ -257,12 +190,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         Text(
                           "Already have an account? ",
                           style: TextFontStyle.textStyle18c231F20poppins700
-                              .copyWith(fontSize: 12.sp,fontWeight: FontWeight.w400),
+                              .copyWith(fontSize: 12.sp,fontWeight: FontWeight.w400,color: Colors.black),
                         ),
                         GradientText(
                           text: 'Login',
                           gradient: LinearGradient(
-                            colors: [AppColors.c8B3AFF, AppColors.cD020FF],
+                            colors: [Colors.black, Colors.black],
                           ),
                           style: TextFontStyle.textStyle18c231F20poppins700
                               .copyWith(fontSize: 12.sp,fontWeight: FontWeight.w600,decoration: TextDecoration.underline),

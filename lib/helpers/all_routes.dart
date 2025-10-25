@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:final_year_project_frontend/features/language/presentation/language_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:final_year_project_frontend/features/onbording/presentation/onbording.dart';
 import 'package:final_year_project_frontend/features/sign_In/presentation/forgot_password_screen.dart';
@@ -23,6 +24,7 @@ final class Routes {
   static Routes get instance => _routes;
   static const String loadingScreen = '/loading';
   static const String onbordingScreens = '/onbordingScreens';
+  static const String languageScreen = '/languageScreen';
   static const String signinScreen = '/signInScreen';
   static const String otpVerificationScreen = '/otpVerificationScreen';
   static const String otpSuccessfullScreen = '/otpSuccessfullScreen';
@@ -63,6 +65,10 @@ final class RouteGenerator {
         return Platform.isAndroid
             ? _FadedTransitionRoute(widget: const OnbordingScreens(), settings: settings)
             : CupertinoPageRoute(builder: (context) => const OnbordingScreens());
+      case Routes.languageScreen:
+        return Platform.isAndroid
+            ? _FadedTransitionRoute(widget: const LanguageScreen(), settings: settings)
+            : CupertinoPageRoute(builder: (context) => const LanguageScreen());
       case Routes.signinScreen:
         return Platform.isAndroid
             ? _FadedTransitionRoute(widget: const SignInScreen(), settings: settings)

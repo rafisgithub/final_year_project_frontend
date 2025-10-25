@@ -46,8 +46,10 @@
 <color name="cF2F0F0">#F2F0F0</color>
 <color name="c1E1E24">#1E1E24</color>
 <color name="c2F3956">#2F3956</color>
+// New colors added for Krishi App
 
 
+<color name="button">#0B7F22</color>
 
 
 </colors>
