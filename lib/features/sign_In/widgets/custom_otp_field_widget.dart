@@ -113,7 +113,7 @@ class _CustomOtpPinFieldState extends State<CustomOtpPinField> {
               end: Alignment.bottomRight,
             ),
             defaultFieldBorderGradient: const LinearGradient(
-              colors: [Colors.black, Colors.black],
+              colors: [Colors.black, Colors.black ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),

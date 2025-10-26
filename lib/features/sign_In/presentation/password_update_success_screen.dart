@@ -25,7 +25,7 @@ class _PasswordUpdateSuccessScreenState extends State<PasswordUpdateSuccessScree
   Widget build(BuildContext context) {
     return Material(
       child: Container(
-        decoration: BoxDecoration(color: AppColors.c050915),
+        decoration: BoxDecoration(color: AppColors.cFFFFFF),
         child: SafeArea(
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 20.w),
@@ -33,22 +33,25 @@ class _PasswordUpdateSuccessScreenState extends State<PasswordUpdateSuccessScree
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+              
                 Spacer(),
                Container(
                 child: Column(
                   children: [
-                    
+
+               Image(image: AssetImage(Assets.icons.successtick.path)),
                 UIHelper.verticalSpace(40.h),
                 Text(
                   "Password updated".tr,
                   style: TextFontStyle.textStyle18c231F20poppins700.copyWith(
                     fontSize: 24.sp,
+                    color: Colors.black,
                   ),
                   textAlign: TextAlign.center,
                 ),
                 GradientText(text: "successfully", gradient: LinearGradient(colors: [
-                  AppColors.c8B3AFF,
-                  AppColors.cD020FF,
+                 Colors.black,
+                  Colors.black,
                 ]), style: TextFontStyle.textStyle18c231F20poppins700.copyWith(
                   fontSize: 24.sp,
                 )),
@@ -74,6 +77,8 @@ class _PasswordUpdateSuccessScreenState extends State<PasswordUpdateSuccessScree
                     height: 56.h,
                     width: double.infinity,
                     child: CustomsButton(
+                      bgColor1: AppColors.button,
+                      bgColor2: AppColors.button,
                       name: 'Login Now'.tr,
                       textStyle: TextFontStyle.textStyle18c231F20poppins700
                           .copyWith(fontSize: 15.sp),

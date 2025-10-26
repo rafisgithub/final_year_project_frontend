@@ -25,7 +25,7 @@ class _ForgotPasswordscreenState extends State<ForgotPasswordscreen> {
   Widget build(BuildContext context) {
     return Material(
       child: Container(
-        decoration: BoxDecoration(color: AppColors.c050915),
+        decoration: BoxDecoration(color: AppColors.cFFFFFF),
         child: SafeArea(
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 20.w),
@@ -40,18 +40,11 @@ class _ForgotPasswordscreenState extends State<ForgotPasswordscreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Aura',
-                      style: TextFontStyle.textStyle18c231F20poppins700
-                          .copyWith(fontSize: 24.sp),
-                    ),
-                    GradientText(
-                      text: 'Forge',
-                      gradient: LinearGradient(
-                        colors: [AppColors.c8B3AFF, AppColors.cD020FF],
+                        'Krishi App',
+                        style: TextFontStyle.textStyle18c231F20poppins700
+                            .copyWith(fontSize: 24.sp, color: Colors.black),
                       ),
-                      style: TextFontStyle.textStyle18c231F20poppins700
-                          .copyWith(fontSize: 24.sp),
-                    ),
+                    
                   ],
                 ),
                 UIHelper.verticalSpace(40.h),
@@ -59,6 +52,7 @@ class _ForgotPasswordscreenState extends State<ForgotPasswordscreen> {
                   "Forgot password".tr,
                   style: TextFontStyle.textStyle18c231F20poppins700.copyWith(
                     fontSize: 24.sp,
+                    color: Colors.black,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -72,6 +66,7 @@ class _ForgotPasswordscreenState extends State<ForgotPasswordscreen> {
                           .copyWith(
                             fontSize: 14.sp,
                             fontWeight: FontWeight.w500,
+                            color: Colors.black,
                           ),
                       textAlign: TextAlign.start,
                     ),
@@ -89,6 +84,8 @@ class _ForgotPasswordscreenState extends State<ForgotPasswordscreen> {
                   height: 56.h,
                   width: double.infinity,
                   child: CustomsButton(
+                    bgColor1: AppColors.button,
+                      bgColor2: AppColors.button,
                     name: 'Continue'.tr,
                     textStyle: TextFontStyle.textStyle18c231F20poppins700
                         .copyWith(fontSize: 15.sp),
