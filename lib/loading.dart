@@ -1,16 +1,8 @@
-import 'dart:developer';
-
+import 'package:final_year_project_frontend/features/language/presentation/language_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:final_year_project_frontend/constants/app_constants.dart';
-import 'package:final_year_project_frontend/features/onbording/presentation/onbording.dart';
-import 'package:final_year_project_frontend/helpers/all_routes.dart';
-import 'package:final_year_project_frontend/helpers/navigation_service.dart';
-import 'package:final_year_project_frontend/networks/dio/dio.dart';
 import 'package:final_year_project_frontend/splash_screen.dart';
-import 'helpers/di.dart';
 import 'helpers/helper_methods.dart';
-import 'package:final_year_project_frontend/navigation_screen.dart';
 
 final class Loading extends StatefulWidget {
   const Loading({super.key});
@@ -22,6 +14,7 @@ final class Loading extends StatefulWidget {
 class _LoadingState extends State<Loading> {
   
   bool _isLoading = true;
+  bool _videoComplete = false;
 
   @override
   void initState() {
@@ -48,16 +41,23 @@ class _LoadingState extends State<Loading> {
       _isLoading = false;
     });
   }
+  
+  void _onVideoComplete() {
+    setState(() {
+      _videoComplete = true;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const SplashScreen();
+    // Show splash screen with video until both loading is done AND video completes
+    if (_isLoading || !_videoComplete) {
+      return SplashScreen(onVideoComplete: _onVideoComplete);
     }else{
     //  WidgetsBinding.instance.addPostFrameCallback((_) {
     //   NavigationService.navigateToReplacement(Routes.onbordingScreens);
     // });
-    return const OnbordingScreens().animate()
+    return const LanguageScreen().animate()
   .fadeIn(duration: 500.ms) ;
     }
     // If client is logged in

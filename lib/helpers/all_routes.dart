@@ -3,12 +3,10 @@ import 'package:final_year_project_frontend/features/language/presentation/langu
 import 'package:flutter/cupertino.dart';
 import 'package:final_year_project_frontend/features/onbording/presentation/onbording.dart';
 import 'package:final_year_project_frontend/features/sign_In/presentation/forgot_password_screen.dart';
-
 import 'package:final_year_project_frontend/features/sign_In/presentation/otp_verification_screen.dart';
 import 'package:final_year_project_frontend/features/sign_In/presentation/password_update_success_screen.dart';
 import 'package:final_year_project_frontend/features/sign_In/presentation/reset_password_screen.dart';
 import 'package:final_year_project_frontend/features/sign_In/presentation/sign_in_screen.dart';
-
 
 import 'package:final_year_project_frontend/features/sign_up/presentation/sign_up_screen.dart';
 
@@ -23,7 +21,7 @@ final class Routes {
 
   static Routes get instance => _routes;
   static const String loadingScreen = '/loading';
-  static const String onbordingScreens = '/onbordingScreens';
+  static const String onBoardingScreen = '/onBoardingScreen';
   static const String languageScreen = '/languageScreen';
   static const String signinScreen = '/signInScreen';
   static const String otpVerificationScreen = '/otpVerificationScreen';
@@ -61,10 +59,10 @@ final class RouteGenerator {
         return Platform.isAndroid
             ? _FadedTransitionRoute(widget: const Loading(), settings: settings)
             : CupertinoPageRoute(builder: (context) => const Loading());
-      case Routes.onbordingScreens:
+      case Routes.onBoardingScreen:
         return Platform.isAndroid
-            ? _FadedTransitionRoute(widget: const OnbordingScreens(), settings: settings)
-            : CupertinoPageRoute(builder: (context) => const OnbordingScreens());
+            ? _FadedTransitionRoute(widget: const OnBoardingScreen(), settings: settings)
+            : CupertinoPageRoute(builder: (context) => const OnBoardingScreen());
       case Routes.languageScreen:
         return Platform.isAndroid
             ? _FadedTransitionRoute(widget: const LanguageScreen(), settings: settings)
