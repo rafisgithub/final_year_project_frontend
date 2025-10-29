@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'package:get/get_utils/src/extensions/export.dart';
-import 'package:flutter/gestures.dart';
-import 'package:final_year_project_frontend/common_widgets/coustom_%20gradient_text.dart';
-import 'package:final_year_project_frontend/common_widgets/coustom_textfield.dart';
+import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:final_year_project_frontend/common_widgets/customs_button.dart';
 import 'package:final_year_project_frontend/constants/text_font_style.dart';
-import 'package:final_year_project_frontend/gen/assets.gen.dart';
 import 'package:final_year_project_frontend/gen/colors.gen.dart';
 import 'package:final_year_project_frontend/helpers/all_routes.dart';
 import 'package:final_year_project_frontend/helpers/navigation_service.dart';
@@ -21,189 +17,345 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
-  final sharedDecoration = InputDecoration(
-    filled: true,
-    fillColor: Colors.transparent,
+  final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
+  final _fatherNameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  
+  bool _isPasswordVisible = false;
+  String _phoneNumber = '';
 
-    border: OutlineInputBorder(
-      borderSide: BorderSide(color: AppColors.cF2F0F0, width: 2.0),
-      borderRadius: BorderRadius.all(Radius.circular(8.r)),
-    ),
-    enabledBorder: OutlineInputBorder(
-      borderSide: BorderSide(color: AppColors.cF2F0F0, width: 2.0),
-      borderRadius: BorderRadius.all(Radius.circular(8.r)),
-    ),
-    hintStyle: TextFontStyle.textStyle16c8993A4EurostileW400,
-    focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(8.r),
-      borderSide: const BorderSide(color: AppColors.cF2F0F0, width: 2.0),
-    ),
-  );
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _fatherNameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String hintText,
+    required IconData prefixIcon,
+    bool isPassword = false,
+    TextInputType keyboardType = TextInputType.text,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: AppColors.cA1A1AA.withOpacity(0.3), width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 8,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: TextFormField(
+        controller: controller,
+        obscureText: isPassword && !_isPasswordVisible,
+        keyboardType: keyboardType,
+        style: TextStyle(
+          fontSize: 16.sp,
+          fontWeight: FontWeight.w400,
+          color: Colors.black87,
+        ),
+        decoration: InputDecoration(
+          hintText: hintText,
+          hintStyle: TextStyle(
+            fontSize: 15.sp,
+            fontWeight: FontWeight.w400,
+            color: AppColors.cA1A1AA,
+          ),
+          prefixIcon: Icon(
+            prefixIcon,
+            color: AppColors.button,
+            size: 22.sp,
+          ),
+          suffixIcon: isPassword
+              ? IconButton(
+                  icon: Icon(
+                    _isPasswordVisible
+                        ? Icons.visibility_outlined
+                        : Icons.visibility_off_outlined,
+                    color: AppColors.cA1A1AA,
+                    size: 22.sp,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _isPasswordVisible = !_isPasswordVisible;
+                    });
+                  },
+                )
+              : null,
+          border: InputBorder.none,
+          contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 18.h),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12.r),
+            borderSide: BorderSide(color: AppColors.button, width: 2),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12.r),
+            borderSide: BorderSide(color: Colors.transparent, width: 0),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Material(
-      child: Container(
-        decoration: BoxDecoration(color: AppColors.cFFFFFF),
-        child: SafeArea(
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Form(
+          key: _formKey,
           child: SingleChildScrollView(
             child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20.w),
+              padding: EdgeInsets.symmetric(horizontal: 24.w),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  UIHelper.verticalSpace(40.h),
-                 
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Krishi App',
-                        style: TextFontStyle.textStyle18c231F20poppins700
-                            .copyWith(fontSize: 24.sp, color: Colors.black),
-                      ),
-                    ],
+                  UIHelper.verticalSpace(24.h),
+                  
+                  // Back Button
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: Icon(Icons.arrow_back_ios, size: 20.sp, color: Colors.black87),
+                    padding: EdgeInsets.zero,
+                    constraints: BoxConstraints(),
                   ),
-                  UIHelper.verticalSpace(40.h),
-                  Text(
-                    "Sign Up".tr,
-                    style: TextFontStyle.textStyle18c231F20poppins700.copyWith(
-                      fontSize: 24.sp,
+                  
+                  UIHelper.verticalSpace(16.h),
+                  
+                  // App Title
+                  Center(
+                    child: Text(
+                      'Krishi App',
+                      style: TextFontStyle.textStyle18c231F20poppins700.copyWith(
+                        fontSize: 28.sp,
+                        color: AppColors.button,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
-                    textAlign: TextAlign.center,
                   ),
-            
-                  UIHelper.verticalSpace(12.h),
-                  Row(
-                    children: [
-                      Text(
-                        "Full name".tr,
-                        style: TextFontStyle.textStyle18c231F20poppins700
-                            .copyWith(
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w500,
-                            ),
-                        textAlign: TextAlign.start,
-                      ),
-                    ],
+                  
+                  UIHelper.verticalSpace(32.h),
+                  
+                  // Welcome Text
+                  Text(
+                    "Create Account".tr,
+                    style: TextFontStyle.textStyle18c231F20poppins700.copyWith(
+                      fontSize: 26.sp,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.black87,
+                    ),
                   ),
                   UIHelper.verticalSpace(8.h),
-                  CustomTextField(
-                    hintText: 'Enter your full name',
+                  Text(
+                    "Fill in your details to get started".tr,
+                    style: TextStyle(
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.w400,
+                      color: AppColors.cA1A1AA,
+                    ),
+                  ),
+                  
+                  UIHelper.verticalSpace(32.h),
+                  
+                  // Name Field
+                  Text(
+                    "Full Name".tr,
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  UIHelper.verticalSpace(8.h),
+                  _buildTextField(
+                    controller: _nameController,
+                    hintText: 'e.g. Rafi Ahmed',
+                    prefixIcon: Icons.person_outline,
                     keyboardType: TextInputType.name,
-                    textColor: AppColors.cFFFFFF,
                   ),
-                  UIHelper.verticalSpace(16.h),
-                  Row(
-                    children: [
-                      Text(
-                        "Email address".tr,
-                        style: TextFontStyle.textStyle18c231F20poppins700
-                            .copyWith(
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w500,
-                            ),
-                        textAlign: TextAlign.start,
-                      ),
-                    ],
+                  
+                  UIHelper.verticalSpace(20.h),
+                  
+                  // Father's Name Field
+                  Text(
+                    "Father's Name".tr,
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
                   ),
                   UIHelper.verticalSpace(8.h),
-                  CustomTextField(
-                    hintText: 'Enter Your Email address',
+                  _buildTextField(
+                    controller: _fatherNameController,
+                    hintText: 'e.g. Nural Sheikh',
+                    prefixIcon: Icons.family_restroom_outlined,
+                    keyboardType: TextInputType.name,
+                  ),
+                  
+                  UIHelper.verticalSpace(20.h),
+                  
+                  // Email Field
+                  Text(
+                    "Email Address".tr,
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  UIHelper.verticalSpace(8.h),
+                  _buildTextField(
+                    controller: _emailController,
+                    hintText: 'e.g. example@gmail.com',
+                    prefixIcon: Icons.email_outlined,
                     keyboardType: TextInputType.emailAddress,
-                    textColor: AppColors.cFFFFFF,
                   ),
-                
+                  
+                  UIHelper.verticalSpace(20.h),
+                  
+                  // Phone Number Field
+                  Text(
+                    "Phone Number".tr,
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
+                  ),
                   UIHelper.verticalSpace(8.h),
-                  Row(
-                    children: [
-                      Text(
-                        "Password".tr,
-                        style: TextFontStyle.textStyle18c231F20poppins700
-                            .copyWith(
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w500,
-                            ),
-                        textAlign: TextAlign.start,
+                  IntlPhoneField(
+                    decoration: InputDecoration(
+                      hintText: 'Phone Number',
+                      hintStyle: TextStyle(
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.w400,
+                        color: AppColors.cA1A1AA,
                       ),
-                    ],
-                  ),
-                  UIHelper.verticalSpace(8.h),
-                  CustomTextField(
-                    hintText: 'Password',
-                    obscureText: true,
-                    keyboardType: TextInputType.visiblePassword,
-                    textColor: AppColors.cFFFFFF,
-                  ),
-                  UIHelper.verticalSpace(16.h),
-                  Row(
-                    children: [
-                      Text(
-                        "Confirm Password".tr,
-                        style: TextFontStyle.textStyle18c231F20poppins700
-                            .copyWith(
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w500,
-                            ),
-                        textAlign: TextAlign.start,
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                        borderSide: BorderSide(color: AppColors.cA1A1AA.withOpacity(0.3), width: 1.5),
                       ),
-                    ],
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                        borderSide: BorderSide(color: AppColors.cA1A1AA.withOpacity(0.3), width: 1.5),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                        borderSide: BorderSide(color: AppColors.button, width: 2),
+                      ),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 18.h),
+                    ),
+                    initialCountryCode: 'BD',
+                    dropdownIconPosition: IconPosition.trailing,
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.black87,
+                    ),
+                    onChanged: (phone) {
+                      _phoneNumber = phone.completeNumber;
+                    },
+                  ),
+                  
+                  UIHelper.verticalSpace(20.h),
+                  
+                  // Password Field
+                  Text(
+                    "Password".tr,
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
                   ),
                   UIHelper.verticalSpace(8.h),
-                  CustomTextField(
-                    hintText: 'Re-Enter Password',
-                    obscureText: true,
-                    keyboardType: TextInputType.visiblePassword,
-                    textColor: AppColors.cFFFFFF,
+                  _buildTextField(
+                    controller: _passwordController,
+                    hintText: 'Create a strong password',
+                    prefixIcon: Icons.lock_outline,
+                    isPassword: true,
                   ),
-                 
-
-                  UIHelper.verticalSpace(40.h),
-                  Container(
-                    
+                  
+                  UIHelper.verticalSpace(32.h),
+                  
+                  // Sign Up Button
+                  SizedBox(
                     height: 56.h,
                     width: double.infinity,
                     child: CustomsButton(
                       bgColor1: AppColors.button,
                       bgColor2: AppColors.button,
                       name: 'Sign Up'.tr,
-                      textStyle: TextFontStyle.textStyle18c231F20poppins700
-                          .copyWith(fontSize: 15.sp),
+                      textStyle: TextFontStyle.textStyle18c231F20poppins700.copyWith(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w600,
+                      ),
                       callback: () {
+                        // Collect all data (selected_language will come from language_screen)
+                        final signUpData = {
+                          'name': _nameController.text,
+                          'father_name': _fatherNameController.text,
+                          'email': _emailController.text,
+                          'phone_number': _phoneNumber,
+                          'password': _passwordController.text,
+                        };
+                        
+                        print('Sign Up Data: $signUpData');
+                        
                         NavigationService.navigateTo(
                           Routes.otpVerificationScreen,
                         );
                       },
                     ),
                   ),
-            
-                  UIHelper.verticalSpace(40.h),
-                   GestureDetector(
-                    onTap: () {
-                      NavigationService.navigateToReplacement(Routes.signinScreen);
-                    },
-                     child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Already have an account? ",
-                          style: TextFontStyle.textStyle18c231F20poppins700
-                              .copyWith(fontSize: 12.sp,fontWeight: FontWeight.w400,color: Colors.black),
-                        ),
-                        GradientText(
-                          text: 'Login',
-                          gradient: LinearGradient(
-                            colors: [Colors.black, Colors.black],
+                  
+                  UIHelper.verticalSpace(24.h),
+                  
+                  // Already have account
+                  Center(
+                    child: GestureDetector(
+                      onTap: () {
+                        NavigationService.navigateToReplacement(Routes.signinScreen);
+                      },
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "Already have an account? ",
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w400,
+                              color: Colors.black87,
+                            ),
                           ),
-                          style: TextFontStyle.textStyle18c231F20poppins700
-                              .copyWith(fontSize: 12.sp,fontWeight: FontWeight.w600,decoration: TextDecoration.underline),
-                        ),
-                      ],
-                                     ),
-                   ),
-                
+                          Text(
+                            'Login',
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.button,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  
+                  UIHelper.verticalSpace(32.h),
                 ],
               ),
             ),

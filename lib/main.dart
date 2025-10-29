@@ -72,7 +72,7 @@ class UtillScreenMobile extends StatelessWidget {
     //String language = 'en_US';
 
     String countryCode = 'en_US';
-     String language = appData.read(kKeyLanguage)??'en_US';
+     String language = appData.read(kKeyLanguage)??'bn_BD';
     // String countryCode = appData.read(kKeyCountryCode);
    var scrieensize = MediaQuery.sizeOf(context); 
     return ScreenUtilInit(

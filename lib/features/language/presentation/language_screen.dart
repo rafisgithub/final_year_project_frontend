@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:final_year_project_frontend/common_widgets/customs_button.dart';
+import 'package:final_year_project_frontend/constants/app_constants.dart';
 import 'package:final_year_project_frontend/constants/text_font_style.dart';
 import 'package:final_year_project_frontend/gen/colors.gen.dart';
 import 'package:final_year_project_frontend/helpers/all_routes.dart';
+import 'package:final_year_project_frontend/helpers/di.dart';
 import 'package:final_year_project_frontend/helpers/navigation_service.dart';
-import 'package:get/get_utils/src/extensions/export.dart';
+import 'package:get/get.dart';
 
 class LanguageScreen extends StatefulWidget {
   // ignore: use_super_parameters
@@ -208,6 +210,18 @@ class _LanguageScreenState extends State<LanguageScreen> {
                   name: 'Continue'.tr,
                   callback: _selectedLanguage != null
                       ? () {
+                          // Get the language code ('bn_BD' or 'en_US')
+                          final selectedLangCode = _languages
+                              .firstWhere((lang) => lang['name'] == _selectedLanguage)['code'];
+                          final localeCode = selectedLangCode == 'bn' ? 'bn_BD' : 'en_US';
+                          
+                          // Save to GetStorage
+                          appData.write(kKeyLanguage, localeCode);
+                          
+                          // Update GetX locale
+                          Get.updateLocale(Locale(localeCode.split('_')[0], localeCode.split('_')[1]));
+                          
+                          // Navigate to sign up
                           NavigationService.navigateToReplacement(
                             Routes.signUpScreen,
                           );

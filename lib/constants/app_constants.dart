@@ -88,13 +88,9 @@ const String kFacebook = 'facebook';
 const String kApple = 'apple';
 const String kGoogle = 'google';
 const String kKeyEnglish = 'en';
-const String kKeyPortuguese = 'pt';
-const String kKeyFrench = 'fr';
-const String kKeyGerman = 'de';
-const String kKeySpanish = 'es';
-const String kKeyRussian = 'ru';
-const String kKeyFirstName = 'first_name';
-const String kKeyLastName = 'lst_name';
+const String kKeyBangla = 'bn';
+
+const String kKeyFullName = 'full_name';
 const String kKeyPhone = 'phone';
 const String kKeyEmail = 'email';
 const String kKeyImage = 'image';
@@ -103,7 +99,6 @@ const String kKeyUserID = 'user_id';
 const String kKeyShopID = 'shop_id';
 const String kKeycategoriesID = 'categoriesId';
 const String kKeyproductID = 'productId';
-const String kKeyShopSlug = 'shop_slug';
 const String kKeyRestaurantID = 'productId';
 const String kKeyIsExploring = 'exploring';
 const String kKeyIsFirst = 'is_first_time';
@@ -113,27 +108,15 @@ const String kkeystafprofiledone = 'is_staff_profile_done';
 
 const List<String> kLanguagesKey = [
   kKeyEnglish,
-  kKeyPortuguese,
-  kKeyFrench,
-  kKeyGerman,
-  kKeySpanish,
-  kKeyRussian,
+  kKeyBangla,
 ];
 const Map languages = <String, String>{
   kKeyEnglish: "English",
-  kKeyPortuguese: "Portuguese",
-  kKeyFrench: "French",
-  kKeyGerman: "Dutch",
-  kKeySpanish: "Spanish",
-  kKeyRussian: "Russian",
+  kKeyBangla: "Bangla",
 };
 const Map countriesCode = <String, String>{
   kKeyEnglish: "US",
-  kKeyPortuguese: "PT",
-  kKeyFrench: "FR",
-  kKeyGerman: "DE",
-  kKeySpanish: "ES",
-  kKeyRussian: "RU",
+  kKeyBangla: "BD",
 };
 
 class DefaultValue {

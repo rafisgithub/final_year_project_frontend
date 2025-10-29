@@ -89,23 +89,12 @@ String language(String languageKey) {
     case kKeyEnglish:
       language = "English";
       break;
-    case kKeyFrench:
-      language = "French";
-      break;
-    case kKeyGerman:
-      language = "Dutch";
-      break;
-    case kKeyRussian:
-      language = "Russian";
-      break;
-    case kKeyPortuguese:
-      language = "Portuguese";
-      break;
-    case kKeySpanish:
-      language = "Spanish";
+    case kKeyBangla:
+      language = "Bangla";
       break;
     default:
-      language = "Portuguese";
+      language = "Bangla";
+
   }
   return language;
 }
@@ -144,22 +133,7 @@ Future<void> setInitValue() async {
   await Future.delayed(const Duration(seconds: 2));
 }
 
-// Future<void> initiInternetChecker() async {
-//   InternetConnectionChecker.createInstance(
-//           checkTimeout: const Duration(seconds: 1),
-//           checkInterval: const Duration(seconds: 2))
-//       .onStatusChange
-//       .listen((status) {
-//     switch (status) {
-//       case InternetConnectionStatus.connected:
-//         ToastUtil.showShortToast('Data connection is available.');
-//         break;
-//       case InternetConnectionStatus.disconnected:
-//         ToastUtil.showNoInternetToast();
-//         break;
-//     }
-//   });
-// }
+
 
 Completer<T> wrapInCompleter<T>(Future<T> future) {
   final completer = Completer<T>();
