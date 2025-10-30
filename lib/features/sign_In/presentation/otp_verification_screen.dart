@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get_utils/src/extensions/export.dart';
-import 'package:final_year_project_frontend/common_widgets/coustom_%20gradient_text.dart';
 import 'package:final_year_project_frontend/common_widgets/customs_button.dart';
 import 'package:final_year_project_frontend/common_widgets/common_text_button.dart';
 import 'package:final_year_project_frontend/constants/text_font_style.dart';
@@ -21,106 +20,142 @@ class OtpVerificationScreen extends StatefulWidget {
 class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   @override
   Widget build(BuildContext context) {
-    return Material(
-      child: Container(
-        decoration: BoxDecoration(color: AppColors.cFFFFFF),
-        child: SafeArea(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20.w),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                UIHelper.verticalSpace(40.h),
-               
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 24.w),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              UIHelper.verticalSpace(24.h),
+              
+              // Back Button
+              IconButton(
+                onPressed: () => Navigator.pop(context),
+                icon: Icon(Icons.arrow_back_ios, size: 20.sp, color: AppColors.button),
+                padding: EdgeInsets.zero,
+                constraints: BoxConstraints(),
+              ),
+              
+              UIHelper.verticalSpace(16.h),
+              
+              // App Title with Agricultural Icon
+              Center(
+                child: Column(
                   children: [
+                    Container(
+                      padding: EdgeInsets.all(16.w),
+                      decoration: BoxDecoration(
+                        color: AppColors.button.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.eco,
+                        size: 40.sp,
+                        color: AppColors.button,
+                      ),
+                    ),
+                    UIHelper.verticalSpace(12.h),
                     Text(
                       'Krishi App',
-                      style: TextFontStyle.textStyle18c231F20poppins700
-                          .copyWith(fontSize: 24.sp, color: Colors.black),
+                      style: TextFontStyle.textStyle18c231F20poppins700.copyWith(
+                        fontSize: 28.sp,
+                        color: AppColors.button,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    Text(
+                      '🌱 Agricultural Officer Assistant',
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.c28B446,
+                      ),
                     ),
                   ],
                 ),
-                UIHelper.verticalSpace(40.h),
+              ),
+              
+              UIHelper.verticalSpace(24.h),
+              
+              // Title Text
+              Text(
+                "OTP Verification".tr,
+                style: TextFontStyle.textStyle18c231F20poppins700.copyWith(
+                  fontSize: 24.sp,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.black87,
+                ),
+              ),
+              UIHelper.verticalSpace(6.h),
+              Text(
+                "Enter the verification code we send you on: Alberts******@gmail.com",
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w400,
+                  color: AppColors.cA1A1AA,
+                ),
+              ),
+              
+              UIHelper.verticalSpace(28.h),
+              
+              CustomOtpPinField(
+                onSubmit: (String) {},
+                onChange: (String) {},
+              ),
 
-                Align(
-                  alignment: Alignment.topCenter,
-                  child: Text(
-                    "OTP Verification".tr,
-                    style: TextFontStyle.textStyle18c231F20poppins700.copyWith(
-                      fontSize: 24.sp,
-                      height: 1.6.h,
+              UIHelper.verticalSpace(20.h),
+              
+              Center(
+                child: CommonTextButton(
+                  text: 'Click to resend code',
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.button,
+                  onTap: () {
+                    // TODO: Implement resend code logic
+                  },
+                ),
+              ),
+
+              Spacer(),
+              
+              // Confirm Button
+              Container(
+                height: 56.h,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16.r),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.button.withValues(alpha: 0.3),
+                      blurRadius: 12,
+                      offset: Offset(0, 6),
                     ),
-                    textAlign: TextAlign.start,
+                  ],
+                ),
+                child: CustomsButton(
+                  bgColor1: AppColors.button,
+                  bgColor2: AppColors.c28B446,
+                  name: 'Confirm'.tr,
+                  textStyle: TextFontStyle.textStyle18c231F20poppins700.copyWith(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w700,
                   ),
+                  callback: () {
+                    NavigationService.navigateToWithArgs(
+                      Routes.mainNavigationBar,
+                      {
+                        'pageNum': 0,
+                      },
+                    );
+                  },
                 ),
-                UIHelper.verticalSpace(15.h),
-                Align(
-                  alignment: Alignment.topCenter,
-                  child: Text(
-                    "Enter the verification code we send you on: Alberts******@gmail.com",
-                    style: TextFontStyle.textStyle12c7E7E7Epoppins400.copyWith(
-                      fontSize: 14.sp,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                UIHelper.verticalSpace(40.h),
-                Align(
-                  alignment: Alignment.bottomLeft,
-                  child: CustomOtpPinField(onSubmit: (String ) {  }, onChange: (String ) {  },),
-                ),
-
-                UIHelper.verticalSpace(60.h),
-                                  GestureDetector(
-                    onTap: () {
-                      NavigationService.navigateToReplacement(Routes.signinScreen);
-                    },
-                     child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Don’t receive the code? ",
-                          style: TextFontStyle.textStyle18c231F20poppins700
-                              .copyWith(fontSize: 12.sp,fontWeight: FontWeight.w400,color: Colors.black),
-                        ),
-                        GradientText(
-                          text: 'Click to resend code',
-                          gradient: LinearGradient(
-                            colors: [Colors.black, Colors.black],
-                          ),
-                          style: TextFontStyle.textStyle18c231F20poppins700
-                              .copyWith(fontSize: 12.sp,fontWeight: FontWeight.w600,decoration: TextDecoration.underline),
-                        ),
-                      ],
-                                     ),
-                   ),
-                
-
-                UIHelper.verticalSpace(120.h),
-                SizedBox(
-                  height: 48.h,
-                  width: double.infinity,
-                  child: CustomsButton(
-                    bgColor1: AppColors.button,
-                    bgColor2: AppColors.button,
-                    name: 'Confirm'.tr,
-                    callback: () {
-                      NavigationService.navigateToWithArgs(
-                        Routes.mainNavigationBar,
-                        {
-                          'pageNum': 0,
-                        }
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
+              ),
+              
+              UIHelper.verticalSpace(32.h),
+            ],
           ),
         ),
       ),

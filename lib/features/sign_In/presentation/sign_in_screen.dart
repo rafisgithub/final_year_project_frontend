@@ -261,8 +261,11 @@ class _SignInScreenState extends State<SignInScreen> {
                       //   'password': _passwordController.text,
                       // };
                       
-                      NavigationService.navigateToReplacement(
-                        Routes.otpVerificationScreen,
+                      NavigationService.navigateToWithArgs(
+                        Routes.mainNavigationBar,
+                        {
+                          'pageNum': 0,
+                        },
                       );
                     },
                   ),

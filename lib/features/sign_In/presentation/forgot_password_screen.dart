@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get_utils/src/extensions/export.dart';
-import 'package:final_year_project_frontend/common_widgets/coustom_%20gradient_text.dart';
-import 'package:final_year_project_frontend/common_widgets/coustom_textfield.dart';
 import 'package:final_year_project_frontend/common_widgets/customs_button.dart';
 import 'package:final_year_project_frontend/constants/text_font_style.dart';
 import 'package:final_year_project_frontend/gen/colors.gen.dart';
@@ -18,86 +16,213 @@ class ForgotPasswordscreen extends StatefulWidget {
 }
 
 class _ForgotPasswordscreenState extends State<ForgotPasswordscreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _emailController = TextEditingController();
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    super.dispose();
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String hintText,
+    required String labelText,
+    required IconData prefixIcon,
+    TextInputType keyboardType = TextInputType.text,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(
+          color: AppColors.button.withValues(alpha: 0.2),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.button.withValues(alpha: 0.08),
+            blurRadius: 12,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: TextFormField(
+        controller: controller,
+        keyboardType: keyboardType,
+        style: TextStyle(
+          fontSize: 16.sp,
+          fontWeight: FontWeight.w500,
+          color: Colors.black87,
+        ),
+        decoration: InputDecoration(
+          labelText: labelText,
+          labelStyle: TextStyle(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w600,
+            color: AppColors.button,
+          ),
+          hintText: hintText,
+          hintStyle: TextStyle(
+            fontSize: 15.sp,
+            fontWeight: FontWeight.w400,
+            color: AppColors.cA1A1AA,
+          ),
+          prefixIcon: Icon(prefixIcon, color: AppColors.button, size: 22.sp),
+          border: InputBorder.none,
+          contentPadding: EdgeInsets.symmetric(
+            horizontal: 16.w,
+            vertical: 18.h,
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16.r),
+            borderSide: BorderSide(color: AppColors.button, width: 2),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16.r),
+            borderSide: BorderSide(color: Colors.transparent, width: 0),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Material(
-      child: Container(
-        decoration: BoxDecoration(color: AppColors.c050915),
-        child: SafeArea(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20.w),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                UIHelper.verticalSpace(40.h),
-               
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Aura',
-                      style: TextFontStyle.textStyle18c231F20poppins700
-                          .copyWith(fontSize: 24.sp),
-                    ),
-                    GradientText(
-                      text: 'Forge',
-                      gradient: LinearGradient(
-                        colors: [AppColors.c8B3AFF, AppColors.cD020FF],
-                      ),
-                      style: TextFontStyle.textStyle18c231F20poppins700
-                          .copyWith(fontSize: 24.sp),
-                    ),
-                  ],
-                ),
-                UIHelper.verticalSpace(40.h),
-                Text(
-                  "Forgot password".tr,
-                  style: TextFontStyle.textStyle18c231F20poppins700.copyWith(
-                    fontSize: 24.sp,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Form(
+          key: _formKey,
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 24.w),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  UIHelper.verticalSpace(24.h),
 
-                UIHelper.verticalSpace(40.h),
-                Row(
-                  children: [
-                    Text(
-                      "Email address".tr,
-                      style: TextFontStyle.textStyle18c231F20poppins700
-                          .copyWith(
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.w500,
-                          ),
-                      textAlign: TextAlign.start,
+                  // Back Button
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: Icon(
+                      Icons.arrow_back_ios,
+                      size: 20.sp,
+                      color: AppColors.button,
                     ),
-                  ],
-                ),
-                UIHelper.verticalSpace(8.h),
-                UIHelper.verticalSpace(8.h),
-                CustomTextField(
-                  hintText: 'Email address',
-                  keyboardType: TextInputType.emailAddress,
-                  textColor: AppColors.cFFFFFF,
-                ),
-                Spacer(),
-                Container(
-                  height: 56.h,
-                  width: double.infinity,
-                  child: CustomsButton(
-                    name: 'Continue'.tr,
-                    textStyle: TextFontStyle.textStyle18c231F20poppins700
-                        .copyWith(fontSize: 15.sp),
-                    callback: () {
-                      NavigationService.navigateTo(
-                        Routes.resetPasswordScreen,
-                      );
-                    },
+                    padding: EdgeInsets.zero,
+                    constraints: BoxConstraints(),
                   ),
-                ),
-                UIHelper.verticalSpace(40.h),
-              ],
+
+                  UIHelper.verticalSpace(16.h),
+
+                  // App Title with Agricultural Icon
+                  Center(
+                    child: Column(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.all(16.w),
+                          decoration: BoxDecoration(
+                            color: AppColors.button.withValues(alpha: 0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.eco,
+                            size: 40.sp,
+                            color: AppColors.button,
+                          ),
+                        ),
+                        UIHelper.verticalSpace(12.h),
+                        Text(
+                          'Krishi App',
+                          style: TextFontStyle.textStyle18c231F20poppins700
+                              .copyWith(
+                                fontSize: 28.sp,
+                                color: AppColors.button,
+                                fontWeight: FontWeight.w800,
+                              ),
+                        ),
+                        Text(
+                          '🌱 Agricultural Officer Assistant',
+                          style: TextStyle(
+                            fontSize: 13.sp,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.c28B446,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  UIHelper.verticalSpace(24.h),
+
+                  // Title Text
+                  Text(
+                    "Forgot Password".tr,
+                    style: TextFontStyle.textStyle18c231F20poppins700.copyWith(
+                      fontSize: 24.sp,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  UIHelper.verticalSpace(6.h),
+                  Text(
+                    "Enter your email to reset password 🔐".tr,
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w400,
+                      color: AppColors.cA1A1AA,
+                    ),
+                  ),
+
+                  UIHelper.verticalSpace(28.h),
+
+                  // Email Field
+                  _buildTextField(
+                    controller: _emailController,
+                    hintText: 'Enter your email',
+                    labelText: "Email Address".tr,
+                    prefixIcon: Icons.email_outlined,
+                    keyboardType: TextInputType.emailAddress,
+                  ),
+
+                  UIHelper.verticalSpace(28.h),
+
+                  // Continue Button
+                  Container(
+                    height: 56.h,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16.r),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.button.withValues(alpha: 0.3),
+                          blurRadius: 12,
+                          offset: Offset(0, 6),
+                        ),
+                      ],
+                    ),
+                    child: CustomsButton(
+                      bgColor1: AppColors.button,
+                      bgColor2: AppColors.c28B446,
+                      name: 'Continue'.tr,
+                      textStyle: TextFontStyle.textStyle18c231F20poppins700
+                          .copyWith(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w700,
+                          ),
+                      callback: () {
+                        NavigationService.navigateTo(
+                          Routes.otpVerificationScreen,
+                        );
+                      },
+                    ),
+                  ),
+
+                  UIHelper.verticalSpace(32.h),
+                ],
+              ),
             ),
           ),
         ),
