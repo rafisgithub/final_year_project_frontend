@@ -1,17 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
 import 'package:get/get_utils/src/extensions/export.dart';
-
-import 'package:flutter/gestures.dart';
 import 'package:final_year_project_frontend/common_widgets/coustom_%20gradient_text.dart';
 import 'package:final_year_project_frontend/common_widgets/customs_button.dart';
 import 'package:final_year_project_frontend/constants/text_font_style.dart';
 import 'package:final_year_project_frontend/features/sign_In/widgets/custom_otp_field_widget.dart';
-
-import 'package:final_year_project_frontend/gen/assets.gen.dart';
 import 'package:final_year_project_frontend/gen/colors.gen.dart';
-
 import 'package:final_year_project_frontend/helpers/all_routes.dart';
 import 'package:final_year_project_frontend/helpers/navigation_service.dart';
 import 'package:final_year_project_frontend/helpers/ui_helpers.dart';

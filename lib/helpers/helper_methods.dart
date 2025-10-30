@@ -4,15 +4,8 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:final_year_project_frontend/helpers/custom_button.dart';
-// import 'package:http/http.dart' as http;
 import '/helpers/di.dart';
 import '../constants/app_constants.dart';
-import '../constants/text_font_style.dart';
-import '../gen/colors.gen.dart';
 
 //final appData = locator.get<GetStorage>();
 // final plcaeMarkAddress = locator.get<PlcaeMarkAddress>();

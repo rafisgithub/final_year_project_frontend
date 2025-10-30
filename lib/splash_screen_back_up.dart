@@ -22,40 +22,26 @@ class _SplashScreenState extends State<SplashScreen> {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     
     _videoController = VideoPlayerController.asset('assets/video/ads.mp4')
-      ..setLooping(false)
-      ..setVolume(1.0) 
+      ..setLooping(false) // Don't loop - play once like a movie intro
+      ..setVolume(1.0) // Enable sound for cinematic experience
       ..initialize().then((_) {
         if (!mounted) return;
         setState(() {
           _isVideoInitialized = true;
         });
         _videoController.play();
-
-        // Add this line to control the video playback after 2 seconds
-        // Comment out or remove this line if you don't want 2-second playback control
-        Future.delayed(const Duration(seconds: 1), () {
-          if (mounted) {
-            // Proceed to the next step after 2 seconds of video
-            _onVideoPartialComplete();
-          }
-        });
         
+        // Listen for video completion to handle navigation
         _videoController.addListener(_checkVideoCompletion);
       }).catchError((error) {
+        // If video fails to load, fallback after 3 seconds
         Future.delayed(const Duration(seconds: 3), () {
           if (mounted) {
+            // Parent widget (Loading) will handle navigation
             setState(() {});
           }
         });
       });
-  }
-
-  // Function to handle actions after 2 seconds of video playback
-  void _onVideoPartialComplete() {
-    // You can put any action you want to execute after 2 seconds
-    widget.onVideoComplete?.call();
-    // For example, navigate to another screen (if needed):
-    // Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => NewScreen()));
   }
 
   void _checkVideoCompletion() {
@@ -72,6 +58,7 @@ class _SplashScreenState extends State<SplashScreen> {
   void dispose() {
     _videoController.removeListener(_checkVideoCompletion);
     _videoController.dispose();
+    // Restore system UI
     SystemChrome.setEnabledSystemUIMode(
       SystemUiMode.manual,
       overlays: SystemUiOverlay.values,
@@ -82,19 +69,21 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black, 
+      backgroundColor: Colors.black, // Black background for cinematic feel
       body: Stack(
         fit: StackFit.expand,
         children: [
+          // Fullscreen video player
           if (_isVideoInitialized)
             FittedBox(
-              fit: BoxFit.cover, 
+              fit: BoxFit.cover, // Cover entire screen like movie intro
               child: SizedBox(
                 width: _videoController.value.size.width,
                 height: _videoController.value.size.height,
                 child: VideoPlayer(_videoController),
               ),
             ),
+          // Show nothing while loading - just black screen
         ],
       ),
     );

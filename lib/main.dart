@@ -12,7 +12,6 @@ import 'package:final_year_project_frontend/helpers/di.dart';
 import 'package:final_year_project_frontend/helpers/language.dart';
 import 'package:final_year_project_frontend/helpers/register_provider.dart';
 import 'package:final_year_project_frontend/loading.dart';
-import 'package:final_year_project_frontend/networks/dio/dio.dart';
 import 'package:provider/provider.dart';
 import 'helpers/helper_methods.dart';
 import 'helpers/navigation_service.dart';
@@ -27,11 +26,7 @@ void main() async {
   DioSingleton.instance.create();
 
   runApp(
-      // DevicePreview(
-      //   // enabled: !kReleaseMode,
-      //   builder: (context) => const MyApp(), // Wrap your app
-      // ),
-      const MyApp());
+    const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -68,14 +63,12 @@ class UtillScreenMobile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    //String language = 'ru_RU';
-    //String language = 'en_US';
+      //String language = 'ru_RU';
+      //String language = 'en_US';
 
      String language = appData.read(kKeyLanguage)??'bn_BD';
-    // String countryCode = appData.read(kKeyCountryCode);
    var screenSize = MediaQuery.sizeOf(context);
     return ScreenUtilInit(
-      //designSize: const Size(412, 892),
       designSize:  Size(screenSize.width, screenSize.height),
       minTextAdapt: true,
       splitScreenMode: true,

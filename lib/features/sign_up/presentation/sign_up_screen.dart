@@ -38,6 +38,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   Widget _buildTextField({
     required TextEditingController controller,
     required String hintText,
+    required String labelText,
     required IconData prefixIcon,
     bool isPassword = false,
     TextInputType keyboardType = TextInputType.text,
@@ -46,10 +47,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: AppColors.button.withOpacity(0.2), width: 1.5),
+        border: Border.all(color: AppColors.button.withValues(alpha: 0.2), width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: AppColors.button.withOpacity(0.08),
+            color: AppColors.button.withValues(alpha: 0.08),
             blurRadius: 12,
             offset: Offset(0, 4),
           ),
@@ -65,7 +66,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
           color: Colors.black87,
         ),
         decoration: InputDecoration(
+          labelText: labelText,
           hintText: hintText,
+          labelStyle: TextStyle(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w600,
+            color: AppColors.button,
+          ),
           hintStyle: TextStyle(
             fontSize: 15.sp,
             fontWeight: FontWeight.w400,
@@ -116,9 +123,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              AppColors.button.withOpacity(0.05),
+              AppColors.button.withValues(alpha: 0.05),
               Colors.white,
-              AppColors.c28B446.withOpacity(0.03),
+              AppColors.c28B446.withValues(alpha: 0.03),
             ],
           ),
         ),
@@ -150,7 +157,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           Container(
                             padding: EdgeInsets.all(16.w),
                             decoration: BoxDecoration(
-                              color: AppColors.button.withOpacity(0.1),
+                              color: AppColors.button.withValues(alpha: 0.1),
                               shape: BoxShape.circle,
                             ),
                             child: Icon(
@@ -204,17 +211,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     UIHelper.verticalSpace(28.h),
                     
                     // Name Field
-                    Text(
-                      "Full Name".tr,
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    UIHelper.verticalSpace(8.h),
                     _buildTextField(
                       controller: _nameController,
+                      labelText: 'Full Name'.tr,
                       hintText: 'e.g. Rafi Ahmed',
                       prefixIcon: Icons.person_outline,
                       keyboardType: TextInputType.name,
@@ -223,17 +222,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     UIHelper.verticalSpace(20.h),
                     
                     // Father's Name Field
-                    Text(
-                      "Father's Name".tr,
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    UIHelper.verticalSpace(8.h),
                     _buildTextField(
                       controller: _fatherNameController,
+                      labelText: "Father's Name".tr,
                       hintText: 'e.g. Nural Sheikh',
                       prefixIcon: Icons.family_restroom_outlined,
                       keyboardType: TextInputType.name,
@@ -242,17 +233,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     UIHelper.verticalSpace(20.h),
                     
                     // Email Field
-                    Text(
-                      "Email Address".tr,
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    UIHelper.verticalSpace(8.h),
                     _buildTextField(
                       controller: _emailController,
+                      labelText: 'Email Address'.tr,
                       hintText: 'e.g. example@gmail.com',
                       prefixIcon: Icons.email_outlined,
                       keyboardType: TextInputType.emailAddress,
@@ -261,18 +244,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     UIHelper.verticalSpace(20.h),
                     
                     // Phone Number Field
-                    Text(
-                      "Phone Number".tr,
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    UIHelper.verticalSpace(8.h),
                     IntlPhoneField(
                       decoration: InputDecoration(
+                        labelText: 'Phone Number'.tr,
                         hintText: 'Phone Number',
+                        labelStyle: TextStyle(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.button,
+                        ),
                         hintStyle: TextStyle(
                           fontSize: 15.sp,
                           fontWeight: FontWeight.w400,
@@ -282,11 +262,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         fillColor: Colors.white,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16.r),
-                          borderSide: BorderSide(color: AppColors.button.withOpacity(0.2), width: 1.5),
+                          borderSide: BorderSide(color: AppColors.button.withValues(alpha: 0.2), width: 1.5),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16.r),
-                          borderSide: BorderSide(color: AppColors.button.withOpacity(0.2), width: 1.5),
+                          borderSide: BorderSide(color: AppColors.button.withValues(alpha: 0.2), width: 1.5),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16.r),
@@ -309,17 +289,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     UIHelper.verticalSpace(20.h),
                     
                     // Password Field
-                    Text(
-                      "Password".tr,
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    UIHelper.verticalSpace(8.h),
                     _buildTextField(
                       controller: _passwordController,
+                      labelText: 'Password'.tr,
                       hintText: 'Create a strong password',
                       prefixIcon: Icons.lock_outline,
                       isPassword: true,
@@ -335,7 +307,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         borderRadius: BorderRadius.circular(16.r),
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.button.withOpacity(0.3),
+                            color: AppColors.button.withValues(alpha: 0.3),
                             blurRadius: 12,
                             offset: Offset(0, 6),
                           ),
@@ -350,16 +322,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           fontWeight: FontWeight.w700,
                         ),
                         callback: () {
-                          // Collect all data (selected_language will come from language_screen)
-                          final signUpData = {
-                            'name': _nameController.text,
-                            'father_name': _fatherNameController.text,
-                            'email': _emailController.text,
-                            'phone_number': _phoneNumber,
-                            'password': _passwordController.text,
-                          };
-                          
-                          print('Sign Up Data: $signUpData');
+                          // TODO: Implement sign-up logic
+                          // Collect and send sign-up data to API
+                          // Example:
+                          // final signUpData = {
+                          //   'name': _nameController.text,
+                          //   'father_name': _fatherNameController.text,
+                          //   'email': _emailController.text,
+                          //   'phone_number': _phoneNumber,
+                          //   'password': _passwordController.text,
+                          // };
                           
                           NavigationService.navigateTo(
                             Routes.otpVerificationScreen,

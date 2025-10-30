@@ -102,19 +102,19 @@ class _LanguageScreenState extends State<LanguageScreen> {
                           ),
                           decoration: BoxDecoration(
                             color: isSelected
-                                ? AppColors.button.withOpacity(0.1)
+                                ? AppColors.button.withValues(alpha: 0.1)
                                 : Colors.white,
                             borderRadius: BorderRadius.circular(16.r),
                             border: Border.all(
                               color: isSelected
                                   ? AppColors.button
-                                  : AppColors.cA1A1AA.withOpacity(0.3),
+                                  : AppColors.cA1A1AA.withValues(alpha: 0.3),
                               width: isSelected ? 2.w : 1.w,
                             ),
                             boxShadow: isSelected
                                 ? [
                                     BoxShadow(
-                                      color: AppColors.button.withOpacity(0.2),
+                                      color: AppColors.button.withValues(alpha: 0.2),
                                       blurRadius: 8,
                                       offset: const Offset(0, 4),
                                     ),
@@ -129,8 +129,8 @@ class _LanguageScreenState extends State<LanguageScreen> {
                                 height: 48.w,
                                 decoration: BoxDecoration(
                                   color: isSelected
-                                      ? AppColors.button.withOpacity(0.1)
-                                      : AppColors.cA1A1AA.withOpacity(0.1),
+                                      ? AppColors.button.withValues(alpha: 0.1)
+                                      : AppColors.cA1A1AA.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(12.r),
                                 ),
                                 child: Center(
@@ -203,10 +203,10 @@ class _LanguageScreenState extends State<LanguageScreen> {
                 child: CustomsButton(
                   bgColor1: _selectedLanguage != null
                       ? AppColors.button
-                      : AppColors.cA1A1AA.withOpacity(0.3),
+                      : AppColors.cA1A1AA.withValues(alpha: 0.3),
                   bgColor2: _selectedLanguage != null
                       ? AppColors.button
-                      : AppColors.cA1A1AA.withOpacity(0.3),
+                      : AppColors.cA1A1AA.withValues(alpha: 0.3),
                   name: 'Continue'.tr,
                   callback: _selectedLanguage != null
                       ? () {

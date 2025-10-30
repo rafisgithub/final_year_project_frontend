@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
-import 'package:final_year_project_frontend/constants/text_font_style.dart';
 import 'package:final_year_project_frontend/features/home/presentation/home.dart';
 import 'package:final_year_project_frontend/gen/assets.gen.dart';
 import 'package:final_year_project_frontend/gen/colors.gen.dart';
