@@ -71,13 +71,12 @@ class UtillScreenMobile extends StatelessWidget {
     //String language = 'ru_RU';
     //String language = 'en_US';
 
-    String countryCode = 'en_US';
      String language = appData.read(kKeyLanguage)??'bn_BD';
     // String countryCode = appData.read(kKeyCountryCode);
-   var scrieensize = MediaQuery.sizeOf(context); 
+   var screenSize = MediaQuery.sizeOf(context);
     return ScreenUtilInit(
       //designSize: const Size(412, 892),
-      designSize:  Size(scrieensize.width, scrieensize.height),
+      designSize:  Size(screenSize.width, screenSize.height),
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (_, child) {
@@ -87,13 +86,7 @@ class UtillScreenMobile extends StatelessWidget {
             //  showMaterialDialog(context);
             },
             child: GetMaterialApp(
-      //           //    showPerformanceOverlay: true,
-      //            supportedLocales: L10n.all,
-      // localizationsDelegates: const [
-      //   GlobalMaterialLocalizations.delegate,
-      //   GlobalWidgetsLocalizations.delegate,
-      //   GlobalCupertinoLocalizations.delegate,
-      // ],
+
                 useInheritedMediaQuery: true,
                 locale: Locale(language),
                 translations: LocalString(),
