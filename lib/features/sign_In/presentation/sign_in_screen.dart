@@ -8,6 +8,7 @@ import 'package:final_year_project_frontend/gen/colors.gen.dart';
 import 'package:final_year_project_frontend/helpers/all_routes.dart';
 import 'package:final_year_project_frontend/helpers/navigation_service.dart';
 import 'package:final_year_project_frontend/helpers/ui_helpers.dart';
+import 'package:final_year_project_frontend/networks/auth_service.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -21,12 +22,76 @@ class _SignInScreenState extends State<SignInScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isPasswordVisible = false;
+  bool _isLoading = false;
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _handleSignIn() async {
+    if (_formKey.currentState?.validate() ?? false) {
+      setState(() {
+        _isLoading = true;
+      });
+
+      try {
+        final result = await AuthService.signIn(
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+        );
+
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+
+          if (result['success'] == true) {
+            // Show success message
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(result['message'] ?? 'Login successful!'),
+                backgroundColor: AppColors.button,
+                duration: Duration(seconds: 2),
+              ),
+            );
+
+            // Navigate to home page
+            NavigationService.navigateToWithArgs(
+              Routes.mainNavigationBar,
+              {
+                'pageNum': 0,
+              },
+            );
+          } else {
+            // Show error message
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(result['message'] ?? 'Login failed'),
+                backgroundColor: Colors.red,
+                duration: Duration(seconds: 3),
+              ),
+            );
+          }
+        }
+      } catch (e) {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('An error occurred. Please try again.'),
+              backgroundColor: Colors.red,
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
+      }
+    }
   }
 
   Widget _buildTextField({
@@ -244,31 +309,27 @@ class _SignInScreenState extends State<SignInScreen> {
                       ),
                     ],
                   ),
-                  child: CustomsButton(
-                    bgColor1: AppColors.button,
-                    bgColor2: AppColors.c28B446,
-                    name: 'Login'.tr,
-                    textStyle: TextFontStyle.textStyle18c231F20poppins700.copyWith(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w700,
-                    ),
-                    callback: () {
-                      // TODO: Implement login logic
-                      // Collect and send login data to API
-                      // Example:
-                      // final loginData = {
-                      //   'email': _emailController.text,
-                      //   'password': _passwordController.text,
-                      // };
-                      
-                      NavigationService.navigateToWithArgs(
-                        Routes.mainNavigationBar,
-                        {
-                          'pageNum': 0,
-                        },
-                      );
-                    },
-                  ),
+                  child: _isLoading
+                      ? Center(
+                          child: SizedBox(
+                            height: 24.h,
+                            width: 24.w,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.5,
+                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            ),
+                          ),
+                        )
+                      : CustomsButton(
+                          bgColor1: AppColors.button,
+                          bgColor2: AppColors.c28B446,
+                          name: 'Login'.tr,
+                          textStyle: TextFontStyle.textStyle18c231F20poppins700.copyWith(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w700,
+                          ),
+                          callback: _isLoading ? () {} : _handleSignIn,
+                        ),
                 ),
                 
                 UIHelper.verticalSpace(24.h),

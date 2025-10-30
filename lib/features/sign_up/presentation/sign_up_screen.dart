@@ -4,11 +4,14 @@ import 'package:get/get_utils/src/extensions/export.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:final_year_project_frontend/common_widgets/customs_button.dart';
 import 'package:final_year_project_frontend/common_widgets/common_text_button.dart';
+import 'package:final_year_project_frontend/constants/app_constants.dart';
 import 'package:final_year_project_frontend/constants/text_font_style.dart';
 import 'package:final_year_project_frontend/gen/colors.gen.dart';
 import 'package:final_year_project_frontend/helpers/all_routes.dart';
+import 'package:final_year_project_frontend/helpers/di.dart';
 import 'package:final_year_project_frontend/helpers/navigation_service.dart';
 import 'package:final_year_project_frontend/helpers/ui_helpers.dart';
+import 'package:final_year_project_frontend/networks/auth_service.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -25,6 +28,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _passwordController = TextEditingController();
   
   bool _isPasswordVisible = false;
+  bool _isLoading = false;
   String _phoneNumber = '';
 
   @override
@@ -34,6 +38,80 @@ class _SignUpScreenState extends State<SignUpScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _handleSignUp() async {
+    if (_formKey.currentState?.validate() ?? false) {
+      setState(() {
+        _isLoading = true;
+      });
+
+      try {
+        // Get selected language from storage or default to 'en'
+        // Storage format is 'en_US' or 'bn_BD', but backend expects 'en' or 'bn'
+        final storedLanguage = appData.read(kKeyLanguage) ?? 'en';
+        final selectedLanguage = storedLanguage.contains('_') 
+            ? storedLanguage.split('_')[0] 
+            : storedLanguage;
+
+        final result = await AuthService.signUp(
+          name: _nameController.text.trim(),
+          fatherName: _fatherNameController.text.trim(),
+          email: _emailController.text.trim(),
+          phoneNumber: _phoneNumber,
+          password: _passwordController.text,
+          selectedLanguage: selectedLanguage,
+        );
+
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+
+          if (result['success'] == true) {
+            // Show success message
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(result['message'] ?? 'Account created successfully!'),
+                backgroundColor: AppColors.button,
+                duration: Duration(seconds: 2),
+              ),
+            );
+
+            // Navigate to home page
+            NavigationService.navigateToWithArgs(
+              Routes.mainNavigationBar,
+              {
+                'pageNum': 0,
+              },
+            );
+          } else {
+            // Show error message
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(result['message'] ?? 'Sign up failed'),
+                backgroundColor: Colors.red,
+                duration: Duration(seconds: 3),
+              ),
+            );
+          }
+        }
+      } catch (e) {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('An error occurred. Please try again.'),
+              backgroundColor: Colors.red,
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
+      }
+    }
   }
 
   Widget _buildTextField({
@@ -303,34 +381,27 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           ),
                         ],
                       ),
-                      child: CustomsButton(
-                        bgColor1: AppColors.button,
-                        bgColor2: AppColors.c28B446,
-                        name: 'Sign Up'.tr,
-                        textStyle: TextFontStyle.textStyle18c231F20poppins700.copyWith(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w700,
-                        ),
-                        callback: () {
-                          // TODO: Implement sign-up logic
-                          // Collect and send sign-up data to API
-                          // Example:
-                          // final signUpData = {
-                          //   'name': _nameController.text,
-                          //   'father_name': _fatherNameController.text,
-                          //   'email': _emailController.text,
-                          //   'phone_number': _phoneNumber,
-                          //   'password': _passwordController.text,
-                          // };
-                          
-                          NavigationService.navigateToWithArgs(
-                            Routes.mainNavigationBar,
-                            {
-                              'pageNum': 0,
-                            },
-                          );
-                        },
-                      ),
+                      child: _isLoading
+                          ? Center(
+                              child: SizedBox(
+                                height: 24.h,
+                                width: 24.w,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.5,
+                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                ),
+                              ),
+                            )
+                          : CustomsButton(
+                              bgColor1: AppColors.button,
+                              bgColor2: AppColors.c28B446,
+                              name: 'Sign Up'.tr,
+                              textStyle: TextFontStyle.textStyle18c231F20poppins700.copyWith(
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.w700,
+                              ),
+                              callback: _isLoading ? () {} : _handleSignUp,
+                            ),
                     ),
                     
                     UIHelper.verticalSpace(24.h),

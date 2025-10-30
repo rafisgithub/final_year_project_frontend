@@ -7,6 +7,7 @@ import 'package:final_year_project_frontend/gen/colors.gen.dart';
 import 'package:final_year_project_frontend/helpers/all_routes.dart';
 import 'package:final_year_project_frontend/helpers/navigation_service.dart';
 import 'package:final_year_project_frontend/helpers/ui_helpers.dart';
+import 'package:final_year_project_frontend/networks/auth_service.dart';
 
 class ForgotPasswordscreen extends StatefulWidget {
   const ForgotPasswordscreen({super.key});
@@ -18,11 +19,72 @@ class ForgotPasswordscreen extends StatefulWidget {
 class _ForgotPasswordscreenState extends State<ForgotPasswordscreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
+  bool _isLoading = false;
 
   @override
   void dispose() {
     _emailController.dispose();
     super.dispose();
+  }
+
+  Future<void> _handleSendOtp() async {
+    if (_formKey.currentState?.validate() ?? false) {
+      setState(() {
+        _isLoading = true;
+      });
+
+      try {
+        final result = await AuthService.sendOtp(
+          email: _emailController.text.trim(),
+          purpose: 'password_reset',
+        );
+
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+
+          if (result['success'] == true) {
+            // Show success message
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(result['message'] ?? 'OTP sent to your email!'),
+                backgroundColor: AppColors.button,
+                duration: Duration(seconds: 2),
+              ),
+            );
+
+            // Navigate to OTP verification screen
+            NavigationService.navigateTo(
+              Routes.otpVerificationScreen,
+            );
+          } else {
+            // Show error message
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(result['message'] ?? 'Failed to send OTP'),
+                backgroundColor: Colors.red,
+                duration: Duration(seconds: 3),
+              ),
+            );
+          }
+        }
+      } catch (e) {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('An error occurred. Please try again.'),
+              backgroundColor: Colors.red,
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
+      }
+    }
   }
 
   Widget _buildTextField({
@@ -203,21 +265,30 @@ class _ForgotPasswordscreenState extends State<ForgotPasswordscreen> {
                         ),
                       ],
                     ),
-                    child: CustomsButton(
-                      bgColor1: AppColors.button,
-                      bgColor2: AppColors.c28B446,
-                      name: 'Continue'.tr,
-                      textStyle: TextFontStyle.textStyle18c231F20poppins700
-                          .copyWith(
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w700,
+                    child: _isLoading
+                        ? Center(
+                            child: SizedBox(
+                              height: 24.h,
+                              width: 24.w,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.5,
+                                valueColor:
+                                    AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            ),
+                          )
+                        : CustomsButton(
+                            bgColor1: AppColors.button,
+                            bgColor2: AppColors.c28B446,
+                            name: 'Continue'.tr,
+                            textStyle:
+                                TextFontStyle.textStyle18c231F20poppins700
+                                    .copyWith(
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.w700,
+                            ),
+                            callback: _isLoading ? () {} : _handleSendOtp,
                           ),
-                      callback: () {
-                        NavigationService.navigateTo(
-                          Routes.otpVerificationScreen,
-                        );
-                      },
-                    ),
                   ),
 
                   UIHelper.verticalSpace(32.h),

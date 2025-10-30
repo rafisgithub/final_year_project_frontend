@@ -21,4 +21,9 @@ final class Endpoints {
   Endpoints._();
 
   // auth
+  static const String signup = "signup/";
+  static const String signin = "signin/";
+  static const String sendOtp = "send-otp/";
+  static const String verifyOtp = "verify-otp/";
+  static const String resetPassword = "reset-password/";
 }
