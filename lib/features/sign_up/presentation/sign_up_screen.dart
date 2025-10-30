@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get_utils/src/extensions/export.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:final_year_project_frontend/common_widgets/customs_button.dart';
+import 'package:final_year_project_frontend/common_widgets/common_text_button.dart';
 import 'package:final_year_project_frontend/constants/text_font_style.dart';
 import 'package:final_year_project_frontend/gen/colors.gen.dart';
 import 'package:final_year_project_frontend/helpers/all_routes.dart';
@@ -117,27 +118,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              AppColors.button.withValues(alpha: 0.05),
-              Colors.white,
-              AppColors.c28B446.withValues(alpha: 0.03),
-            ],
-          ),
-        ),
-        child: SafeArea(
-          child: Form(
-            key: _formKey,
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24.w),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Form(
+          key: _formKey,
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 24.w),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                     UIHelper.verticalSpace(24.h),
                     
                     // Back Button
@@ -344,38 +334,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     
                     // Already have account
                     Center(
-                      child: GestureDetector(
+                      child: CommonTextButtonWithPrefix(
+                        prefixText: "Already have an account? ",
+                        buttonText: 'Login',
                         onTap: () {
                           NavigationService.navigateToReplacement(Routes.signinScreen);
                         },
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              "Already have an account? ",
-                              style: TextStyle(
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.w400,
-                                color: Colors.black87,
-                              ),
-                            ),
-                            Text(
-                              'Login',
-                              style: TextStyle(
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.button,
-                                decoration: TextDecoration.underline,
-                              ),
-                            ),
-                          ],
-                        ),
                       ),
                     ),
                     
                     UIHelper.verticalSpace(32.h),
-                  ],
-                ),
+                ],
               ),
             ),
           ),

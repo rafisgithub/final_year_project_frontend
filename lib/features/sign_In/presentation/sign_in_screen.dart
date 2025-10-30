@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get_utils/src/extensions/export.dart';
 import 'package:final_year_project_frontend/common_widgets/customs_button.dart';
+import 'package:final_year_project_frontend/common_widgets/common_text_button.dart';
 import 'package:final_year_project_frontend/constants/text_font_style.dart';
 import 'package:final_year_project_frontend/gen/colors.gen.dart';
 import 'package:final_year_project_frontend/helpers/all_routes.dart';
@@ -31,6 +32,7 @@ class _SignInScreenState extends State<SignInScreen> {
   Widget _buildTextField({
     required TextEditingController controller,
     required String hintText,
+    required String labelText,
     required IconData prefixIcon,
     bool isPassword = false,
     TextInputType keyboardType = TextInputType.text,
@@ -58,6 +60,12 @@ class _SignInScreenState extends State<SignInScreen> {
           color: Colors.black87,
         ),
         decoration: InputDecoration(
+          labelText: labelText,
+          labelStyle: TextStyle(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w600,
+            color: AppColors.button,
+          ),
           hintText: hintText,
           hintStyle: TextStyle(
             fontSize: 15.sp,
@@ -103,111 +111,93 @@ class _SignInScreenState extends State<SignInScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-    
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              AppColors.button.withValues(alpha: 0.05),
-              Colors.white,
-              AppColors.c28B446.withValues(alpha: 0.03),
-            ],
-          ),
-        ),
+      backgroundColor: Colors.white,
+      body: SafeArea(
         child: Form(
           key: _formKey,
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 24.w),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                UIHelper.verticalSpace(24.h),
-                
-                // Back Button
-                IconButton(
-                  onPressed: () => Navigator.pop(context),
-                  icon: Icon(Icons.arrow_back_ios, size: 20.sp, color: AppColors.button),
-                  padding: EdgeInsets.zero,
-                  constraints: BoxConstraints(),
-                ),
-                
-                UIHelper.verticalSpace(16.h),
-                
-                // App Title with Agricultural Icon
-                Center(
-                  child: Column(
-                    children: [
-                      Container(
-                        padding: EdgeInsets.all(16.w),
-                        decoration: BoxDecoration(
-                          color: AppColors.button.withValues(alpha: 0.1),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.eco,
-                          size: 40.sp,
-                          color: AppColors.button,
-                        ),
+          child: SingleChildScrollView(
+            child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 24.w),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                        UIHelper.verticalSpace(24.h),
+                    
+                    // Back Button
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: Icon(Icons.arrow_back_ios, size: 20.sp, color: AppColors.button),
+                      padding: EdgeInsets.zero,
+                      constraints: BoxConstraints(),
+                    ),
+                    
+                    UIHelper.verticalSpace(16.h),
+                    
+                    // App Title with Agricultural Icon
+                    Center(
+                      child: Column(
+                        children: [
+                          Container(
+                            padding: EdgeInsets.all(16.w),
+                            decoration: BoxDecoration(
+                              color: AppColors.button.withValues(alpha: 0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.eco,
+                              size: 40.sp,
+                              color: AppColors.button,
+                            ),
+                          ),
+                          UIHelper.verticalSpace(12.h),
+                          Text(
+                            'Krishi App',
+                            style: TextFontStyle.textStyle18c231F20poppins700.copyWith(
+                              fontSize: 28.sp,
+                              color: AppColors.button,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          Text(
+                            '🌱 Agricultural Officer Assistant',
+                            style: TextStyle(
+                              fontSize: 13.sp,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.c28B446,
+                            ),
+                          ),
+                        ],
                       ),
-                      UIHelper.verticalSpace(12.h),
-                      Text(
-                        'Krishi App',
-                        style: TextFontStyle.textStyle18c231F20poppins700.copyWith(
-                          fontSize: 28.sp,
-                          color: AppColors.button,
-                          fontWeight: FontWeight.w800,
-                        ),
+                    ),
+                    
+                    UIHelper.verticalSpace(24.h),
+                    
+                    // Welcome Text
+                    Text(
+                      "Welcome Back".tr,
+                      style: TextFontStyle.textStyle18c231F20poppins700.copyWith(
+                        fontSize: 24.sp,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.black87,
                       ),
-                      Text(
-                        '🌱 Agricultural Officer Assistant',
-                        style: TextStyle(
-                          fontSize: 13.sp,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.c28B446,
-                        ),
+                    ),
+                    UIHelper.verticalSpace(6.h),
+                    Text(
+                      "Login to protect crops from diseases 🌾".tr,
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w400,
+                        color: AppColors.cA1A1AA,
                       ),
-                    ],
-                  ),
-                ),
-                
-                UIHelper.verticalSpace(32.h),
-                
-                // Welcome Text
-                Text(
-                  "Welcome Back".tr,
-                  style: TextFontStyle.textStyle18c231F20poppins700.copyWith(
-                    fontSize: 26.sp,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.black87,
-                  ),
-                ),
-                UIHelper.verticalSpace(8.h),
-                Text(
-                  "Login to protect crops from diseases 🌾".tr,
-                  style: TextStyle(
-                    fontSize: 15.sp,
-                    fontWeight: FontWeight.w400,
-                    color: AppColors.cA1A1AA,
-                  ),
-                ),
-                
-                UIHelper.verticalSpace(40.h),
+                    ),
+                    
+                    UIHelper.verticalSpace(28.h),
                 
                 // Email Field
-                Text(
-                  "Email Address".tr,
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black87,
-                  ),
-                ),
-                UIHelper.verticalSpace(8.h),
                 _buildTextField(
                   controller: _emailController,
                   hintText: 'Enter your email',
+                  labelText: "Email Address".tr,
                   prefixIcon: Icons.email_outlined,
                   keyboardType: TextInputType.emailAddress,
                 ),
@@ -215,18 +205,10 @@ class _SignInScreenState extends State<SignInScreen> {
                 UIHelper.verticalSpace(20.h),
                 
                 // Password Field
-                Text(
-                  "Password".tr,
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black87,
-                  ),
-                ),
-                UIHelper.verticalSpace(8.h),
                 _buildTextField(
                   controller: _passwordController,
                   hintText: 'Enter password',
+                  labelText: "Password".tr,
                   prefixIcon: Icons.lock_outline,
                   isPassword: true,
                 ),
@@ -236,23 +218,17 @@ class _SignInScreenState extends State<SignInScreen> {
                 // Forgot Password
                 Align(
                   alignment: Alignment.centerRight,
-                  child: GestureDetector(
+                  child: CommonTextButton(
+                    text: 'Forgot password?',
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w600,
                     onTap: () {
                       NavigationService.navigateTo(Routes.forgotPasswordscreen);
                     },
-                    child: Text(
-                      'Forgot password?',
-                      style: TextStyle(
-                        fontSize: 13.sp,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.button,
-                        decoration: TextDecoration.underline,
-                      ),
-                    ),
                   ),
                 ),
                 
-                UIHelper.verticalSpace(40.h),
+                UIHelper.verticalSpace(28.h),
                 
                 // Login Button
                 Container(
@@ -296,37 +272,18 @@ class _SignInScreenState extends State<SignInScreen> {
                 
                 // Don't have account
                 Center(
-                  child: GestureDetector(
+                  child: CommonTextButtonWithPrefix(
+                    prefixText: "Don't have an account? ",
+                    buttonText: 'Sign up',
                     onTap: () {
                       NavigationService.navigateTo(Routes.signUpScreen);
                     },
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Don't have an account? ",
-                          style: TextStyle(
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.w400,
-                            color: Colors.black87,
-                          ),
-                        ),
-                        Text(
-                          'Sign up',
-                          style: TextStyle(
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.button,
-                            decoration: TextDecoration.underline,
-                          ),
-                        ),
-                      ],
-                    ),
                   ),
                 ),
                 
                 UIHelper.verticalSpace(32.h),
-              ],
+                ],
+              ),
             ),
           ),
         ),

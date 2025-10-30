@@ -198,14 +198,27 @@ class _LanguageScreenState extends State<LanguageScreen> {
               ),
 
               // Continue Button
-              SizedBox(
+              Container(
                 height: 56.h,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16.r),
+                  boxShadow: _selectedLanguage != null
+                      ? [
+                          BoxShadow(
+                            color: AppColors.button.withValues(alpha: 0.3),
+                            blurRadius: 12,
+                            offset: Offset(0, 6),
+                          ),
+                        ]
+                      : [],
+                ),
                 child: CustomsButton(
                   bgColor1: _selectedLanguage != null
                       ? AppColors.button
                       : AppColors.cA1A1AA.withValues(alpha: 0.3),
                   bgColor2: _selectedLanguage != null
-                      ? AppColors.button
+                      ? AppColors.c28B446
                       : AppColors.cA1A1AA.withValues(alpha: 0.3),
                   name: 'Continue'.tr,
                   callback: _selectedLanguage != null
@@ -228,7 +241,7 @@ class _LanguageScreenState extends State<LanguageScreen> {
                         }
                       : () {},
                   textStyle: TextFontStyle.textStyle18c231F20poppins700
-                      .copyWith(fontSize: 16.sp, fontWeight: FontWeight.w600),
+                      .copyWith(fontSize: 16.sp, fontWeight: FontWeight.w700),
                 ),
               ),
               SizedBox(height: 32.h),
