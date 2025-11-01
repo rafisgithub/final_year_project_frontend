@@ -127,6 +127,7 @@ class AuthService {
           await appData.write(kKeyRefreshToken, userData['refresh_token']);
           await appData.write(kKeyUserId, userData['id'].toString());
           await appData.write(kKeyEmail, userData['email']);
+          await appData.write(kKeyIsLoggedIn,true);
           
           // Update Dio with the new token
           DioSingleton.instance.update(userData['access_token']);

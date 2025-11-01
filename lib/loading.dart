@@ -1,4 +1,7 @@
+import 'package:final_year_project_frontend/constants/app_constants.dart';
 import 'package:final_year_project_frontend/features/language/presentation/language_screen.dart';
+import 'package:final_year_project_frontend/helpers/di.dart';
+import 'package:final_year_project_frontend/navigation_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:final_year_project_frontend/splash_screen.dart';
@@ -57,6 +60,11 @@ class _LoadingState extends State<Loading> {
     //  WidgetsBinding.instance.addPostFrameCallback((_) {
     //   NavigationService.navigateToReplacement(Routes.onbordingScreens);
     // });
+      final isLoggedIn = appData.read(kKeyIsLoggedIn);
+    if (isLoggedIn == true) {
+      return const MainNavigationBar(pageNum: 0);
+
+    }
     return const LanguageScreen().animate()
   .fadeIn(duration: 500.ms) ;
     }

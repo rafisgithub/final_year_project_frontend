@@ -49,101 +49,103 @@ class _MainNavigationBarState extends State<MainNavigationBar> {
         color: AppColors.c050915, // Background color for the nav bar
         padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 10.h),
         child: SafeArea(
-          child: GNav(
-            rippleColor:
-                Colors.grey[800]!, // Tab button ripple color when pressed
-            hoverColor: Colors.grey[700]!, // Tab button hover color
-            haptic: true, // Haptic feedback
-            tabBorderRadius: 100.r, // Rounded corners for tabs
-            duration: const Duration(
-              milliseconds: 900,
-            ), // Tab animation duration
-            gap: 8.w, // Gap between icon and text
-            color: Colors.white.withOpacity(0.7), // Unselected icon/text color
-            activeColor: Colors.white, // Selected icon/text color
-            iconSize: 24.w, // Icon size
-                
-            padding: EdgeInsets.symmetric(
-              horizontal: 20.w,
-              vertical: 10.h,
-            ), // Tab padding
-            // Fallback background color
-            onTabChange: (index) {
-              setState(() {
-                currentTab = index;
-              });
-            },
-            tabs: [
-              GButton(
-                icon: Icons.home, // Replace with your asset icon
-                leading: CircleAvatar(
-                  backgroundColor: currentTab == 0
-                      ? Colors.transparent
-                      : AppColors.c1F1538,
-                  child: Image(
-                    image: AssetImage(Assets.icons.homeicon.path),
-                    width: 20.w,
-                    height: 20.w,
+          child: FittedBox(
+            child: GNav(
+              rippleColor:
+                  Colors.grey[800]!, // Tab button ripple color when pressed
+              hoverColor: Colors.grey[700]!, // Tab button hover color
+              haptic: true, // Haptic feedback
+              tabBorderRadius: 100.r, // Rounded corners for tabs
+              duration: const Duration(
+                milliseconds: 900,
+              ), // Tab animation duration
+              gap: 8.w, // Gap between icon and text
+              color: Colors.white.withOpacity(0.7), // Unselected icon/text color
+              activeColor: Colors.white, // Selected icon/text color
+              iconSize: 24.w, // Icon size
+                  
+              padding: EdgeInsets.symmetric(
+                horizontal: 20.w,
+                vertical: 10.h,
+              ), // Tab padding
+              // Fallback background color
+              onTabChange: (index) {
+                setState(() {
+                  currentTab = index;
+                });
+              },
+              tabs: [
+                GButton(
+                  icon: Icons.home, // Replace with your asset icon
+                  leading: CircleAvatar(
+                    backgroundColor: currentTab == 0
+                        ? Colors.transparent
+                        : AppColors.c1F1538,
+                    child: Image(
+                      image: AssetImage(Assets.icons.homeicon.path),
+                      width: 20.w,
+                      height: 20.w,
+                    ),
+                  ),
+                  text: 'Home',
+                  backgroundGradient: LinearGradient(
+                    colors: [AppColors.button, AppColors.button],
                   ),
                 ),
-                text: 'Home',
-                backgroundGradient: LinearGradient(
-                  colors: [AppColors.c8B3AFF, AppColors.cD020FF],
-                ),
-              ),
-              GButton(
-                borderRadius: BorderRadius.circular(100.r),
-                icon: Icons.person, // Replace with your asset icon
-                leading: CircleAvatar(
-                  backgroundColor: currentTab == 1
-                      ? Colors.transparent
-                      : AppColors.c1F1538,
-                  child: Image(
-                    image: AssetImage(Assets.icons.agentsicon.path),
-                    width: 20.w,
-                    height: 20.w,
+                GButton(
+                  borderRadius: BorderRadius.circular(100.r),
+                  icon: Icons.person, // Replace with your asset icon
+                  leading: CircleAvatar(
+                    backgroundColor: currentTab == 1
+                        ? Colors.transparent
+                        : AppColors.c1F1538,
+                    child: Image(
+                      image: AssetImage(Assets.icons.agentsicon.path),
+                      width: 20.w,
+                      height: 20.w,
+                    ),
+                  ),
+                  text: 'Agent',
+                  backgroundGradient: LinearGradient(
+                    colors: [AppColors.button, AppColors.button],
                   ),
                 ),
-                text: 'Agent',
-                backgroundGradient: LinearGradient(
-                  colors: [AppColors.c8B3AFF, AppColors.cD020FF],
-                ),
-              ),
-              GButton(
-                icon: Icons.list, // Replace with your asset icon
-                leading: CircleAvatar(
-                  backgroundColor: currentTab == 2
-                      ? Colors.transparent
-                      : AppColors.c1F1538,
-                  child: Image(
-                    image: AssetImage(Assets.icons.listicon.path),
-                    width: 20.w,
-                    height: 20.w,
+                GButton(
+                  icon: Icons.list, // Replace with your asset icon
+                  leading: CircleAvatar(
+                    backgroundColor: currentTab == 2
+                        ? Colors.transparent
+                        : AppColors.c1F1538,
+                    child: Image(
+                      image: AssetImage(Assets.icons.listicon.path),
+                      width: 20.w,
+                      height: 20.w,
+                    ),
+                  ),
+                  text: 'Job list',
+                  backgroundGradient: LinearGradient(
+                    colors:[AppColors.button, AppColors.button],
                   ),
                 ),
-                text: 'Job list',
-                backgroundGradient: LinearGradient(
-                  colors: [AppColors.c8B3AFF, AppColors.cD020FF],
-                ),
-              ),
-              GButton(
-                icon: Icons.person_outline, // Replace with your asset icon
-                leading: CircleAvatar(
-                  backgroundColor: currentTab == 3
-                      ? Colors.transparent
-                      : AppColors.c1F1538,
-                  child: Image(
-                    image: AssetImage(Assets.icons.profileicon.path),
-                    width: 20.w,
-                    height: 20.w,
+                GButton(
+                  icon: Icons.person_outline, // Replace with your asset icon
+                  leading: CircleAvatar(
+                    backgroundColor: currentTab == 3
+                        ? Colors.transparent
+                        : AppColors.c1F1538,
+                    child: Image(
+                      image: AssetImage(Assets.icons.profileicon.path),
+                      width: 20.w,
+                      height: 20.w,
+                    ),
+                  ),
+                  text: 'Profile',
+                  backgroundGradient: LinearGradient(
+                    colors:[AppColors.button, AppColors.button],
                   ),
                 ),
-                text: 'Profile',
-                backgroundGradient: LinearGradient(
-                  colors: [AppColors.c8B3AFF, AppColors.cD020FF],
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
