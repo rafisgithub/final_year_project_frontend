@@ -2,7 +2,7 @@
 
 const String url = "https://test.drinkwithme.click/api/";
 
-const String imageUrl = "https://test.drinkwithme.click/api/";
+const String imageUrl = "https://test.drinkwithme.click/";
 // String imageUrl = String.fromEnvironment("IMAGE_URL");
 
 final class NetworkConstants {
@@ -27,4 +27,7 @@ final class Endpoints {
   static const String verifyOtp = "verify-otp/";
   static const String resetPassword = "reset-password/";
   static const String signout = "signout/";
+  
+  // profile
+  static const String profileGet = "profile-get/";
 }

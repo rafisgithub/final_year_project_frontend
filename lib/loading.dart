@@ -2,6 +2,7 @@ import 'package:final_year_project_frontend/constants/app_constants.dart';
 import 'package:final_year_project_frontend/features/language/presentation/language_screen.dart';
 import 'package:final_year_project_frontend/helpers/di.dart';
 import 'package:final_year_project_frontend/navigation_screen.dart';
+import 'package:final_year_project_frontend/networks/dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:final_year_project_frontend/splash_screen.dart';
@@ -27,19 +28,16 @@ class _LoadingState extends State<Loading> {
 
   loadInitialData() async {
     await setInitValue();
-    // bool data = appData.read(kKeyIsLoggedIn) ?? false;
-
-    // bool data2 = appData.read(kKeyIsLoggedIn2) ?? false;
-    // if (data) {
-    //   String token = appData.read(kKeyAccessToken);
-    //   DioSingleton.instance.update(token);
-    // } else if (data2) {
-    //   String token = appData.read(kKeyAccessToken2);
-    //   DioSingleton.instance.update(token);
-    // } else {
-    //   // DioSingleton.instance.update("");
-
-    // }
+    
+    // Restore access token if user is logged in
+    bool isLoggedIn = appData.read(kKeyIsLoggedIn) ?? false;
+    if (isLoggedIn) {
+      String? token = appData.read(kKeyAccessToken);
+      if (token != null && token.isNotEmpty) {
+        DioSingleton.instance.update(token);
+      }
+    }
+    
     setState(() {
       _isLoading = false;
     });

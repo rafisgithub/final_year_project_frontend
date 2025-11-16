@@ -1,7 +1,10 @@
 import 'package:final_year_project_frontend/gen/colors.gen.dart';
 import 'package:final_year_project_frontend/networks/auth_service.dart';
+import 'package:final_year_project_frontend/networks/profile_service.dart';
+import 'package:final_year_project_frontend/networks/endpoints.dart';
 import 'package:final_year_project_frontend/helpers/all_routes.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -13,6 +16,27 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   // Create a GlobalKey to access the ScaffoldState
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  
+  Map<String, dynamic>? _profileData;
+  bool _isLoadingProfile = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+    final result = await ProfileService.getProfile();
+    if (mounted) {
+      setState(() {
+        if (result['success'] == true) {
+          _profileData = result['data'];
+        }
+        _isLoadingProfile = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,29 +49,86 @@ class _HomeScreenState extends State<HomeScreen> {
             padding: EdgeInsets.zero,
             children:  <Widget>[
               DrawerHeader(
-                
-                
                 decoration: BoxDecoration(
-                  color: Colors.deepOrange,
+                  color: AppColors.button,
                 ),
-                child: Text(
-                  'Menu',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                  ),
-                ),
+                child: _isLoadingProfile
+                    ? Center(
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                        ),
+                      )
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          // Avatar
+                          CircleAvatar(
+                            radius: 30.r,
+                            backgroundColor: Colors.white,
+                            backgroundImage: _profileData?['avatar'] != null
+                                ? NetworkImage('${imageUrl}${_profileData!['avatar']}')
+                                : null,
+                            child: _profileData?['avatar'] == null
+                                ? Icon(
+                                    Icons.person,
+                                    size: 35.sp,
+                                    color: AppColors.button,
+                                  )
+                                : null,
+                          ),
+                          SizedBox(height: 12.h),
+                          // Name
+                          Text(
+                            _profileData?['name'] ?? 'User Name',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18.sp,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          SizedBox(height: 4.h),
+                          // Email
+                          Text(
+                            _profileData?['email'] ?? 'user@email.com',
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.9),
+                              fontSize: 14.sp,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
               ),
 
               ListTile(
-                leading: Icon(Icons.home),
+                leading: Icon(Icons.home, color: AppColors.button),
                 title: Text('Home'),
               ),
               ListTile(
-                leading: Icon(Icons.settings),
+                leading: Icon(Icons.swap_horiz, color: AppColors.button),
+                title: Text('Switch Role'),
+                onTap: () {
+                  // Handle switch role action
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.language, color: AppColors.button),
+                title: Text('Change Language'),
+                onTap: () {
+                  // Handle change language action
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.settings, color: AppColors.button),
                 title: Text('Settings'),
               ),
-           Spacer(),
+              SizedBox(height: 250),
               ListTile(
                 leading: Icon(Icons.logout, color: AppColors.button),
                 title: Text('Logout'),
