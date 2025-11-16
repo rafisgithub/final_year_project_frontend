@@ -98,6 +98,7 @@ const String kKeyDeviceID = 'device_id';
 const String kKeyUserID = 'user_id';
 const String kKeyRefreshToken = 'refresh_token';
 const String kKeyUserId = 'user_id';
+const String kKeyRole = 'role';
 const String kKeyShopID = 'shop_id';
 const String kKeycategoriesID = 'categoriesId';
 const String kKeyproductID = 'productId';

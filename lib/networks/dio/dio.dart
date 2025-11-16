@@ -35,15 +35,22 @@ final class DioSingleton {
     if (kDebugMode) {
       print("Dio update");
     }
+    
+    Map<String, dynamic> headers = {
+      NetworkConstants.ACCEPT: NetworkConstants.ACCEPT_TYPE,
+      NetworkConstants.ACCEPT_LANGUAGE: appData.read(kKeyLanguage) ?? "pt",
+      NetworkConstants.APP_KEY: NetworkConstants.APP_KEY_VALUE,
+    };
+    
+    // Only add Authorization header if token is not empty
+    if (auth.isNotEmpty) {
+      headers[NetworkConstants.AUTHORIZATION] = "Bearer $auth";
+    }
+    
     BaseOptions options = BaseOptions(
       baseUrl: url,
       responseType: ResponseType.json,
-      headers: {
-        NetworkConstants.ACCEPT: NetworkConstants.ACCEPT_TYPE,
-        NetworkConstants.ACCEPT_LANGUAGE: appData.read(kKeyLanguage) ?? "pt",
-        NetworkConstants.APP_KEY: NetworkConstants.APP_KEY_VALUE,
-        NetworkConstants.AUTHORIZATION: "Bearer $auth",
-      },
+      headers: headers,
       connectTimeout: const Duration(milliseconds: 100000),
       receiveTimeout: const Duration(milliseconds: 100000),
     );
@@ -76,6 +83,20 @@ Future<Response> postHttp(String path, [dynamic data]) =>
       path,
       data: data,
       cancelToken: DioSingleton.cancelToken,
+    );
+
+// Post without Authorization header for sign-up, sign-in, send-otp
+Future<Response> postHttpNoAuth(String path, [dynamic data]) =>
+    DioSingleton.instance.dio.post(
+      path,
+      data: data,
+      cancelToken: DioSingleton.cancelToken,
+      options: Options(
+        headers: {
+          NetworkConstants.ACCEPT: NetworkConstants.ACCEPT_TYPE,
+          NetworkConstants.APP_KEY: NetworkConstants.APP_KEY_VALUE,
+        },
+      ),
     );
 
 Future<Response> putHttp(String path, [dynamic data]) =>

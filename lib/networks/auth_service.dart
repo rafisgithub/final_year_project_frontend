@@ -29,7 +29,7 @@ class AuthService {
         print('Sign Up Request: $data');
       }
 
-      final response = await postHttp(Endpoints.signup, data);
+      final response = await postHttpNoAuth(Endpoints.signup, data);
 
       if (kDebugMode) {
         print('Sign Up Response: ${response.data}');
@@ -45,6 +45,9 @@ class AuthService {
           await appData.write(kKeyRefreshToken, userData['refresh_token']);
           await appData.write(kKeyUserId, userData['id'].toString());
           await appData.write(kKeyEmail, userData['email']);
+          if (userData['role'] != null) {
+            await appData.write(kKeyRole, userData['role']);
+          }
           
           // Update Dio with the new token
           DioSingleton.instance.update(userData['access_token']);
@@ -111,7 +114,7 @@ class AuthService {
         print('Sign In Request: $data');
       }
 
-      final response = await postHttp(Endpoints.signin, data);
+      final response = await postHttpNoAuth(Endpoints.signin, data);
 
       if (kDebugMode) {
         print('Sign In Response: ${response.data}');
@@ -128,6 +131,9 @@ class AuthService {
           await appData.write(kKeyUserId, userData['id'].toString());
           await appData.write(kKeyEmail, userData['email']);
           await appData.write(kKeyIsLoggedIn,true);
+          if (userData['role'] != null) {
+            await appData.write(kKeyRole, userData['role']);
+          }
           
           // Update Dio with the new token
           DioSingleton.instance.update(userData['access_token']);
@@ -194,7 +200,7 @@ class AuthService {
         print('Send OTP Request: $data');
       }
 
-      final response = await postHttp(Endpoints.sendOtp, data);
+      final response = await postHttpNoAuth(Endpoints.sendOtp, data);
 
       if (kDebugMode) {
         print('Send OTP Response: ${response.data}');
@@ -247,6 +253,96 @@ class AuthService {
       return {
         'success': false,
         'message': 'An unexpected error occurred',
+      };
+    }
+  }
+
+  // Sign Out
+  static Future<Map<String, dynamic>> signOut() async {
+    try {
+      // Get refresh token from storage
+      final refreshToken = appData.read(kKeyRefreshToken);
+      
+      if (refreshToken == null) {
+        return {
+          'success': false,
+          'message': 'No refresh token found',
+        };
+      }
+
+      final data = {
+        'refresh_token': refreshToken,
+      };
+
+      if (kDebugMode) {
+        print('Sign Out Request: $data');
+      }
+
+      final response = await postHttp(Endpoints.signout, data);
+
+      if (kDebugMode) {
+        print('Sign Out Response: ${response.data}');
+      }
+
+      if (response.statusCode == 200 || response.statusCode == 201 || response.statusCode == 204) {
+        // Clear all stored data
+        await appData.remove(kKeyAccessToken);
+        await appData.remove(kKeyRefreshToken);
+        await appData.remove(kKeyUserId);
+        await appData.remove(kKeyEmail);
+        await appData.remove(kKeyIsLoggedIn);
+        await appData.remove(kKeyRole);
+        
+        // Clear Dio token
+        DioSingleton.instance.update('');
+        
+        final responseData = response.data;
+        return {
+          'success': true,
+          'message': responseData?['message'] ?? 'Signed out successfully',
+        };
+      } else {
+        return {
+          'success': false,
+          'message': 'Sign out failed',
+        };
+      }
+    } on DioException catch (e) {
+      if (kDebugMode) {
+        print('Sign Out DioException: ${e.message}');
+        print('Response: ${e.response?.data}');
+      }
+      
+      // Even if API call fails, clear local data
+      await appData.remove(kKeyAccessToken);
+      await appData.remove(kKeyRefreshToken);
+      await appData.remove(kKeyUserId);
+      await appData.remove(kKeyEmail);
+      await appData.remove(kKeyIsLoggedIn);
+      await appData.remove(kKeyRole);
+      DioSingleton.instance.update('');
+      
+      return {
+        'success': true,
+        'message': 'Signed out successfully',
+      };
+    } catch (e) {
+      if (kDebugMode) {
+        print('Sign Out Error: $e');
+      }
+      
+      // Even if error occurs, clear local data
+      await appData.remove(kKeyAccessToken);
+      await appData.remove(kKeyRefreshToken);
+      await appData.remove(kKeyUserId);
+      await appData.remove(kKeyEmail);
+      await appData.remove(kKeyIsLoggedIn);
+      await appData.remove(kKeyRole);
+      DioSingleton.instance.update('');
+      
+      return {
+        'success': true,
+        'message': 'Signed out successfully',
       };
     }
   }
