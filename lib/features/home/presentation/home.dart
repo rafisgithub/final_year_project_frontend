@@ -1,6 +1,7 @@
 import 'package:final_year_project_frontend/gen/colors.gen.dart';
 import 'package:final_year_project_frontend/networks/auth_service.dart';
 import 'package:final_year_project_frontend/networks/profile_service.dart';
+import 'package:final_year_project_frontend/networks/advertisement_service.dart';
 import 'package:final_year_project_frontend/networks/endpoints.dart';
 import 'package:final_year_project_frontend/helpers/all_routes.dart';
 import 'package:final_year_project_frontend/constants/app_constants.dart';
@@ -25,12 +26,9 @@ class _HomeScreenState extends State<HomeScreen> {
   
   final TextEditingController _searchController = TextEditingController();
   
-  // Sample data - replace with API calls later
-  final List<Map<String, dynamic>> _banners = [
-    {'title': 'Special Offer 20% OFF', 'color': AppColors.button, 'icon': Icons.local_offer},
-    {'title': 'New Arrivals', 'color': AppColors.c28B446, 'icon': Icons.new_releases},
-    {'title': 'Fresh Products', 'color': AppColors.button, 'icon': Icons.shopping_bag},
-  ];
+  // Banner data from API
+  List<Map<String, dynamic>> _banners = [];
+  bool _isLoadingBanners = true;
   
   final List<Map<String, dynamic>> _shops = [
     {'id': 1, 'name': 'Green Farm Store', 'owner': 'John Doe', 'initials': 'GF', 'color': AppColors.button, 'rating': 4.5},
@@ -70,6 +68,19 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _loadProfile();
     _loadLanguage();
+    _loadBanners();
+  }
+  
+  Future<void> _loadBanners() async {
+    final result = await AdvertisementService.getAdvertisements();
+    if (mounted) {
+      setState(() {
+        if (result['success'] == true) {
+          _banners = List<Map<String, dynamic>>.from(result['data'] ?? []);
+        }
+        _isLoadingBanners = false;
+      });
+    }
   }
   
   Future<void> _loadLanguage() async {
@@ -184,9 +195,76 @@ class _HomeScreenState extends State<HomeScreen> {
               ListTile(
                 leading: Icon(Icons.language, color: AppColors.button),
                 title: Text('Change Language'),
-                onTap: () {
-                  // Handle change language action
+                onTap: () async {
                   Navigator.pop(context);
+                  
+                  // Show language selection dialog
+                  final selectedLanguage = await showDialog<String>(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: Text('Select Language'),
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ListTile(
+                            leading: Radio<String>(
+                              value: 'en',
+                              groupValue: _currentLanguage,
+                              activeColor: AppColors.button,
+                              onChanged: (value) {
+                                Navigator.pop(context, value);
+                              },
+                            ),
+                            title: Text('English'),
+                            onTap: () => Navigator.pop(context, 'en'),
+                          ),
+                          ListTile(
+                            leading: Radio<String>(
+                              value: 'bn',
+                              groupValue: _currentLanguage,
+                              activeColor: AppColors.button,
+                              onChanged: (value) {
+                                Navigator.pop(context, value);
+                              },
+                            ),
+                            title: Text('বাংলা (Bangla)'),
+                            onTap: () => Navigator.pop(context, 'bn'),
+                          ),
+                        ],
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: Text('Cancel'),
+                        ),
+                      ],
+                    ),
+                  );
+
+                  if (selectedLanguage != null && selectedLanguage != _currentLanguage) {
+                    // Save to local storage
+                    await GetStorage().write(kKeyLanguage, selectedLanguage);
+                    
+                    // Update UI
+                    setState(() {
+                      _currentLanguage = selectedLanguage;
+                    });
+                    
+                    // Show confirmation
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            selectedLanguage == 'en' 
+                                ? 'Language changed to English' 
+                                : 'ভাষা বাংলায় পরিবর্তিত হয়েছে',
+                          ),
+                          backgroundColor: AppColors.button,
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                    }
+                  }
                 },
               ),
               ListTile(
@@ -452,60 +530,128 @@ class _HomeScreenState extends State<HomeScreen> {
             // Banner Section
             SizedBox(
               height: 180.h,
-              child: PageView.builder(
-                itemCount: _banners.length,
-                onPageChanged: (index) {
-                  setState(() {
-                    _currentBannerIndex = index;
-                  });
-                },
-                itemBuilder: (context, index) {
-                  final banner = _banners[index];
-                  return Container(
-                    margin: EdgeInsets.symmetric(horizontal: 16.w),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          banner['color'],
-                          banner['color'].withOpacity(0.7),
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
+              child: _isLoadingBanners
+                  ? Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.button,
                       ),
-                      borderRadius: BorderRadius.circular(16.r),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 8,
-                          offset: Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            banner['icon'],
-                            size: 48.sp,
-                            color: Colors.white,
-                          ),
-                          SizedBox(height: 12.h),
-                          Text(
-                            banner['title'],
-                            style: TextStyle(
-                              fontSize: 20.sp,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                    )
+                  : _banners.isEmpty
+                      ? Container(
+                          margin: EdgeInsets.symmetric(horizontal: 16.w),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                AppColors.button,
+                                AppColors.button.withOpacity(0.7),
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
                             ),
-                            textAlign: TextAlign.center,
+                            borderRadius: BorderRadius.circular(16.r),
                           ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
+                          child: Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.image_not_supported,
+                                  size: 48.sp,
+                                  color: Colors.white,
+                                ),
+                                SizedBox(height: 12.h),
+                                Text(
+                                  'No advertisements available',
+                                  style: TextStyle(
+                                    fontSize: 16.sp,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                      : PageView.builder(
+                          itemCount: _banners.length,
+                          onPageChanged: (index) {
+                            setState(() {
+                              _currentBannerIndex = index;
+                            });
+                          },
+                          itemBuilder: (context, index) {
+                            final banner = _banners[index];
+                            return Container(
+                              margin: EdgeInsets.symmetric(horizontal: 16.w),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(16.r),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    blurRadius: 8,
+                                    offset: Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(16.r),
+                                child: Image.network(
+                                  '${imageUrl}${banner['banner_image']}',
+                                  fit: BoxFit.cover,
+                                  width: double.infinity,
+                                  loadingBuilder: (context, child, loadingProgress) {
+                                    if (loadingProgress == null) return child;
+                                    return Container(
+                                      color: AppColors.button.withOpacity(0.1),
+                                      child: Center(
+                                        child: CircularProgressIndicator(
+                                          value: loadingProgress.expectedTotalBytes != null
+                                              ? loadingProgress.cumulativeBytesLoaded /
+                                                  loadingProgress.expectedTotalBytes!
+                                              : null,
+                                          color: AppColors.button,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Container(
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          colors: [
+                                            AppColors.button,
+                                            AppColors.c28B446,
+                                          ],
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
+                                        ),
+                                      ),
+                                      child: Center(
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Icon(
+                                              Icons.broken_image,
+                                              size: 48.sp,
+                                              color: Colors.white,
+                                            ),
+                                            SizedBox(height: 8.h),
+                                            Text(
+                                              'Image not available',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 14.sp,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            );
+                          },
+                        ),
             ),
             
             // Banner Indicators
@@ -535,7 +681,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    _translate('Featured Shops', 'ফিচার্ড দোকান'),
+                    _translate('Nearby Shops', 'নিকটস্থ দোকানসমূহ'),
                     style: TextStyle(
                       fontSize: 20.sp,
                       fontWeight: FontWeight.bold,

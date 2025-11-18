@@ -30,4 +30,7 @@ final class Endpoints {
   
   // profile
   static const String profileGet = "profile-get/";
+  
+  // advertisements
+  static const String advertisements = "advertisements/";
 }
