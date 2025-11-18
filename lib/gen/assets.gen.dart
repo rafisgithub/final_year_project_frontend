@@ -87,6 +87,10 @@ class $AssetsIconsGen {
   AssetGenImage get companyicon =>
       const AssetGenImage('assets/icons/companyicon.png');
 
+  /// File path: assets/icons/conversation.png
+  AssetGenImage get conversation =>
+      const AssetGenImage('assets/icons/conversation.png');
+
   /// File path: assets/icons/googleicon.png
   AssetGenImage get googleicon =>
       const AssetGenImage('assets/icons/googleicon.png');
@@ -107,6 +111,9 @@ class $AssetsIconsGen {
   AssetGenImage get manyicon =>
       const AssetGenImage('assets/icons/manyicon.png');
 
+  /// File path: assets/icons/menu.png
+  AssetGenImage get menu => const AssetGenImage('assets/icons/menu.png');
+
   /// File path: assets/icons/profileicon.png
   AssetGenImage get profileicon =>
       const AssetGenImage('assets/icons/profileicon.png');
@@ -123,6 +130,9 @@ class $AssetsIconsGen {
   AssetGenImage get robotAiicon2 =>
       const AssetGenImage('assets/icons/robotAiicon2.png');
 
+  /// File path: assets/icons/search.png
+  AssetGenImage get search => const AssetGenImage('assets/icons/search.png');
+
   /// File path: assets/icons/successtick.png
   AssetGenImage get successtick =>
       const AssetGenImage('assets/icons/successtick.png');
@@ -136,29 +146,31 @@ class $AssetsIconsGen {
     agentsicon,
     aiicon,
     companyicon,
+    conversation,
     googleicon,
     homeicon,
     listicon,
     locationicon,
     manyicon,
+    menu,
     profileicon,
     raactiveAiicon,
     robotAiicon,
     robotAiicon2,
+    search,
     successtick,
     textaiicon,
   ];
 }
 
-class $AssetsImagesGen {
-  const $AssetsImagesGen();
+class $AssetsVideoGen {
+  const $AssetsVideoGen();
 
-  /// File path: assets/images/splashicom.png
-  AssetGenImage get splashicom =>
-      const AssetGenImage('assets/images/splashicom.png');
+  /// File path: assets/video/ads.mp4
+  String get ads => 'assets/video/ads.mp4';
 
   /// List of all assets
-  List<AssetGenImage> get values => [splashicom];
+  List<String> get values => [ads];
 }
 
 class Assets {
@@ -167,7 +179,7 @@ class Assets {
   static const $AssetsColorGen color = $AssetsColorGen();
   static const $AssetsFontsGen fonts = $AssetsFontsGen();
   static const $AssetsIconsGen icons = $AssetsIconsGen();
-  static const $AssetsImagesGen images = $AssetsImagesGen();
+  static const $AssetsVideoGen video = $AssetsVideoGen();
 }
 
 class AssetGenImage {

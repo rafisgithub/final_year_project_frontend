@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:final_year_project_frontend/features/home/presentation/home.dart';
-import 'package:final_year_project_frontend/gen/assets.gen.dart';
+import 'package:final_year_project_frontend/features/scanner/presentation/scanner_screen.dart';
 import 'package:final_year_project_frontend/gen/colors.gen.dart';
-import 'package:final_year_project_frontend/provider/main_page_view_provider.dart';
-import 'package:provider/provider.dart';
+
 class MainNavigationBar extends StatefulWidget {
   final int pageNum;
   const MainNavigationBar({Key? key, required this.pageNum}) : super(key: key);
@@ -18,9 +17,8 @@ class _MainNavigationBarState extends State<MainNavigationBar> {
   late int currentTab;
   final List<Widget> screens = [
     HomeScreen(),
-    HomeScreen(),
-    HomeScreen(),
-    HomeScreen(),
+    ScannerScreen(),
+    HomeScreen(), // Replace with ChatScreen when created
 
   ];
 
@@ -28,10 +26,6 @@ class _MainNavigationBarState extends State<MainNavigationBar> {
   void initState() {
     super.initState();
     currentTab = widget.pageNum;
-    final pageViewProvider = Provider.of<MainPageViewProvider>(
-      context,
-      listen: false,
-    );
   }
 
   @override
@@ -42,33 +36,57 @@ class _MainNavigationBarState extends State<MainNavigationBar> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.c050915,
+      backgroundColor: Colors.white,
       resizeToAvoidBottomInset: true,
       body: screens[currentTab],
       bottomNavigationBar: Container(
-        color: AppColors.c050915, // Background color for the nav bar
-        padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 10.h),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border(
+            top: BorderSide(
+              color: Colors.grey[200]!,
+              width: 1,
+            ),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 20,
+              offset: Offset(0, -5),
+            ),
+          ],
+        ),
         child: SafeArea(
-          child: FittedBox(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
             child: GNav(
-              rippleColor:
-                  Colors.grey[800]!, // Tab button ripple color when pressed
-              hoverColor: Colors.grey[700]!, // Tab button hover color
-              haptic: true, // Haptic feedback
-              tabBorderRadius: 100.r, // Rounded corners for tabs
-              duration: const Duration(
-                milliseconds: 900,
-              ), // Tab animation duration
-              gap: 8.w, // Gap between icon and text
-              color: Colors.white.withOpacity(0.7), // Unselected icon/text color
-              activeColor: Colors.white, // Selected icon/text color
-              iconSize: 24.w, // Icon size
-                  
-              padding: EdgeInsets.symmetric(
-                horizontal: 20.w,
-                vertical: 10.h,
-              ), // Tab padding
-              // Fallback background color
+              rippleColor: AppColors.button.withOpacity(0.2),
+              hoverColor: AppColors.button.withOpacity(0.1),
+              haptic: true,
+              tabBorderRadius: 16.r,
+              curve: Curves.easeOutCubic,
+              duration: const Duration(milliseconds: 400),
+              gap: 10.w,
+              color: Colors.grey[500],
+              activeColor: Colors.white,
+              iconSize: 26.sp,
+              textStyle: TextStyle(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+              ),
+              tabBackgroundColor: AppColors.button,
+              tabBackgroundGradient: LinearGradient(
+                colors: [
+                  AppColors.button,
+                  AppColors.c28B446,
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 14.h),
+              tabMargin: EdgeInsets.symmetric(horizontal: 4.w),
+              selectedIndex: currentTab,
               onTabChange: (index) {
                 setState(() {
                   currentTab = index;
@@ -76,73 +94,22 @@ class _MainNavigationBarState extends State<MainNavigationBar> {
               },
               tabs: [
                 GButton(
-                  icon: Icons.home, // Replace with your asset icon
-                  leading: CircleAvatar(
-                    backgroundColor: currentTab == 0
-                        ? Colors.transparent
-                        : AppColors.c1F1538,
-                    child: Image(
-                      image: AssetImage(Assets.icons.homeicon.path),
-                      width: 20.w,
-                      height: 20.w,
-                    ),
-                  ),
+                  icon: Icons.home_rounded,
                   text: 'Home',
-                  backgroundGradient: LinearGradient(
-                    colors: [AppColors.button, AppColors.button],
-                  ),
+                  iconActiveColor: Colors.white,
+                  iconColor: Colors.grey[500],
                 ),
                 GButton(
-                  borderRadius: BorderRadius.circular(100.r),
-                  icon: Icons.person, // Replace with your asset icon
-                  leading: CircleAvatar(
-                    backgroundColor: currentTab == 1
-                        ? Colors.transparent
-                        : AppColors.c1F1538,
-                    child: Image(
-                      image: AssetImage(Assets.icons.agentsicon.path),
-                      width: 20.w,
-                      height: 20.w,
-                    ),
-                  ),
-                  text: 'Agent',
-                  backgroundGradient: LinearGradient(
-                    colors: [AppColors.button, AppColors.button],
-                  ),
+                  icon: Icons.camera_alt_rounded,
+                  text: 'Scan',
+                  iconActiveColor: Colors.white,
+                  iconColor: Colors.grey[500],
                 ),
                 GButton(
-                  icon: Icons.list, // Replace with your asset icon
-                  leading: CircleAvatar(
-                    backgroundColor: currentTab == 2
-                        ? Colors.transparent
-                        : AppColors.c1F1538,
-                    child: Image(
-                      image: AssetImage(Assets.icons.listicon.path),
-                      width: 20.w,
-                      height: 20.w,
-                    ),
-                  ),
-                  text: 'Job list',
-                  backgroundGradient: LinearGradient(
-                    colors:[AppColors.button, AppColors.button],
-                  ),
-                ),
-                GButton(
-                  icon: Icons.person_outline, // Replace with your asset icon
-                  leading: CircleAvatar(
-                    backgroundColor: currentTab == 3
-                        ? Colors.transparent
-                        : AppColors.c1F1538,
-                    child: Image(
-                      image: AssetImage(Assets.icons.profileicon.path),
-                      width: 20.w,
-                      height: 20.w,
-                    ),
-                  ),
-                  text: 'Profile',
-                  backgroundGradient: LinearGradient(
-                    colors:[AppColors.button, AppColors.button],
-                  ),
+                  icon: Icons.chat_bubble_rounded,
+                  text: 'Chat',
+                  iconActiveColor: Colors.white,
+                  iconColor: Colors.grey[500],
                 ),
               ],
             ),
