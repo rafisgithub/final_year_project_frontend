@@ -23,6 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Map<String, dynamic>? _profileData;
   bool _isLoadingProfile = true;
   String _currentLanguage = 'en';
+  String _searchType = 'product'; // 'product' or 'shop'
   
   final TextEditingController _searchController = TextEditingController();
   
@@ -38,6 +39,13 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
   
   final List<Map<String, dynamic>> _categories = [
+    {
+      'id': 0,
+      'nameEn': 'ALL',
+      'nameBn': 'সব',
+      'icon': Icons.grid_view,
+      'color': AppColors.button
+    },
     {
       'id': 1,
       'nameEn': 'Seeds',
@@ -62,6 +70,7 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
   
   int _currentBannerIndex = 0;
+  int _selectedCategoryId = 0; // 0 means ALL
 
   @override
   void initState() {
@@ -496,16 +505,100 @@ class _HomeScreenState extends State<HomeScreen> {
               child: TextField(
                 controller: _searchController,
                 decoration: InputDecoration(
-                  hintText: _translate('Search products...', 'পণ্য খুঁজুন...'),
+                  hintText: _searchType == 'product'
+                      ? _translate('Search products...', 'পণ্য খুঁজুন...')
+                      : _translate('Search shops...', 'দোকান খুঁজুন...'),
                   hintStyle: TextStyle(color: Colors.grey[400]),
-                  prefixIcon: Icon(Icons.search, color: AppColors.button),
+                  prefixIcon: Icon(
+                    _searchType == 'product' ? Icons.search : Icons.store_outlined,
+                    color: AppColors.button,
+                  ),
                   suffixIcon: IconButton(
                     icon: Icon(Icons.filter_list, color: AppColors.button),
-                    onPressed: () {
-                      // Handle filter action
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Filter options coming soon')),
+                    onPressed: () async {
+                      // Show search type selection dialog
+                      final selectedType = await showDialog<String>(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: Text(
+                            _translate('Search For', 'খুঁজুন'),
+                            style: TextStyle(
+                              color: AppColors.button,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          content: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              ListTile(
+                                leading: Radio<String>(
+                                  value: 'product',
+                                  groupValue: _searchType,
+                                  activeColor: AppColors.button,
+                                  onChanged: (value) {
+                                    Navigator.pop(context, value);
+                                  },
+                                ),
+                                title: Row(
+                                  children: [
+                                    Icon(Icons.shopping_bag, color: AppColors.button),
+                                    SizedBox(width: 8.w),
+                                    Text(_translate('Products', 'পণ্য')),
+                                  ],
+                                ),
+                                onTap: () => Navigator.pop(context, 'product'),
+                              ),
+                              Divider(),
+                              ListTile(
+                                leading: Radio<String>(
+                                  value: 'shop',
+                                  groupValue: _searchType,
+                                  activeColor: AppColors.button,
+                                  onChanged: (value) {
+                                    Navigator.pop(context, value);
+                                  },
+                                ),
+                                title: Row(
+                                  children: [
+                                    Icon(Icons.store, color: AppColors.button),
+                                    SizedBox(width: 8.w),
+                                    Text(_translate('Shops', 'দোকান')),
+                                  ],
+                                ),
+                                onTap: () => Navigator.pop(context, 'shop'),
+                              ),
+                            ],
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: Text(
+                                _translate('Cancel', 'বাতিল'),
+                                style: TextStyle(color: Colors.grey[600]),
+                              ),
+                            ),
+                          ],
+                        ),
                       );
+
+                      if (selectedType != null) {
+                        setState(() {
+                          _searchType = selectedType;
+                          _searchController.clear();
+                        });
+                        
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              selectedType == 'product'
+                                  ? _translate('Search mode: Products', 'অনুসন্ধান মোড: পণ্য')
+                                  : _translate('Search mode: Shops', 'অনুসন্ধান মোড: দোকান'),
+                            ),
+                            backgroundColor: AppColors.button,
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+                      }
                     },
                   ),
                   filled: true,
@@ -519,8 +612,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 onSubmitted: (value) {
                   // Handle search
                   if (value.isNotEmpty) {
+                    final searchIn = _searchType == 'product'
+                        ? _translate('products', 'পণ্য')
+                        : _translate('shops', 'দোকান');
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Searching for: $value')),
+                      SnackBar(
+                        content: Text(
+                          '${_translate('Searching', 'খুঁজছি')} $searchIn: $value',
+                        ),
+                      ),
                     );
                   }
                 },
@@ -529,7 +629,7 @@ class _HomeScreenState extends State<HomeScreen> {
             
             // Banner Section
             SizedBox(
-              height: 180.h,
+              height: 140.h,
               child: _isLoadingBanners
                   ? Center(
                       child: CircularProgressIndicator(
@@ -703,10 +803,10 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             
-            SizedBox(height: 12.h),
+            SizedBox(height: 8.h),
             
             SizedBox(
-              height: 140.h,
+              height: 110.h,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 padding: EdgeInsets.symmetric(horizontal: 12.w),
@@ -738,24 +838,24 @@ class _HomeScreenState extends State<HomeScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           CircleAvatar(
-                            radius: 35.r,
+                            radius: 30.r,
                             backgroundColor: shop['color'],
                             child: Text(
                               shop['initials'],
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 20.sp,
+                                fontSize: 18.sp,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                           ),
-                          SizedBox(height: 8.h),
+                          SizedBox(height: 6.h),
                           Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 8.w),
+                            padding: EdgeInsets.symmetric(horizontal: 6.w),
                             child: Text(
                               shop['name'],
                               style: TextStyle(
-                                fontSize: 13.sp,
+                                fontSize: 12.sp,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.black87,
                               ),
@@ -764,16 +864,16 @@ class _HomeScreenState extends State<HomeScreen> {
                               textAlign: TextAlign.center,
                             ),
                           ),
-                          SizedBox(height: 4.h),
+                          SizedBox(height: 2.h),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.star, color: Colors.amber, size: 14.sp),
-                              SizedBox(width: 4.w),
+                              Icon(Icons.star, color: Colors.amber, size: 12.sp),
+                              SizedBox(width: 2.w),
                               Text(
                                 shop['rating'].toString(),
                                 style: TextStyle(
-                                  fontSize: 12.sp,
+                                  fontSize: 11.sp,
                                   color: Colors.grey[600],
                                 ),
                               ),
@@ -795,37 +895,134 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Text(
                 _translate('Product Categories', 'পণ্যের বিভাগ'),
                 style: TextStyle(
-                  fontSize: 20.sp,
+                  fontSize: 18.sp,
                   fontWeight: FontWeight.bold,
                   color: AppColors.button,
                 ),
               ),
             ),
             
+            SizedBox(height: 8.h),
+            
+            SizedBox(
+              height: 90.h,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                padding: EdgeInsets.symmetric(horizontal: 12.w),
+                itemCount: _categories.length,
+                itemBuilder: (context, index) {
+                  final category = _categories[index];
+                  final categoryName = _translate(category['nameEn'], category['nameBn']);
+                  final isSelected = _selectedCategoryId == category['id'];
+                  
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _selectedCategoryId = category['id'];
+                      });
+                      // Filter products by category
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('${_translate('Filtering by', 'ফিল্টার করা হচ্ছে')} $categoryName...'),
+                          duration: Duration(seconds: 1),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      width: 90.w,
+                      margin: EdgeInsets.symmetric(horizontal: 4.w),
+                      decoration: BoxDecoration(
+                        color: isSelected ? category['color'] : Colors.white,
+                        borderRadius: BorderRadius.circular(12.r),
+                        border: Border.all(
+                          color: isSelected ? category['color'] : Colors.grey[300]!,
+                          width: isSelected ? 2 : 1,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.08),
+                            blurRadius: 8,
+                            offset: Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            category['icon'],
+                            size: 28.sp,
+                            color: isSelected ? Colors.white : category['color'],
+                          ),
+                          SizedBox(height: 6.h),
+                          Text(
+                            categoryName,
+                            style: TextStyle(
+                              fontSize: 11.sp,
+                              fontWeight: FontWeight.w600,
+                              color: isSelected ? Colors.white : Colors.black87,
+                            ),
+                            textAlign: TextAlign.center,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            
+            SizedBox(height: 16.h),
+            
+            // Products Section
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.w),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    _translate('Products', 'পণ্য'),
+                    style: TextStyle(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.button,
+                    ),
+                  ),
+                  Text(
+                    _selectedCategoryId == 0 
+                        ? _translate('All Products', 'সব পণ্য')
+                        : _translate(
+                            _categories.firstWhere((c) => c['id'] == _selectedCategoryId)['nameEn'],
+                            _categories.firstWhere((c) => c['id'] == _selectedCategoryId)['nameBn'],
+                          ),
+                    style: TextStyle(
+                      fontSize: 13.sp,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            
             SizedBox(height: 12.h),
             
-            GridView.builder(
-              shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(),
+            // Products Grid (Placeholder for now)
+            Padding(
               padding: EdgeInsets.symmetric(horizontal: 16.w),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                crossAxisSpacing: 12.w,
-                mainAxisSpacing: 12.h,
-                childAspectRatio: 0.85,
-              ),
-              itemCount: _categories.length,
-              itemBuilder: (context, index) {
-                final category = _categories[index];
-                final categoryName = _translate(category['nameEn'], category['nameBn']);
-                return GestureDetector(
-                  onTap: () {
-                    // Filter products by category
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('${_translate('Filtering by', 'ফিল্টার করা হচ্ছে')} $categoryName...')),
-                    );
-                  },
-                  child: Container(
+              child: GridView.builder(
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 12.w,
+                  mainAxisSpacing: 12.h,
+                  childAspectRatio: 0.75,
+                ),
+                itemCount: 6, // Placeholder count
+                itemBuilder: (context, index) {
+                  return Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(12.r),
@@ -838,40 +1035,69 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                     ),
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // Product Image Placeholder
                         Container(
-                          padding: EdgeInsets.all(12.w),
+                          height: 120.h,
                           decoration: BoxDecoration(
-                            color: category['color'].withOpacity(0.1),
-                            shape: BoxShape.circle,
+                            color: Colors.grey[200],
+                            borderRadius: BorderRadius.vertical(top: Radius.circular(12.r)),
                           ),
-                          child: Icon(
-                            category['icon'],
-                            size: 32.sp,
-                            color: category['color'],
+                          child: Center(
+                            child: Icon(
+                              Icons.image,
+                              size: 40.sp,
+                              color: Colors.grey[400],
+                            ),
                           ),
                         ),
-                        SizedBox(height: 8.h),
                         Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 4.w),
-                          child: Text(
-                            categoryName,
-                            style: TextStyle(
-                              fontSize: 13.sp,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black87,
-                            ),
-                            textAlign: TextAlign.center,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
+                          padding: EdgeInsets.all(8.w),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Product ${index + 1}',
+                                style: TextStyle(
+                                  fontSize: 13.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black87,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              SizedBox(height: 4.h),
+                              Text(
+                                '৳ ${(index + 1) * 100}',
+                                style: TextStyle(
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.button,
+                                ),
+                              ),
+                              SizedBox(height: 4.h),
+                              Row(
+                                children: [
+                                  Icon(Icons.star, size: 12.sp, color: Colors.amber),
+                                  SizedBox(width: 4.w),
+                                  Text(
+                                    '4.5',
+                                    style: TextStyle(
+                                      fontSize: 11.sp,
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
                         ),
                       ],
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
             
             SizedBox(height: 24.h),
