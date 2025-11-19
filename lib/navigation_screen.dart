@@ -41,6 +41,10 @@ class _MainNavigationBarState extends State<MainNavigationBar> {
       body: screens[currentTab],
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(25.r),
+            topRight: Radius.circular(25.r),
+          ),
           color: Colors.white,
           border: Border(
             top: BorderSide(
@@ -56,14 +60,20 @@ class _MainNavigationBarState extends State<MainNavigationBar> {
             ),
           ],
         ),
-        child: SafeArea(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+          child: Container(
+            decoration: BoxDecoration(
+             
+              borderRadius: BorderRadius.only(topLeft: Radius.circular(16.r), topRight: Radius.circular(16.r)),
+              
+            ),
             child: GNav(
               rippleColor: AppColors.button.withOpacity(0.2),
               hoverColor: AppColors.button.withOpacity(0.1),
               haptic: true,
               tabBorderRadius: 16.r,
+              
               curve: Curves.easeOutCubic,
               duration: const Duration(milliseconds: 400),
               gap: 10.w,
@@ -106,7 +116,7 @@ class _MainNavigationBarState extends State<MainNavigationBar> {
                   iconColor: Colors.grey[500],
                 ),
                 GButton(
-                  icon: Icons.chat_bubble_rounded,
+                  icon: Icons.chat,
                   text: 'Chat',
                   iconActiveColor: Colors.white,
                   iconColor: Colors.grey[500],

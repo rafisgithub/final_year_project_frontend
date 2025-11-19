@@ -795,7 +795,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       appBar: AppBar(
         // backgroundColor:  AppColors.button.withValues(alpha: 0.1),
-        elevation: 2,
+        elevation: 0,
         leading: Padding(
           padding: EdgeInsets.all(8.w),
           child: InkWell(
