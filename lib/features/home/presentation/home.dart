@@ -196,9 +196,268 @@ class _HomeScreenState extends State<HomeScreen> {
               ListTile(
                 leading: Icon(Icons.swap_horiz, color: AppColors.button),
                 title: Text('Switch Role'),
-                onTap: () {
-                  // Handle switch role action
+                onTap: () async {
                   Navigator.pop(context);
+                  
+                  // Get current role from storage
+                  final currentRole = GetStorage().read(kKeyRole) ?? 'Customer';
+                  
+                  // Show role selection dialog
+                  final selectedRole = await showDialog<String>(
+                    context: context,
+                    builder: (context) => Dialog(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20.r),
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.all(24.w),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Switch Role',
+                              style: TextStyle(
+                                fontSize: 24.sp,
+                                color: Colors.black87,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            SizedBox(height: 8.h),
+                            Text(
+                              'Select your role to continue',
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                color: Colors.grey[600],
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                            SizedBox(height: 24.h),
+                            // Customer Option
+                            InkWell(
+                              onTap: () => Navigator.pop(context, 'Customer'),
+                              borderRadius: BorderRadius.circular(16.r),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 20.w,
+                                  vertical: 20.h,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: currentRole == 'Customer'
+                                      ? AppColors.button.withValues(alpha: 0.1)
+                                      : Colors.white,
+                                  borderRadius: BorderRadius.circular(16.r),
+                                  border: Border.all(
+                                    color: currentRole == 'Customer'
+                                        ? AppColors.button
+                                        : Colors.grey.withValues(alpha: 0.3),
+                                    width: currentRole == 'Customer' ? 2.w : 1.w,
+                                  ),
+                                  boxShadow: currentRole == 'Customer'
+                                      ? [
+                                          BoxShadow(
+                                            color: AppColors.button.withValues(alpha: 0.2),
+                                            blurRadius: 8,
+                                            offset: const Offset(0, 4),
+                                          ),
+                                        ]
+                                      : [],
+                                ),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      width: 48.w,
+                                      height: 48.w,
+                                      decoration: BoxDecoration(
+                                        color: currentRole == 'Customer'
+                                            ? AppColors.button.withValues(alpha: 0.15)
+                                            : Colors.grey.withValues(alpha: 0.1),
+                                        borderRadius: BorderRadius.circular(12.r),
+                                      ),
+                                      child: Icon(
+                                        Icons.person_outline,
+                                        color: currentRole == 'Customer'
+                                            ? AppColors.button
+                                            : Colors.grey[600],
+                                        size: 24.sp,
+                                      ),
+                                    ),
+                                    SizedBox(width: 16.w),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Customer',
+                                            style: TextStyle(
+                                              fontSize: 16.sp,
+                                              fontWeight: FontWeight.w600,
+                                              color: currentRole == 'Customer'
+                                                  ? AppColors.button
+                                                  : Colors.black87,
+                                            ),
+                                          ),
+                                          SizedBox(height: 4.h),
+                                          Text(
+                                            'Browse and purchase products',
+                                            style: TextStyle(
+                                              fontSize: 14.sp,
+                                              fontWeight: FontWeight.w400,
+                                              color: Colors.grey[600],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    AnimatedOpacity(
+                                      duration: const Duration(milliseconds: 200),
+                                      opacity: currentRole == 'Customer' ? 1.0 : 0.0,
+                                      child: Container(
+                                        width: 28.w,
+                                        height: 28.w,
+                                        decoration: BoxDecoration(
+                                          color: AppColors.button,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Icon(
+                                          Icons.check,
+                                          color: Colors.white,
+                                          size: 18.sp,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: 16.h),
+                            // Seller Option
+                            InkWell(
+                              onTap: () => Navigator.pop(context, 'Seller'),
+                              borderRadius: BorderRadius.circular(16.r),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 20.w,
+                                  vertical: 20.h,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: currentRole == 'Seller'
+                                      ? AppColors.button.withValues(alpha: 0.1)
+                                      : Colors.white,
+                                  borderRadius: BorderRadius.circular(16.r),
+                                  border: Border.all(
+                                    color: currentRole == 'Seller'
+                                        ? AppColors.button
+                                        : Colors.grey.withValues(alpha: 0.3),
+                                    width: currentRole == 'Seller' ? 2.w : 1.w,
+                                  ),
+                                  boxShadow: currentRole == 'Seller'
+                                      ? [
+                                          BoxShadow(
+                                            color: AppColors.button.withValues(alpha: 0.2),
+                                            blurRadius: 8,
+                                            offset: const Offset(0, 4),
+                                          ),
+                                        ]
+                                      : [],
+                                ),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      width: 48.w,
+                                      height: 48.w,
+                                      decoration: BoxDecoration(
+                                        color: currentRole == 'Seller'
+                                            ? AppColors.button.withValues(alpha: 0.15)
+                                            : Colors.grey.withValues(alpha: 0.1),
+                                        borderRadius: BorderRadius.circular(12.r),
+                                      ),
+                                      child: Icon(
+                                        Icons.storefront_outlined,
+                                        color: currentRole == 'Seller'
+                                            ? AppColors.button
+                                            : Colors.grey[600],
+                                        size: 24.sp,
+                                      ),
+                                    ),
+                                    SizedBox(width: 16.w),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Seller',
+                                            style: TextStyle(
+                                              fontSize: 16.sp,
+                                              fontWeight: FontWeight.w600,
+                                              color: currentRole == 'Seller'
+                                                  ? AppColors.button
+                                                  : Colors.black87,
+                                            ),
+                                          ),
+                                          SizedBox(height: 4.h),
+                                          Text(
+                                            'Manage your shop and products',
+                                            style: TextStyle(
+                                              fontSize: 14.sp,
+                                              fontWeight: FontWeight.w400,
+                                              color: Colors.grey[600],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    AnimatedOpacity(
+                                      duration: const Duration(milliseconds: 200),
+                                      opacity: currentRole == 'Seller' ? 1.0 : 0.0,
+                                      child: Container(
+                                        width: 28.w,
+                                        height: 28.w,
+                                        decoration: BoxDecoration(
+                                          color: AppColors.button,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Icon(
+                                          Icons.check,
+                                          color: Colors.white,
+                                          size: 18.sp,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+
+                  if (selectedRole != null && selectedRole != currentRole) {
+                    // Save to local storage
+                    await GetStorage().write(kKeyRole, selectedRole);
+                    
+                    // Update profile data
+                    if (mounted) {
+                      setState(() {
+                        if (_profileData != null) {
+                          _profileData!['role'] = selectedRole;
+                        }
+                      });
+                      
+                      // Show confirmation
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Role switched to $selectedRole'),
+                          backgroundColor: AppColors.button,
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                    }
+                  }
                 },
               ),
               ListTile(
@@ -210,43 +469,232 @@ class _HomeScreenState extends State<HomeScreen> {
                   // Show language selection dialog
                   final selectedLanguage = await showDialog<String>(
                     context: context,
-                    builder: (context) => AlertDialog(
-                      title: Text('Select Language'),
-                      content: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          ListTile(
-                            leading: Radio<String>(
-                              value: 'en',
-                              groupValue: _currentLanguage,
-                              activeColor: AppColors.button,
-                              onChanged: (value) {
-                                Navigator.pop(context, value);
-                              },
-                            ),
-                            title: Text('English'),
-                            onTap: () => Navigator.pop(context, 'en'),
-                          ),
-                          ListTile(
-                            leading: Radio<String>(
-                              value: 'bn',
-                              groupValue: _currentLanguage,
-                              activeColor: AppColors.button,
-                              onChanged: (value) {
-                                Navigator.pop(context, value);
-                              },
-                            ),
-                            title: Text('বাংলা (Bangla)'),
-                            onTap: () => Navigator.pop(context, 'bn'),
-                          ),
-                        ],
+                    builder: (context) => Dialog(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20.r),
                       ),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: Text('Cancel'),
+                      child: Padding(
+                        padding: EdgeInsets.all(24.w),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Choose Your Language',
+                              style: TextStyle(
+                                fontSize: 24.sp,
+                                color: Colors.black87,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            SizedBox(height: 8.h),
+                            Text(
+                              'Select your preferred language',
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                color: Colors.grey[600],
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                            SizedBox(height: 24.h),
+                            // English Option
+                            InkWell(
+                              onTap: () => Navigator.pop(context, 'en'),
+                              borderRadius: BorderRadius.circular(16.r),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 20.w,
+                                  vertical: 20.h,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: _currentLanguage == 'en'
+                                      ? AppColors.button.withValues(alpha: 0.1)
+                                      : Colors.white,
+                                  borderRadius: BorderRadius.circular(16.r),
+                                  border: Border.all(
+                                    color: _currentLanguage == 'en'
+                                        ? AppColors.button
+                                        : Colors.grey.withValues(alpha: 0.3),
+                                    width: _currentLanguage == 'en' ? 2.w : 1.w,
+                                  ),
+                                  boxShadow: _currentLanguage == 'en'
+                                      ? [
+                                          BoxShadow(
+                                            color: AppColors.button.withValues(alpha: 0.2),
+                                            blurRadius: 8,
+                                            offset: const Offset(0, 4),
+                                          ),
+                                        ]
+                                      : [],
+                                ),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      width: 48.w,
+                                      height: 48.w,
+                                      decoration: BoxDecoration(
+                                        color: _currentLanguage == 'en'
+                                            ? AppColors.button.withValues(alpha: 0.1)
+                                            : Colors.grey.withValues(alpha: 0.1),
+                                        borderRadius: BorderRadius.circular(12.r),
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          '🇬🇧',
+                                          style: TextStyle(fontSize: 28.sp),
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(width: 16.w),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'English',
+                                            style: TextStyle(
+                                              fontSize: 16.sp,
+                                              fontWeight: FontWeight.w600,
+                                              color: _currentLanguage == 'en'
+                                                  ? AppColors.button
+                                                  : Colors.black87,
+                                            ),
+                                          ),
+                                          SizedBox(height: 4.h),
+                                          Text(
+                                            'English',
+                                            style: TextStyle(
+                                              fontSize: 14.sp,
+                                              fontWeight: FontWeight.w400,
+                                              color: Colors.grey[600],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    AnimatedOpacity(
+                                      duration: const Duration(milliseconds: 200),
+                                      opacity: _currentLanguage == 'en' ? 1.0 : 0.0,
+                                      child: Container(
+                                        width: 28.w,
+                                        height: 28.w,
+                                        decoration: BoxDecoration(
+                                          color: AppColors.button,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Icon(
+                                          Icons.check,
+                                          color: Colors.white,
+                                          size: 18.sp,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: 16.h),
+                            // Bangla Option
+                            InkWell(
+                              onTap: () => Navigator.pop(context, 'bn'),
+                              borderRadius: BorderRadius.circular(16.r),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 20.w,
+                                  vertical: 20.h,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: _currentLanguage == 'bn'
+                                      ? AppColors.button.withValues(alpha: 0.1)
+                                      : Colors.white,
+                                  borderRadius: BorderRadius.circular(16.r),
+                                  border: Border.all(
+                                    color: _currentLanguage == 'bn'
+                                        ? AppColors.button
+                                        : Colors.grey.withValues(alpha: 0.3),
+                                    width: _currentLanguage == 'bn' ? 2.w : 1.w,
+                                  ),
+                                  boxShadow: _currentLanguage == 'bn'
+                                      ? [
+                                          BoxShadow(
+                                            color: AppColors.button.withValues(alpha: 0.2),
+                                            blurRadius: 8,
+                                            offset: const Offset(0, 4),
+                                          ),
+                                        ]
+                                      : [],
+                                ),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      width: 48.w,
+                                      height: 48.w,
+                                      decoration: BoxDecoration(
+                                        color: _currentLanguage == 'bn'
+                                            ? AppColors.button.withValues(alpha: 0.1)
+                                            : Colors.grey.withValues(alpha: 0.1),
+                                        borderRadius: BorderRadius.circular(12.r),
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          '🇧🇩',
+                                          style: TextStyle(fontSize: 28.sp),
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(width: 16.w),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Bangla',
+                                            style: TextStyle(
+                                              fontSize: 16.sp,
+                                              fontWeight: FontWeight.w600,
+                                              color: _currentLanguage == 'bn'
+                                                  ? AppColors.button
+                                                  : Colors.black87,
+                                            ),
+                                          ),
+                                          SizedBox(height: 4.h),
+                                          Text(
+                                            'বাংলা',
+                                            style: TextStyle(
+                                              fontSize: 14.sp,
+                                              fontWeight: FontWeight.w400,
+                                              color: Colors.grey[600],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    AnimatedOpacity(
+                                      duration: const Duration(milliseconds: 200),
+                                      opacity: _currentLanguage == 'bn' ? 1.0 : 0.0,
+                                      child: Container(
+                                        width: 28.w,
+                                        height: 28.w,
+                                        decoration: BoxDecoration(
+                                          color: AppColors.button,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Icon(
+                                          Icons.check,
+                                          color: Colors.white,
+                                          size: 18.sp,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                   );
 
@@ -346,7 +794,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       appBar: AppBar(
-        backgroundColor:  AppColors.button.withValues(alpha: 0.1),
+        // backgroundColor:  AppColors.button.withValues(alpha: 0.1),
         elevation: 2,
         leading: Padding(
           padding: EdgeInsets.all(8.w),
@@ -519,65 +967,234 @@ class _HomeScreenState extends State<HomeScreen> {
                       // Show search type selection dialog
                       final selectedType = await showDialog<String>(
                         context: context,
-                        builder: (context) => AlertDialog(
-                          title: Text(
-                            _translate('Search For', 'খুঁজুন'),
-                            style: TextStyle(
-                              color: AppColors.button,
-                              fontWeight: FontWeight.bold,
+                        builder: (context) => Dialog(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20.r),
+                          ),
+                          child: Padding(
+                            padding: EdgeInsets.all(24.w),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  _translate('Search For', 'খুঁজুন'),
+                                  style: TextStyle(
+                                    fontSize: 24.sp,
+                                    color: Colors.black87,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                SizedBox(height: 8.h),
+                                Text(
+                                  _translate('Select what you want to search', 'আপনি কি খুঁজতে চান তা নির্বাচন করুন'),
+                                  style: TextStyle(
+                                    fontSize: 14.sp,
+                                    color: Colors.grey[600],
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                ),
+                                SizedBox(height: 24.h),
+                                // Products Option
+                                InkWell(
+                                  onTap: () => Navigator.pop(context, 'product'),
+                                  borderRadius: BorderRadius.circular(16.r),
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 200),
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 20.w,
+                                      vertical: 20.h,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: _searchType == 'product'
+                                          ? AppColors.button.withValues(alpha: 0.1)
+                                          : Colors.white,
+                                      borderRadius: BorderRadius.circular(16.r),
+                                      border: Border.all(
+                                        color: _searchType == 'product'
+                                            ? AppColors.button
+                                            : Colors.grey.withValues(alpha: 0.3),
+                                        width: _searchType == 'product' ? 2.w : 1.w,
+                                      ),
+                                      boxShadow: _searchType == 'product'
+                                          ? [
+                                              BoxShadow(
+                                                color: AppColors.button.withValues(alpha: 0.2),
+                                                blurRadius: 8,
+                                                offset: const Offset(0, 4),
+                                              ),
+                                            ]
+                                          : [],
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          width: 48.w,
+                                          height: 48.w,
+                                          decoration: BoxDecoration(
+                                            color: _searchType == 'product'
+                                                ? AppColors.button.withValues(alpha: 0.15)
+                                                : Colors.grey.withValues(alpha: 0.1),
+                                            borderRadius: BorderRadius.circular(12.r),
+                                          ),
+                                          child: Icon(
+                                            Icons.shopping_bag_outlined,
+                                            color: _searchType == 'product'
+                                                ? AppColors.button
+                                                : Colors.grey[600],
+                                            size: 24.sp,
+                                          ),
+                                        ),
+                                        SizedBox(width: 16.w),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                _translate('Products', 'পণ্য'),
+                                                style: TextStyle(
+                                                  fontSize: 16.sp,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: _searchType == 'product'
+                                                      ? AppColors.button
+                                                      : Colors.black87,
+                                                ),
+                                              ),
+                                              SizedBox(height: 4.h),
+                                              Text(
+                                                _translate('Search for products', 'পণ্য খুঁজুন'),
+                                                style: TextStyle(
+                                                  fontSize: 14.sp,
+                                                  fontWeight: FontWeight.w400,
+                                                  color: Colors.grey[600],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        AnimatedOpacity(
+                                          duration: const Duration(milliseconds: 200),
+                                          opacity: _searchType == 'product' ? 1.0 : 0.0,
+                                          child: Container(
+                                            width: 28.w,
+                                            height: 28.w,
+                                            decoration: BoxDecoration(
+                                              color: AppColors.button,
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: Icon(
+                                              Icons.check,
+                                              color: Colors.white,
+                                              size: 18.sp,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(height: 16.h),
+                                // Shops Option
+                                InkWell(
+                                  onTap: () => Navigator.pop(context, 'shop'),
+                                  borderRadius: BorderRadius.circular(16.r),
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 200),
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 20.w,
+                                      vertical: 20.h,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: _searchType == 'shop'
+                                          ? AppColors.button.withValues(alpha: 0.1)
+                                          : Colors.white,
+                                      borderRadius: BorderRadius.circular(16.r),
+                                      border: Border.all(
+                                        color: _searchType == 'shop'
+                                            ? AppColors.button
+                                            : Colors.grey.withValues(alpha: 0.3),
+                                        width: _searchType == 'shop' ? 2.w : 1.w,
+                                      ),
+                                      boxShadow: _searchType == 'shop'
+                                          ? [
+                                              BoxShadow(
+                                                color: AppColors.button.withValues(alpha: 0.2),
+                                                blurRadius: 8,
+                                                offset: const Offset(0, 4),
+                                              ),
+                                            ]
+                                          : [],
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          width: 48.w,
+                                          height: 48.w,
+                                          decoration: BoxDecoration(
+                                            color: _searchType == 'shop'
+                                                ? AppColors.button.withValues(alpha: 0.15)
+                                                : Colors.grey.withValues(alpha: 0.1),
+                                            borderRadius: BorderRadius.circular(12.r),
+                                          ),
+                                          child: Icon(
+                                            Icons.store_outlined,
+                                            color: _searchType == 'shop'
+                                                ? AppColors.button
+                                                : Colors.grey[600],
+                                            size: 24.sp,
+                                          ),
+                                        ),
+                                        SizedBox(width: 16.w),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                _translate('Shops', 'দোকান'),
+                                                style: TextStyle(
+                                                  fontSize: 16.sp,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: _searchType == 'shop'
+                                                      ? AppColors.button
+                                                      : Colors.black87,
+                                                ),
+                                              ),
+                                              SizedBox(height: 4.h),
+                                              Text(
+                                                _translate('Search for shops', 'দোকান খুঁজুন'),
+                                                style: TextStyle(
+                                                  fontSize: 14.sp,
+                                                  fontWeight: FontWeight.w400,
+                                                  color: Colors.grey[600],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        AnimatedOpacity(
+                                          duration: const Duration(milliseconds: 200),
+                                          opacity: _searchType == 'shop' ? 1.0 : 0.0,
+                                          child: Container(
+                                            width: 28.w,
+                                            height: 28.w,
+                                            decoration: BoxDecoration(
+                                              color: AppColors.button,
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: Icon(
+                                              Icons.check,
+                                              color: Colors.white,
+                                              size: 18.sp,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                          content: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              ListTile(
-                                leading: Radio<String>(
-                                  value: 'product',
-                                  groupValue: _searchType,
-                                  activeColor: AppColors.button,
-                                  onChanged: (value) {
-                                    Navigator.pop(context, value);
-                                  },
-                                ),
-                                title: Row(
-                                  children: [
-                                    Icon(Icons.shopping_bag, color: AppColors.button),
-                                    SizedBox(width: 8.w),
-                                    Text(_translate('Products', 'পণ্য')),
-                                  ],
-                                ),
-                                onTap: () => Navigator.pop(context, 'product'),
-                              ),
-                              Divider(),
-                              ListTile(
-                                leading: Radio<String>(
-                                  value: 'shop',
-                                  groupValue: _searchType,
-                                  activeColor: AppColors.button,
-                                  onChanged: (value) {
-                                    Navigator.pop(context, value);
-                                  },
-                                ),
-                                title: Row(
-                                  children: [
-                                    Icon(Icons.store, color: AppColors.button),
-                                    SizedBox(width: 8.w),
-                                    Text(_translate('Shops', 'দোকান')),
-                                  ],
-                                ),
-                                onTap: () => Navigator.pop(context, 'shop'),
-                              ),
-                            ],
-                          ),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(context),
-                              child: Text(
-                                _translate('Cancel', 'বাতিল'),
-                                style: TextStyle(color: Colors.grey[600]),
-                              ),
-                            ),
-                          ],
                         ),
                       );
 
