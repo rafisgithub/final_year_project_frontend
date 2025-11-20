@@ -3,6 +3,7 @@ import 'package:final_year_project_frontend/networks/auth_service.dart';
 import 'package:final_year_project_frontend/networks/profile_service.dart';
 import 'package:final_year_project_frontend/networks/advertisement_service.dart';
 import 'package:final_year_project_frontend/networks/store_service.dart';
+import 'package:final_year_project_frontend/networks/search_service.dart';
 import 'package:final_year_project_frontend/networks/endpoints.dart';
 import 'package:final_year_project_frontend/helpers/all_routes.dart';
 import 'package:final_year_project_frontend/constants/app_constants.dart';
@@ -37,6 +38,11 @@ class _HomeScreenState extends State<HomeScreen> {
   // Stores data from API
   List<Map<String, dynamic>> _stores = [];
   bool _isLoadingStores = true;
+  
+  // Search results
+  List<Map<String, dynamic>> _searchResults = [];
+  bool _isSearching = false;
+  bool _showSearchResults = false;
   
   final List<Map<String, dynamic>> _categories = [
     {
@@ -79,6 +85,261 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadLanguage();
     _loadBanners();
     _loadStores();
+  }
+
+  Future<void> _handleSearch(String query) async {
+    if (query.isEmpty) {
+      setState(() {
+        _showSearchResults = false;
+        _searchResults = [];
+      });
+      return;
+    }
+
+    setState(() {
+      _isSearching = true;
+      _showSearchResults = true;
+    });
+
+    try {
+      final result = await SearchService.searchProductAndSeller(
+        searchFor: _searchType,
+        name: query,
+      );
+
+      if (mounted) {
+        setState(() {
+          _isSearching = false;
+          if (result['success']) {
+            _searchResults = List<Map<String, dynamic>>.from(result['data'] ?? []);
+          } else {
+            _searchResults = [];
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(result['message'] ?? 'No results found'),
+                backgroundColor: Colors.orange,
+              ),
+            );
+          }
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isSearching = false;
+          _searchResults = [];
+        });
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Search error: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Widget _buildProductSearchResults() {
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 12.w,
+        mainAxisSpacing: 12.h,
+        childAspectRatio: 0.75,
+      ),
+      itemCount: _searchResults.length,
+      itemBuilder: (context, index) {
+        final product = _searchResults[index];
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12.r),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 8,
+                offset: Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Product Image
+              ClipRRect(
+                borderRadius: BorderRadius.vertical(top: Radius.circular(12.r)),
+                child: Image.network(
+                  '${imageUrl}${product['thumbnail']}',
+                  height: 120.h,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      height: 120.h,
+                      color: Colors.grey[200],
+                      child: Icon(Icons.image_not_supported, size: 40.sp, color: Colors.grey),
+                    );
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.all(8.w),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      product['name'] ?? '',
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    SizedBox(height: 4.h),
+                    Row(
+                      children: [
+                        if (product['discount_price'] != null)
+                          Text(
+                            '৳${product['discount_price']}',
+                            style: TextStyle(
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.button,
+                            ),
+                          ),
+                        SizedBox(width: 6.w),
+                        if (product['discount_price'] != null)
+                          Text(
+                            '৳${product['price']}',
+                            style: TextStyle(
+                              fontSize: 12.sp,
+                              color: Colors.grey,
+                              decoration: TextDecoration.lineThrough,
+                            ),
+                          ),
+                        if (product['discount_price'] == null)
+                          Text(
+                            '৳${product['price']}',
+                            style: TextStyle(
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.button,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildStoreSearchResults() {
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      itemCount: _searchResults.length,
+      itemBuilder: (context, index) {
+        final store = _searchResults[index];
+        return Container(
+          margin: EdgeInsets.only(bottom: 12.h),
+          padding: EdgeInsets.all(12.w),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12.r),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 8,
+                offset: Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Store owner avatar
+              CircleAvatar(
+                radius: 30.r,
+                backgroundColor: AppColors.button.withOpacity(0.1),
+                backgroundImage: store['user']?['avatar'] != null
+                    ? NetworkImage('${imageUrl}${store['user']['avatar']}')
+                    : null,
+                child: store['user']?['avatar'] == null
+                    ? Icon(Icons.store, size: 30.sp, color: AppColors.button)
+                    : null,
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      store['store_name'] ?? '',
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    SizedBox(height: 4.h),
+                    Text(
+                      store['user']?['name'] ?? '',
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                    SizedBox(height: 4.h),
+                    Row(
+                      children: [
+                        Icon(Icons.location_on, size: 14.sp, color: Colors.grey),
+                        SizedBox(width: 4.w),
+                        Expanded(
+                          child: Text(
+                            store['store_address'] ?? '',
+                            style: TextStyle(
+                              fontSize: 12.sp,
+                              color: Colors.grey[600],
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 4.h),
+                    Row(
+                      children: [
+                        Icon(Icons.phone, size: 14.sp, color: Colors.grey),
+                        SizedBox(width: 4.w),
+                        Text(
+                          store['store_contact_number'] ?? '',
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.arrow_forward_ios, size: 16.sp, color: Colors.grey),
+            ],
+          ),
+        );
+      },
+    );
   }
   
   Future<void> _loadBanners() async {
@@ -1095,7 +1356,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 decoration: InputDecoration(
                   hintText: _searchType == 'product'
                       ? _translate('Search products...', 'পণ্য খুঁজুন...')
-                      : _translate('Search shops...', 'দোকান খুঁজুন...'),
+                      : _translate('Search Store...', 'দোকান খুঁজুন...'),
                   hintStyle: TextStyle(color: Colors.grey[400]),
                   prefixIcon: Icon(
                     _searchType == 'product' ? Icons.search : Icons.store_outlined,
@@ -1234,9 +1495,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ),
                                 ),
                                 SizedBox(height: 16.h),
-                                // Shops Option
+                                // Store Option
                                 InkWell(
-                                  onTap: () => Navigator.pop(context, 'shop'),
+                                  onTap: () => Navigator.pop(context, 'store'),
                                   borderRadius: BorderRadius.circular(16.r),
                                   child: AnimatedContainer(
                                     duration: const Duration(milliseconds: 200),
@@ -1245,17 +1506,17 @@ class _HomeScreenState extends State<HomeScreen> {
                                       vertical: 20.h,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: _searchType == 'shop'
+                                      color: _searchType == 'store'
                                           ? AppColors.button.withValues(alpha: 0.1)
                                           : Colors.white,
                                       borderRadius: BorderRadius.circular(16.r),
                                       border: Border.all(
-                                        color: _searchType == 'shop'
+                                        color: _searchType == 'store'
                                             ? AppColors.button
                                             : Colors.grey.withValues(alpha: 0.3),
-                                        width: _searchType == 'shop' ? 2.w : 1.w,
+                                        width: _searchType == 'store' ? 2.w : 1.w,
                                       ),
-                                      boxShadow: _searchType == 'shop'
+                                      boxShadow: _searchType == 'store'
                                           ? [
                                               BoxShadow(
                                                 color: AppColors.button.withValues(alpha: 0.2),
@@ -1290,7 +1551,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                             crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
                                               Text(
-                                                _translate('Shops', 'দোকান'),
+                                                _translate('Store', 'দোকান'),
                                                 style: TextStyle(
                                                   fontSize: 16.sp,
                                                   fontWeight: FontWeight.w600,
@@ -1301,7 +1562,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                               ),
                                               SizedBox(height: 4.h),
                                               Text(
-                                                _translate('Search for shops', 'দোকান খুঁজুন'),
+                                                _translate('Search for store', 'দোকান খুঁজুন'),
                                                 style: TextStyle(
                                                   fontSize: 14.sp,
                                                   fontWeight: FontWeight.w400,
@@ -1349,7 +1610,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             content: Text(
                               selectedType == 'product'
                                   ? _translate('Search mode: Products', 'অনুসন্ধান মোড: পণ্য')
-                                  : _translate('Search mode: Shops', 'অনুসন্ধান মোড: দোকান'),
+                                  : _translate('Search mode: Store', 'অনুসন্ধান মোড: দোকান'),
                             ),
                             backgroundColor: AppColors.button,
                             duration: Duration(seconds: 2),
@@ -1367,22 +1628,77 @@ class _HomeScreenState extends State<HomeScreen> {
                   contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
                 ),
                 onSubmitted: (value) {
-                  // Handle search
-                  if (value.isNotEmpty) {
-                    final searchIn = _searchType == 'product'
-                        ? _translate('products', 'পণ্য')
-                        : _translate('shops', 'দোকান');
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          '${_translate('Searching', 'খুঁজছি')} $searchIn: $value',
-                        ),
-                      ),
-                    );
-                  }
+                  _handleSearch(value);
+                },
+                onChanged: (value) {
+                  // Real-time search
+                  _handleSearch(value);
                 },
               ),
             ),
+            
+            // Search Results Section
+            if (_showSearchResults)
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          _searchType == 'product'
+                              ? _translate('Search Results - Products', 'অনুসন্ধান ফলাফল - পণ্য')
+                              : _translate('Search Results - Stores', 'অনুসন্ধান ফলাফল - দোকান'),
+                          style: TextStyle(
+                            fontSize: 18.sp,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.button,
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.close, color: AppColors.button),
+                          onPressed: () {
+                            setState(() {
+                              _showSearchResults = false;
+                              _searchResults = [];
+                              _searchController.clear();
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 8.h),
+                    _isSearching
+                        ? Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(24.h),
+                              child: CircularProgressIndicator(
+                                color: AppColors.button,
+                              ),
+                            ),
+                          )
+                        : _searchResults.isEmpty
+                            ? Center(
+                                child: Padding(
+                                  padding: EdgeInsets.all(24.h),
+                                  child: Text(
+                                    _translate('No results found', 'কোন ফলাফল পাওয়া যায়নি'),
+                                    style: TextStyle(
+                                      color: Colors.grey[600],
+                                      fontSize: 16.sp,
+                                    ),
+                                  ),
+                                ),
+                              )
+                            : _searchType == 'product'
+                                ? _buildProductSearchResults()
+                                : _buildStoreSearchResults(),
+                    SizedBox(height: 16.h),
+                  ],
+                ),
+              ),
             
             // Banner Section
             SizedBox(
@@ -1531,14 +1847,14 @@ class _HomeScreenState extends State<HomeScreen> {
             
             SizedBox(height: 24.h),
             
-            // Shops Section
+            // Store Section
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 16.w),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    _translate('Nearby Shops', 'নিকটস্থ দোকানসমূহ'),
+                    _translate('Nearby Stores', 'নিকটস্থ দোকানসমূহ'),
                     style: TextStyle(
                       fontSize: 20.sp,
                       fontWeight: FontWeight.bold,
@@ -1548,7 +1864,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   TextButton(
                     onPressed: () {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(_translate('View all shops coming soon', 'সব দোকান শীঘ্রই আসছে'))),
+                        SnackBar(content: Text(_translate('View all stores coming soon', 'সব দোকান শীঘ্রই আসছে'))),
                       );
                     },
                     child: Text(

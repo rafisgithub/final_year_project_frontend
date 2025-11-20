@@ -38,4 +38,7 @@ final class Endpoints {
   
   // stores
   static const String storeList = "store-list/";
+  
+  // search
+  static const String searchProductAndSeller = "search-product-and-seller/";
 }
