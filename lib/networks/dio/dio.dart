@@ -110,3 +110,25 @@ Future<Response> getHttp(String path, [dynamic data]) =>
 Future<Response> deleteHttp(String path, [dynamic data]) =>
     DioSingleton.instance.dio
         .delete(path, data: data, cancelToken: DioSingleton.cancelToken);
+
+// Post with FormData (for file uploads)
+Future<Response> postHttpFormData(String path, FormData formData) =>
+    DioSingleton.instance.dio.post(
+      path,
+      data: formData,
+      cancelToken: DioSingleton.cancelToken,
+      options: Options(
+        contentType: 'multipart/form-data',
+      ),
+    );
+
+// Put with FormData (for file uploads)
+Future<Response> putHttpFormData(String path, FormData formData) =>
+    DioSingleton.instance.dio.put(
+      path,
+      data: formData,
+      cancelToken: DioSingleton.cancelToken,
+      options: Options(
+        contentType: 'multipart/form-data',
+      ),
+    );

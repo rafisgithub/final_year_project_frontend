@@ -9,6 +9,7 @@ import 'package:final_year_project_frontend/constants/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:image_picker/image_picker.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -23,6 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
   
   Map<String, dynamic>? _profileData;
   bool _isLoadingProfile = true;
+  bool _isUpdatingAvatar = false;
   String _currentLanguage = 'en';
   String _searchType = 'product'; // 'product' or 'shop'
   
@@ -134,6 +136,94 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<void> _updateAvatar() async {
+    try {
+      final ImagePicker picker = ImagePicker();
+      
+      // Show image source selection dialog
+      final ImageSource? source = await showDialog<ImageSource>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Choose Image Source'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: Icon(Icons.camera_alt, color: AppColors.button),
+                title: Text('Camera'),
+                onTap: () => Navigator.pop(context, ImageSource.camera),
+              ),
+              ListTile(
+                leading: Icon(Icons.photo_library, color: AppColors.button),
+                title: Text('Gallery'),
+                onTap: () => Navigator.pop(context, ImageSource.gallery),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      if (source == null) return;
+
+      // Pick image
+      final XFile? image = await picker.pickImage(
+        source: source,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 85,
+      );
+
+      if (image == null) return;
+
+      setState(() {
+        _isUpdatingAvatar = true;
+      });
+
+      // Upload avatar
+      final result = await ProfileService.updateAvatar(
+        avatarPath: image.path,
+      );
+
+      if (mounted) {
+        setState(() {
+          _isUpdatingAvatar = false;
+        });
+
+        if (result['success']) {
+          // Reload profile to get updated avatar
+          await _loadProfile();
+          
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(result['message'] ?? 'Avatar updated successfully'),
+              backgroundColor: AppColors.button,
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(result['message'] ?? 'Failed to update avatar'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isUpdatingAvatar = false;
+        });
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -159,19 +249,61 @@ class _HomeScreenState extends State<HomeScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           // Avatar
-                          CircleAvatar(
-                            radius: 30.r,
-                            backgroundColor: Colors.white,
-                            backgroundImage: _profileData?['avatar'] != null
-                                ? NetworkImage('${imageUrl}${_profileData!['avatar']}')
-                                : null,
-                            child: _profileData?['avatar'] == null
-                                ? Icon(
-                                    Icons.person,
-                                    size: 35.sp,
-                                    color: AppColors.button,
-                                  )
-                                : null,
+                          GestureDetector(
+                            onTap: _isUpdatingAvatar ? null : _updateAvatar,
+                            child: Stack(
+                              children: [
+                                CircleAvatar(
+                                  radius: 30.r,
+                                  backgroundColor: Colors.white,
+                                  backgroundImage: _profileData?['avatar'] != null
+                                      ? NetworkImage('${imageUrl}${_profileData!['avatar']}')
+                                      : null,
+                                  child: _profileData?['avatar'] == null
+                                      ? Icon(
+                                          Icons.person,
+                                          size: 35.sp,
+                                          color: AppColors.button,
+                                        )
+                                      : null,
+                                ),
+                                if (_isUpdatingAvatar)
+                                  Positioned.fill(
+                                    child: CircleAvatar(
+                                      radius: 30.r,
+                                      backgroundColor: Colors.black.withOpacity(0.5),
+                                      child: SizedBox(
+                                        width: 24.w,
+                                        height: 24.h,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                Positioned(
+                                  right: 0,
+                                  bottom: 0,
+                                  child: Container(
+                                    padding: EdgeInsets.all(4.w),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.button,
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: Colors.white,
+                                        width: 2.w,
+                                      ),
+                                    ),
+                                    child: Icon(
+                                      Icons.camera_alt,
+                                      size: 12.sp,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                           SizedBox(height: 12.h),
                           // Name
