@@ -48,21 +48,21 @@ class _HomeScreenState extends State<HomeScreen> {
       'id': 1,
       'nameEn': 'Seeds',
       'nameBn': 'বীজ',
-      'icon': Icons.grass,
+      'icon': Icons.eco,
       'color': Color(0xFF8BC34A)
     },
     {
       'id': 2,
       'nameBn': 'সার',
       'nameEn': 'Fertilizer',
-      'icon': Icons.science,
+      'icon': Icons.local_florist,
       'color': Color(0xFF795548)
     },
     {
       'id': 3,
       'nameEn': 'Pesticide',
       'nameBn': 'কীটনাশক',
-      'icon': Icons.water_drop,
+      'icon': Icons.bug_report,
       'color': Color(0xFF009688)
     },
   ];
@@ -200,10 +200,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
               ),
 
-              ListTile(
-                leading: Icon(Icons.home, color: AppColors.button),
-                title: Text('Home'),
-              ),
+            
               ListTile(
                 leading: Icon(Icons.swap_horiz, color: AppColors.button),
                 title: Text('Switch Role'),

@@ -7,9 +7,12 @@ import 'package:final_year_project_frontend/gen/colors.gen.dart';
 import 'package:final_year_project_frontend/helpers/all_routes.dart';
 import 'package:final_year_project_frontend/helpers/navigation_service.dart';
 import 'package:final_year_project_frontend/helpers/ui_helpers.dart';
+import 'package:final_year_project_frontend/networks/auth_service.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
-  const ResetPasswordScreen({super.key});
+  final String? email;
+  
+  const ResetPasswordScreen({super.key, this.email});
 
   @override
   State<ResetPasswordScreen> createState() => _ResetPasswordScreenState();
@@ -21,12 +24,104 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   final _confirmPasswordController = TextEditingController();
   bool _isNewPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
+  bool _isLoading = false;
+  String? _email;
+  
+  @override
+  void initState() {
+    super.initState();
+    // Get email from route arguments if not passed directly
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+      if (args != null && args['email'] != null) {
+        setState(() {
+          _email = args['email'] as String;
+        });
+      }
+    });
+  }
 
   @override
   void dispose() {
     _newPasswordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _handleResetPassword() async {
+    if (_formKey.currentState?.validate() ?? false) {
+      final email = _email ?? widget.email;
+      if (email == null || email.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Email is missing. Please try again.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
+      setState(() {
+        _isLoading = true;
+      });
+
+      try {
+        final result = await AuthService.resetPassword(
+          email: email,
+          newPassword: _newPasswordController.text.trim(),
+          confirmPassword: _confirmPasswordController.text.trim(),
+        );
+
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+
+          if (result['success'] == true) {
+            // Show success message
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(result['message'] ?? 'Password reset successfully!'),
+                backgroundColor: AppColors.button,
+                duration: Duration(seconds: 2),
+              ),
+            );
+
+            // Wait for snackbar to show, then navigate to sign in screen
+            Future.delayed(Duration(seconds: 2), () {
+              if (mounted) {
+                NavigationService.navigateToReplacement(
+                  Routes.signinScreen,
+                );
+              }
+            });
+          } else {
+            // Show error message
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(result['message'] ?? 'Failed to reset password'),
+                backgroundColor: Colors.red,
+                duration: Duration(seconds: 3),
+              ),
+            );
+          }
+        }
+      } catch (e) {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('An error occurred. Please try again.'),
+              backgroundColor: Colors.red,
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
+      }
+    }
   }
 
   Widget _buildTextField({
@@ -37,6 +132,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
     bool isPassword = false,
     required bool isPasswordVisible,
     required VoidCallback onToggleVisibility,
+    String? Function(String?)? validator,
   }) {
     return Container(
       decoration: BoxDecoration(
@@ -54,6 +150,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
       child: TextFormField(
         controller: controller,
         obscureText: isPassword && !isPasswordVisible,
+        validator: validator,
         style: TextStyle(
           fontSize: 16.sp,
           fontWeight: FontWeight.w500,
@@ -202,6 +299,15 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                         _isNewPasswordVisible = !_isNewPasswordVisible;
                       });
                     },
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Password is required';
+                      }
+                      if (value.length < 8) {
+                        return 'Password must be at least 8 characters';
+                      }
+                      return null;
+                    },
                   ),
                   
                   UIHelper.verticalSpace(20.h),
@@ -218,6 +324,15 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                       setState(() {
                         _isConfirmPasswordVisible = !_isConfirmPasswordVisible;
                       });
+                    },
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Please confirm your password';
+                      }
+                      if (value != _newPasswordController.text) {
+                        return 'Passwords do not match';
+                      }
+                      return null;
                     },
                   ),
                   
@@ -237,20 +352,23 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                         ),
                       ],
                     ),
-                    child: CustomsButton(
-                      bgColor1: AppColors.button,
-                      bgColor2: AppColors.c28B446,
-                      name: 'Continue'.tr,
-                      textStyle: TextFontStyle.textStyle18c231F20poppins700.copyWith(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w700,
-                      ),
-                      callback: () {
-                        NavigationService.navigateToReplacement(
-                          Routes.passwordUpdateSuccessScreen,
-                        );
-                      },
-                    ),
+                    child: _isLoading
+                        ? Center(
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2.5,
+                            ),
+                          )
+                        : CustomsButton(
+                            bgColor1: AppColors.button,
+                            bgColor2: AppColors.c28B446,
+                            name: 'Continue'.tr,
+                            textStyle: TextFontStyle.textStyle18c231F20poppins700.copyWith(
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.w700,
+                            ),
+                            callback: _isLoading ? () {} : _handleResetPassword,
+                          ),
                   ),
                   
                   UIHelper.verticalSpace(32.h),

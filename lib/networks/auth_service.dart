@@ -257,6 +257,78 @@ class AuthService {
     }
   }
 
+  // Resend OTP
+  static Future<Map<String, dynamic>> resendOtp({
+    required String email,
+    required String purpose, // 'password_reset' or other purposes
+  }) async {
+    try {
+      final data = {
+        'email': email,
+        'purpose': purpose,
+      };
+
+      if (kDebugMode) {
+        print('Resend OTP Request: $data');
+      }
+
+      final response = await postHttpNoAuth(Endpoints.resendOtp, data);
+
+      if (kDebugMode) {
+        print('Resend OTP Response: ${response.data}');
+      }
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final responseData = response.data;
+        
+        if (responseData['success'] == true) {
+          return {
+            'success': true,
+            'message': responseData['message'] ?? 'OTP resent successfully',
+            'data': responseData['data'],
+          };
+        } else {
+          return {
+            'success': false,
+            'message': responseData['message'] ?? 'Failed to resend OTP',
+          };
+        }
+      } else {
+        return {
+          'success': false,
+          'message': 'Server error: ${response.statusCode}',
+        };
+      }
+    } on DioException catch (e) {
+      if (kDebugMode) {
+        print('Resend OTP DioException: ${e.message}');
+        print('Response: ${e.response?.data}');
+      }
+      
+      if (e.response != null && e.response?.data != null) {
+        final errorData = e.response!.data;
+        return {
+          'success': false,
+          'message': errorData['message'] ?? 'Failed to resend OTP',
+          'errors': errorData['errors'],
+        };
+      }
+      
+      return {
+        'success': false,
+        'message': e.message ?? 'Network error occurred',
+      };
+    } catch (e) {
+      if (kDebugMode) {
+        print('Resend OTP Error: $e');
+      }
+      return {
+        'success': false,
+        'message': 'An unexpected error occurred',
+      };
+    }
+  }
+
   // Sign Out
   static Future<Map<String, dynamic>> signOut() async {
     try {
@@ -343,6 +415,81 @@ class AuthService {
       return {
         'success': true,
         'message': 'Signed out successfully',
+      };
+    }
+  }
+
+  // Reset Password
+  static Future<Map<String, dynamic>> resetPassword({
+    required String email,
+    required String newPassword,
+    required String confirmPassword,
+  }) async {
+    try {
+      final data = {
+        'email': email,
+        'new_password': newPassword,
+        'confirm_password': confirmPassword,
+        'purpose': 'password_reset',
+      };
+
+      if (kDebugMode) {
+        print('Reset Password Request: ${data.keys}');
+      }
+
+      final response = await postHttpNoAuth(Endpoints.resetPassword, data);
+
+      if (kDebugMode) {
+        print('Reset Password Response: ${response.data}');
+      }
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final responseData = response.data;
+        
+        if (responseData['success'] == true) {
+          return {
+            'success': true,
+            'message': responseData['message'] ?? 'Password reset successfully',
+            'data': responseData['data'],
+          };
+        } else {
+          return {
+            'success': false,
+            'message': responseData['message'] ?? 'Failed to reset password',
+          };
+        }
+      } else {
+        return {
+          'success': false,
+          'message': 'Server error: ${response.statusCode}',
+        };
+      }
+    } on DioException catch (e) {
+      if (kDebugMode) {
+        print('Reset Password DioException: ${e.message}');
+        print('Response: ${e.response?.data}');
+      }
+      
+      if (e.response != null && e.response?.data != null) {
+        final errorData = e.response!.data;
+        return {
+          'success': false,
+          'message': errorData['message'] ?? 'Failed to reset password',
+          'errors': errorData['errors'],
+        };
+      }
+      
+      return {
+        'success': false,
+        'message': e.message ?? 'Network error occurred',
+      };
+    } catch (e) {
+      if (kDebugMode) {
+        print('Reset Password Error: $e');
+      }
+      return {
+        'success': false,
+        'message': 'An unexpected error occurred',
       };
     }
   }

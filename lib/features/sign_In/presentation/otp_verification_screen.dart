@@ -9,25 +9,122 @@ import 'package:final_year_project_frontend/gen/colors.gen.dart';
 import 'package:final_year_project_frontend/helpers/all_routes.dart';
 import 'package:final_year_project_frontend/helpers/navigation_service.dart';
 import 'package:final_year_project_frontend/helpers/ui_helpers.dart';
+import 'package:final_year_project_frontend/networks/auth_service.dart';
 
 class OtpVerificationScreen extends StatefulWidget {
-  const OtpVerificationScreen({super.key});
+  final String? email;
+  
+  const OtpVerificationScreen({super.key, this.email});
 
   @override
   State<OtpVerificationScreen> createState() => _OtpVerificationScreenState();
 }
 
 class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
+  String? _email;
+  bool _isResending = false;
+  
+  @override
+  void initState() {
+    super.initState();
+    // Get email from route arguments if not passed directly
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+      if (args != null && args['email'] != null) {
+        setState(() {
+          _email = args['email'] as String;
+        });
+      }
+    });
+  }
+  
+  String _maskEmail(String email) {
+    if (email.isEmpty) return '';
+    final parts = email.split('@');
+    if (parts.length != 2) return email;
+    
+    final username = parts[0];
+    final domain = parts[1];
+    
+    if (username.length <= 2) {
+      return '${username[0]}***@$domain';
+    }
+    
+    final visibleChars = username.substring(0, 2);
+    return '$visibleChars***@$domain';
+  }
+  
+  Future<void> _handleResendOtp() async {
+    final email = _email ?? widget.email;
+    
+    if (email == null || email.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Email not found. Please go back and try again.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+    
+    setState(() {
+      _isResending = true;
+    });
+    
+    try {
+      final response = await AuthService.resendOtp(
+        email: email,
+        purpose: 'password_reset',
+      );
+      
+      if (response['success']) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(response['message'] ?? 'OTP resent successfully'),
+              backgroundColor: AppColors.button,
+            ),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(response['message'] ?? 'Failed to resend OTP'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isResending = false;
+        });
+      }
+    }
+  }
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 24.w),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 24.w),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
               UIHelper.verticalSpace(24.h),
               
               // Back Button
@@ -90,7 +187,9 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
               ),
               UIHelper.verticalSpace(6.h),
               Text(
-                "Enter the verification code we send you on: Alberts******@gmail.com",
+                (_email != null && _email!.isNotEmpty) || (widget.email != null && widget.email!.isNotEmpty)
+                    ? "Enter the verification code we sent to: ${_maskEmail(_email ?? widget.email ?? '')}"
+                    : "Enter the verification code we sent to your email",
                 style: TextStyle(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w400,
@@ -101,6 +200,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
               UIHelper.verticalSpace(28.h),
               
               CustomOtpPinField(
+                maxLength: 4,
                 onSubmit: (String) {},
                 onChange: (String) {},
               ),
@@ -108,18 +208,25 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
               UIHelper.verticalSpace(20.h),
               
               Center(
-                child: CommonTextButton(
-                  text: 'Click to resend code',
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.button,
-                  onTap: () {
-                    // TODO: Implement resend code logic
-                  },
-                ),
+                child: _isResending
+                    ? SizedBox(
+                        height: 20.h,
+                        width: 20.w,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(AppColors.button),
+                        ),
+                      )
+                    : CommonTextButton(
+                        text: 'Click to resend code',
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.button,
+                        onTap: _handleResendOtp,
+                      ),
               ),
 
-              Spacer(),
+              UIHelper.verticalSpace(40.h),
               
               // Confirm Button
               Container(
@@ -144,12 +251,19 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                     fontWeight: FontWeight.w700,
                   ),
                   callback: () {
-                    NavigationService.navigateToWithArgs(
-                      Routes.mainNavigationBar,
-                      {
-                        'pageNum': 0,
-                      },
-                    );
+                    // Navigate to reset password screen with email
+                    final email = _email ?? widget.email;
+                    if (email != null && email.isNotEmpty) {
+                      NavigationService.navigateToWithArgs(
+                        Routes.resetPasswordScreen,
+                        {'email': email},
+                      );
+                    } else {
+                      // Fallback if email is missing
+                      NavigationService.navigateTo(
+                        Routes.resetPasswordScreen,
+                      );
+                    }
                   },
                 ),
               ),
@@ -157,6 +271,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
               UIHelper.verticalSpace(32.h),
             ],
           ),
+        ),
         ),
       ),
     );

@@ -24,6 +24,7 @@ final class Endpoints {
   static const String signup = "signup/";
   static const String signin = "signin/";
   static const String sendOtp = "send-otp/";
+  static const String resendOtp = "resend-otp/";
   static const String verifyOtp = "verify-otp/";
   static const String resetPassword = "reset-password/";
   static const String signout = "signout/";

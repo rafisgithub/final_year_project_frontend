@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:otp_pin_field/otp_pin_field.dart';
 import 'package:final_year_project_frontend/constants/text_font_style.dart';
 import 'package:final_year_project_frontend/gen/colors.gen.dart';
@@ -41,9 +42,12 @@ class _CustomOtpPinFieldState extends State<CustomOtpPinField> {
           } else if (index == 10) {
             return _buildKeyboardButton('0');
           } else if (index == 11) {
-            return _buildKeyboardButton('⌫', onTap: () {
-              _otpPinFieldController.currentState?.clearOtp();
-            });
+            return _buildKeyboardButton(
+              '⌫',
+              onTap: () {
+                _otpPinFieldController.currentState?.clearOtp();
+              },
+            );
           } else {
             return _buildKeyboardButton('${index + 1}');
           }
@@ -54,7 +58,8 @@ class _CustomOtpPinFieldState extends State<CustomOtpPinField> {
 
   Widget _buildKeyboardButton(String text, {VoidCallback? onTap}) {
     return InkWell(
-      onTap: onTap ??
+      onTap:
+          onTap ??
           () {
             _otpPinFieldController.currentState?.controller.text += text;
           },
@@ -91,45 +96,50 @@ class _CustomOtpPinFieldState extends State<CustomOtpPinField> {
           maxLength: widget.maxLength,
           autoFillEnable: widget.autoFillEnable,
           showCustomKeyboard: widget.showCustomKeyboard,
-          customKeyboard: widget.showCustomKeyboard ? _buildCustomKeyboard() : null,
-          showDefaultKeyboard: !widget.showCustomKeyboard,
+          customKeyboard: widget.showCustomKeyboard
+              ? _buildCustomKeyboard()
+              : null,
+          showDefaultKeyboard: true,
+          keyboardType: TextInputType.number,
           textInputAction: TextInputAction.done,
           onSubmit: widget.onSubmit,
           onChange: widget.onChange,
           onCodeChanged: (code) {
             print('Code changed: $code');
+            widget.onChange(code);
           },
+      
           otpPinFieldStyle: OtpPinFieldStyle(
-            textStyle: TextFontStyle.textStyle18c231F20poppins700,
-            activeFieldBorderGradient: const LinearGradient(
-              colors: [Colors.black, Colors.black],
+            textStyle: TextFontStyle.textStyle18c231F20poppins700.copyWith(
+              fontSize: 20.sp,
+              fontWeight: FontWeight.w700,
+              color: Colors.black87,
+            ),
+            activeFieldBorderGradient: LinearGradient(
+              colors: [AppColors.button, AppColors.button],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
-            filledFieldBorderGradient: const LinearGradient(
-              colors: [Colors.black, Colors.black],
+            filledFieldBorderGradient: LinearGradient(
+              colors: [AppColors.button, AppColors.button],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
-            defaultFieldBorderGradient: const LinearGradient(
-              colors: [Colors.black, Colors.black],
+            defaultFieldBorderGradient: LinearGradient(
+              colors: [Colors.grey.shade400, Colors.grey.shade400],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
           ),
-          fieldHeight: 50.0,
-          fieldWidth: 50.0,
-          
+          fieldHeight: 60.0,
+          fieldWidth: 60.0,
           showCursor: true,
-          cursorColor:AppColors.cF2F0F0,
+          cursorColor: AppColors.button,
           cursorWidth: 2.0,
           mainAxisAlignment: MainAxisAlignment.center,
           otpPinFieldDecoration: OtpPinFieldDecoration.defaultPinBoxDecoration,
-
-        
         ),
       ],
     );
   }
 }
-

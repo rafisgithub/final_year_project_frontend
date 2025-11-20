@@ -55,8 +55,9 @@ class _ForgotPasswordscreenState extends State<ForgotPasswordscreen> {
             );
 
             // Navigate to OTP verification screen
-            NavigationService.navigateTo(
+            NavigationService.navigateToWithArgs(
               Routes.otpVerificationScreen,
+              {'email': _emailController.text.trim()},
             );
           } else {
             // Show error message
@@ -118,6 +119,17 @@ class _ForgotPasswordscreenState extends State<ForgotPasswordscreen> {
           fontWeight: FontWeight.w500,
           color: Colors.black87,
         ),
+        validator: (value) {
+          if (value == null || value.trim().isEmpty) {
+            return 'Email is required';
+          }
+          // Email regex validation
+          final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+          if (!emailRegex.hasMatch(value.trim())) {
+            return 'Please enter a valid email';
+          }
+          return null;
+        },
         decoration: InputDecoration(
           labelText: labelText,
           labelStyle: TextStyle(
