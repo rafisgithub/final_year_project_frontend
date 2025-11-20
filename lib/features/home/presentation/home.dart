@@ -2,6 +2,7 @@ import 'package:final_year_project_frontend/gen/colors.gen.dart';
 import 'package:final_year_project_frontend/networks/auth_service.dart';
 import 'package:final_year_project_frontend/networks/profile_service.dart';
 import 'package:final_year_project_frontend/networks/advertisement_service.dart';
+import 'package:final_year_project_frontend/networks/store_service.dart';
 import 'package:final_year_project_frontend/networks/endpoints.dart';
 import 'package:final_year_project_frontend/helpers/all_routes.dart';
 import 'package:final_year_project_frontend/constants/app_constants.dart';
@@ -31,12 +32,9 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Map<String, dynamic>> _banners = [];
   bool _isLoadingBanners = true;
   
-  final List<Map<String, dynamic>> _shops = [
-    {'id': 1, 'name': 'Green Farm Store', 'owner': 'John Doe', 'initials': 'GF', 'color': AppColors.button, 'rating': 4.5},
-    {'id': 2, 'name': 'Fresh Harvest', 'owner': 'Jane Smith', 'initials': 'FH', 'color': AppColors.c28B446, 'rating': 4.8},
-    {'id': 3, 'name': 'Organic Market', 'owner': 'Bob Wilson', 'initials': 'OM', 'color': AppColors.button, 'rating': 4.3},
-    {'id': 4, 'name': 'Farm Direct', 'owner': 'Alice Brown', 'initials': 'FD', 'color': AppColors.c28B446, 'rating': 4.6},
-  ];
+  // Stores data from API
+  List<Map<String, dynamic>> _stores = [];
+  bool _isLoadingStores = true;
   
   final List<Map<String, dynamic>> _categories = [
     {
@@ -78,6 +76,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadProfile();
     _loadLanguage();
     _loadBanners();
+    _loadStores();
   }
   
   Future<void> _loadBanners() async {
@@ -88,6 +87,18 @@ class _HomeScreenState extends State<HomeScreen> {
           _banners = List<Map<String, dynamic>>.from(result['data'] ?? []);
         }
         _isLoadingBanners = false;
+      });
+    }
+  }
+  
+  Future<void> _loadStores() async {
+    final result = await StoreService.getStoreList();
+    if (mounted) {
+      setState(() {
+        if (result['success'] == true) {
+          _stores = List<Map<String, dynamic>>.from(result['data'] ?? []);
+        }
+        _isLoadingStores = false;
       });
     }
   }
@@ -1424,84 +1435,116 @@ class _HomeScreenState extends State<HomeScreen> {
             
             SizedBox(
               height: 110.h,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                padding: EdgeInsets.symmetric(horizontal: 12.w),
-                itemCount: _shops.length,
-                itemBuilder: (context, index) {
-                  final shop = _shops[index];
-                  return GestureDetector(
-                    onTap: () {
-                      // Navigate to shop details
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Opening ${shop['name']} details...')),
-                      );
-                    },
-                    child: Container(
-                      width: 120.w,
-                      margin: EdgeInsets.symmetric(horizontal: 4.w),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12.r),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.08),
-                            blurRadius: 8,
-                            offset: Offset(0, 2),
-                          ),
-                        ],
+              child: _isLoadingStores
+                  ? Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.button,
                       ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          CircleAvatar(
-                            radius: 30.r,
-                            backgroundColor: shop['color'],
-                            child: Text(
-                              shop['initials'],
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18.sp,
-                                fontWeight: FontWeight.bold,
-                              ),
+                    )
+                  : _stores.isEmpty
+                      ? Center(
+                          child: Text(
+                            _translate('No stores available', 'কোন দোকান উপলব্ধ নেই'),
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 14.sp,
                             ),
                           ),
-                          SizedBox(height: 6.h),
-                          Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 6.w),
-                            child: Text(
-                              shop['name'],
-                              style: TextStyle(
-                                fontSize: 12.sp,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black87,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                          SizedBox(height: 2.h),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.star, color: Colors.amber, size: 12.sp),
-                              SizedBox(width: 2.w),
-                              Text(
-                                shop['rating'].toString(),
-                                style: TextStyle(
-                                  fontSize: 11.sp,
-                                  color: Colors.grey[600],
+                        )
+                      : ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          padding: EdgeInsets.symmetric(horizontal: 12.w),
+                          itemCount: _stores.length,
+                          itemBuilder: (context, index) {
+                            final store = _stores[index];
+                            // Only show stores that have a store_name (are sellers)
+                            if (store['store_name'] == null || store['store_name'].toString().isEmpty) {
+                              return SizedBox.shrink();
+                            }
+                            return GestureDetector(
+                              onTap: () {
+                                // Navigate to shop details
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('Opening ${store['name']}\'s store details...')),
+                                );
+                              },
+                              child: Container(
+                                width: 120.w,
+                                margin: EdgeInsets.symmetric(horizontal: 4.w),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(12.r),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.08),
+                                      blurRadius: 8,
+                                      offset: Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    CircleAvatar(
+                                      radius: 30.r,
+                                      backgroundColor: AppColors.button.withValues(alpha: 0.1),
+                                      backgroundImage: store['avatar'] != null && store['avatar'].toString().isNotEmpty
+                                          ? NetworkImage('${imageUrl}${store['avatar']}')
+                                          : null,
+                                      child: store['avatar'] == null || store['avatar'].toString().isEmpty
+                                          ? Icon(
+                                              Icons.store,
+                                              size: 30.sp,
+                                              color: AppColors.button,
+                                            )
+                                          : null,
+                                    ),
+                                    SizedBox(height: 6.h),
+                                    Padding(
+                                      padding: EdgeInsets.symmetric(horizontal: 6.w),
+                                      child: Text(
+                                        store['name'] ?? 'Store',
+                                        style: TextStyle(
+                                          fontSize: 12.sp,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black87,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                    SizedBox(height: 2.h),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.star, color: Colors.amber, size: 12.sp),
+                                        SizedBox(width: 2.w),
+                                        Text(
+                                          (store['avg_rating'] ?? 0.0).toString(),
+                                          style: TextStyle(
+                                            fontSize: 11.sp,
+                                            color: Colors.grey[600],
+                                          ),
+                                        ),
+                                        if (store['total_reviews'] != null && store['total_reviews'] > 0) ...[
+                                          SizedBox(width: 2.w),
+                                          Text(
+                                            '(${store['total_reviews']})',
+                                            style: TextStyle(
+                                              fontSize: 10.sp,
+                                              color: Colors.grey[500],
+                                            ),
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                  ],
                                 ),
                               ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
+                            );
+                          },
+                        ),
             ),
             
             SizedBox(height: 24.h),

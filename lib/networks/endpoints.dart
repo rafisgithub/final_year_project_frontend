@@ -33,4 +33,7 @@ final class Endpoints {
   
   // advertisements
   static const String advertisements = "advertisements/";
+  
+  // stores
+  static const String storeList = "store-list/";
 }
