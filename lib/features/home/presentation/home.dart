@@ -5,6 +5,7 @@ import 'package:final_year_project_frontend/networks/advertisement_service.dart'
 import 'package:final_year_project_frontend/networks/store_service.dart';
 import 'package:final_year_project_frontend/networks/search_service.dart';
 import 'package:final_year_project_frontend/networks/endpoints.dart';
+import 'package:final_year_project_frontend/features/store/presentation/store_details_screen.dart';
 import 'package:final_year_project_frontend/helpers/all_routes.dart';
 import 'package:final_year_project_frontend/constants/app_constants.dart';
 import 'package:flutter/material.dart';
@@ -250,10 +251,19 @@ class _HomeScreenState extends State<HomeScreen> {
       itemCount: _searchResults.length,
       itemBuilder: (context, index) {
         final store = _searchResults[index];
-        return Container(
-          margin: EdgeInsets.only(bottom: 12.h),
-          padding: EdgeInsets.all(12.w),
-          decoration: BoxDecoration(
+        return GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => StoreDetailsScreen(storeData: store),
+              ),
+            );
+          },
+          child: Container(
+            margin: EdgeInsets.only(bottom: 12.h),
+            padding: EdgeInsets.all(12.w),
+            decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(12.r),
             boxShadow: [
@@ -336,6 +346,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               Icon(Icons.arrow_forward_ios, size: 16.sp, color: Colors.grey),
             ],
+          ),
           ),
         );
       },
@@ -1908,9 +1919,11 @@ class _HomeScreenState extends State<HomeScreen> {
                             }
                             return GestureDetector(
                               onTap: () {
-                                // Navigate to shop details
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Opening ${store['name']}\'s store details...')),
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => StoreDetailsScreen(storeData: store),
+                                  ),
                                 );
                               },
                               child: Container(
