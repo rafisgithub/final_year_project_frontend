@@ -28,17 +28,19 @@ final class Endpoints {
   static const String verifyOtp = "verify-otp/";
   static const String resetPassword = "reset-password/";
   static const String signout = "signout/";
-  
+
   // profile
   static const String profileGet = "profile-get/";
   static const String avatarUpdate = "avatar-update/";
-  
+  static const String switchRole = "switch-role/";
+  static const String sellerRegistration = "seller-registration/";
+
   // advertisements
   static const String advertisements = "advertisements/";
-  
+
   // stores
   static const String storeList = "store-list/";
-  
+
   // search
   static const String searchProductAndSeller = "search-product-and-seller/";
 }

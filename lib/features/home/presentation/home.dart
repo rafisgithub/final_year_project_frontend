@@ -6,6 +6,7 @@ import 'package:final_year_project_frontend/networks/store_service.dart';
 import 'package:final_year_project_frontend/networks/search_service.dart';
 import 'package:final_year_project_frontend/networks/endpoints.dart';
 import 'package:final_year_project_frontend/features/store/presentation/store_details_screen.dart';
+import 'package:final_year_project_frontend/features/sign_up/seller_registration_screen.dart';
 import 'package:final_year_project_frontend/helpers/all_routes.dart';
 import 'package:final_year_project_frontend/constants/app_constants.dart';
 import 'package:flutter/material.dart';
@@ -23,59 +24,59 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   // Create a GlobalKey to access the ScaffoldState
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  
+
   Map<String, dynamic>? _profileData;
   bool _isLoadingProfile = true;
   bool _isUpdatingAvatar = false;
   String _currentLanguage = 'en';
   String _searchType = 'product'; // 'product' or 'shop'
-  
+
   final TextEditingController _searchController = TextEditingController();
-  
+
   // Banner data from API
   List<Map<String, dynamic>> _banners = [];
   bool _isLoadingBanners = true;
-  
+
   // Stores data from API
   List<Map<String, dynamic>> _stores = [];
   bool _isLoadingStores = true;
-  
+
   // Search results
   List<Map<String, dynamic>> _searchResults = [];
   bool _isSearching = false;
   bool _showSearchResults = false;
-  
+
   final List<Map<String, dynamic>> _categories = [
     {
       'id': 0,
       'nameEn': 'ALL',
       'nameBn': 'সব',
       'icon': Icons.grid_view,
-      'color': AppColors.button
+      'color': AppColors.button,
     },
     {
       'id': 1,
       'nameEn': 'Seeds',
       'nameBn': 'বীজ',
       'icon': Icons.eco,
-      'color': Color(0xFF8BC34A)
+      'color': Color(0xFF8BC34A),
     },
     {
       'id': 2,
       'nameBn': 'সার',
       'nameEn': 'Fertilizer',
       'icon': Icons.local_florist,
-      'color': Color(0xFF795548)
+      'color': Color(0xFF795548),
     },
     {
       'id': 3,
       'nameEn': 'Pesticide',
       'nameBn': 'কীটনাশক',
       'icon': Icons.bug_report,
-      'color': Color(0xFF009688)
+      'color': Color(0xFF009688),
     },
   ];
-  
+
   int _currentBannerIndex = 0;
   int _selectedCategoryId = 0; // 0 means ALL
 
@@ -112,7 +113,9 @@ class _HomeScreenState extends State<HomeScreen> {
         setState(() {
           _isSearching = false;
           if (result['success']) {
-            _searchResults = List<Map<String, dynamic>>.from(result['data'] ?? []);
+            _searchResults = List<Map<String, dynamic>>.from(
+              result['data'] ?? [],
+            );
           } else {
             _searchResults = [];
             ScaffoldMessenger.of(context).showSnackBar(
@@ -130,7 +133,7 @@ class _HomeScreenState extends State<HomeScreen> {
           _isSearching = false;
           _searchResults = [];
         });
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Search error: ${e.toString()}'),
@@ -181,7 +184,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     return Container(
                       height: 120.h,
                       color: Colors.grey[200],
-                      child: Icon(Icons.image_not_supported, size: 40.sp, color: Colors.grey),
+                      child: Icon(
+                        Icons.image_not_supported,
+                        size: 40.sp,
+                        color: Colors.grey,
+                      ),
                     );
                   },
                 ),
@@ -264,95 +271,99 @@ class _HomeScreenState extends State<HomeScreen> {
             margin: EdgeInsets.only(bottom: 12.h),
             padding: EdgeInsets.all(12.w),
             decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12.r),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 8,
-                offset: Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Store owner avatar
-              CircleAvatar(
-                radius: 30.r,
-                backgroundColor: AppColors.button.withOpacity(0.1),
-                backgroundImage: store['user']?['avatar'] != null
-                    ? NetworkImage('${imageUrl}${store['user']['avatar']}')
-                    : null,
-                child: store['user']?['avatar'] == null
-                    ? Icon(Icons.store, size: 30.sp, color: AppColors.button)
-                    : null,
-              ),
-              SizedBox(width: 12.w),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      store['store_name'] ?? '',
-                      style: TextStyle(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12.r),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 8,
+                  offset: Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Store owner avatar
+                CircleAvatar(
+                  radius: 30.r,
+                  backgroundColor: AppColors.button.withOpacity(0.1),
+                  backgroundImage: store['user']?['avatar'] != null
+                      ? NetworkImage('${imageUrl}${store['user']['avatar']}')
+                      : null,
+                  child: store['user']?['avatar'] == null
+                      ? Icon(Icons.store, size: 30.sp, color: AppColors.button)
+                      : null,
+                ),
+                SizedBox(width: 12.w),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        store['store_name'] ?? '',
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 4.h),
-                    Text(
-                      store['user']?['name'] ?? '',
-                      style: TextStyle(
-                        fontSize: 13.sp,
-                        color: Colors.grey[600],
+                      SizedBox(height: 4.h),
+                      Text(
+                        store['user']?['name'] ?? '',
+                        style: TextStyle(
+                          fontSize: 13.sp,
+                          color: Colors.grey[600],
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 4.h),
-                    Row(
-                      children: [
-                        Icon(Icons.location_on, size: 14.sp, color: Colors.grey),
-                        SizedBox(width: 4.w),
-                        Expanded(
-                          child: Text(
-                            store['store_address'] ?? '',
+                      SizedBox(height: 4.h),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.location_on,
+                            size: 14.sp,
+                            color: Colors.grey,
+                          ),
+                          SizedBox(width: 4.w),
+                          Expanded(
+                            child: Text(
+                              store['store_address'] ?? '',
+                              style: TextStyle(
+                                fontSize: 12.sp,
+                                color: Colors.grey[600],
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 4.h),
+                      Row(
+                        children: [
+                          Icon(Icons.phone, size: 14.sp, color: Colors.grey),
+                          SizedBox(width: 4.w),
+                          Text(
+                            store['store_contact_number'] ?? '',
                             style: TextStyle(
                               fontSize: 12.sp,
                               color: Colors.grey[600],
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
                           ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 4.h),
-                    Row(
-                      children: [
-                        Icon(Icons.phone, size: 14.sp, color: Colors.grey),
-                        SizedBox(width: 4.w),
-                        Text(
-                          store['store_contact_number'] ?? '',
-                          style: TextStyle(
-                            fontSize: 12.sp,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              Icon(Icons.arrow_forward_ios, size: 16.sp, color: Colors.grey),
-            ],
-          ),
+                Icon(Icons.arrow_forward_ios, size: 16.sp, color: Colors.grey),
+              ],
+            ),
           ),
         );
       },
     );
   }
-  
+
   Future<void> _loadBanners() async {
     final result = await AdvertisementService.getAdvertisements();
     if (mounted) {
@@ -364,7 +375,7 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     }
   }
-  
+
   Future<void> _loadStores() async {
     final result = await StoreService.getStoreList();
     if (mounted) {
@@ -376,7 +387,7 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     }
   }
-  
+
   Future<void> _loadLanguage() async {
     final language = GetStorage().read(kKeyLanguage) ?? 'en';
     if (mounted) {
@@ -385,11 +396,11 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     }
   }
-  
+
   String _translate(String en, String bn) {
     return _currentLanguage == 'bn' ? bn : en;
   }
-  
+
   @override
   void dispose() {
     _searchController.dispose();
@@ -411,7 +422,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _updateAvatar() async {
     try {
       final ImagePicker picker = ImagePicker();
-      
+
       // Show image source selection dialog
       final ImageSource? source = await showDialog<ImageSource>(
         context: context,
@@ -452,9 +463,7 @@ class _HomeScreenState extends State<HomeScreen> {
       });
 
       // Upload avatar
-      final result = await ProfileService.updateAvatar(
-        avatarPath: image.path,
-      );
+      final result = await ProfileService.updateAvatar(avatarPath: image.path);
 
       if (mounted) {
         setState(() {
@@ -464,7 +473,7 @@ class _HomeScreenState extends State<HomeScreen> {
         if (result['success']) {
           // Reload profile to get updated avatar
           await _loadProfile();
-          
+
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(result['message'] ?? 'Avatar updated successfully'),
@@ -485,7 +494,7 @@ class _HomeScreenState extends State<HomeScreen> {
         setState(() {
           _isUpdatingAvatar = false;
         });
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error: ${e.toString()}'),
@@ -499,22 +508,18 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _scaffoldKey,  // Assign the key to the Scaffold
+      key: _scaffoldKey, // Assign the key to the Scaffold
       drawer: SizedBox(
         width: 250,
         child: Drawer(
           child: ListView(
             padding: EdgeInsets.zero,
-            children:  <Widget>[
+            children: <Widget>[
               DrawerHeader(
-                decoration: BoxDecoration(
-                  color: AppColors.button,
-                ),
+                decoration: BoxDecoration(color: AppColors.button),
                 child: _isLoadingProfile
                     ? Center(
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                        ),
+                        child: CircularProgressIndicator(color: Colors.white),
                       )
                     : Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -528,8 +533,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                 CircleAvatar(
                                   radius: 30.r,
                                   backgroundColor: Colors.white,
-                                  backgroundImage: _profileData?['avatar'] != null
-                                      ? NetworkImage('${imageUrl}${_profileData!['avatar']}')
+                                  backgroundImage:
+                                      _profileData?['avatar'] != null
+                                      ? NetworkImage(
+                                          '${imageUrl}${_profileData!['avatar']}',
+                                        )
                                       : null,
                                   child: _profileData?['avatar'] == null
                                       ? Icon(
@@ -543,13 +551,18 @@ class _HomeScreenState extends State<HomeScreen> {
                                   Positioned.fill(
                                     child: CircleAvatar(
                                       radius: 30.r,
-                                      backgroundColor: Colors.black.withOpacity(0.5),
+                                      backgroundColor: Colors.black.withOpacity(
+                                        0.5,
+                                      ),
                                       child: SizedBox(
                                         width: 24.w,
                                         height: 24.h,
                                         child: CircularProgressIndicator(
                                           strokeWidth: 2,
-                                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                                Colors.white,
+                                              ),
                                         ),
                                       ),
                                     ),
@@ -604,16 +617,15 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
               ),
 
-            
               ListTile(
                 leading: Icon(Icons.swap_horiz, color: AppColors.button),
                 title: Text('Switch Role'),
                 onTap: () async {
                   Navigator.pop(context);
-                  
+
                   // Get current role from storage
-                  final currentRole = GetStorage().read(kKeyRole) ?? 'Customer';
-                  
+                  final currentRole = GetStorage().read(kKeyRole) ?? 'customer';
+
                   // Show role selection dialog
                   final selectedRole = await showDialog<String>(
                     context: context,
@@ -647,7 +659,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             SizedBox(height: 24.h),
                             // Customer Option
                             InkWell(
-                              onTap: () => Navigator.pop(context, 'Customer'),
+                              onTap: () => Navigator.pop(context, 'customer'),
                               borderRadius: BorderRadius.circular(16.r),
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 200),
@@ -656,20 +668,24 @@ class _HomeScreenState extends State<HomeScreen> {
                                   vertical: 20.h,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: currentRole == 'Customer'
+                                  color: currentRole == 'customer'
                                       ? AppColors.button.withValues(alpha: 0.1)
                                       : Colors.white,
                                   borderRadius: BorderRadius.circular(16.r),
                                   border: Border.all(
-                                    color: currentRole == 'Customer'
+                                    color: currentRole == 'customer'
                                         ? AppColors.button
                                         : Colors.grey.withValues(alpha: 0.3),
-                                    width: currentRole == 'Customer' ? 2.w : 1.w,
+                                    width: currentRole == 'customer'
+                                        ? 2.w
+                                        : 1.w,
                                   ),
-                                  boxShadow: currentRole == 'Customer'
+                                  boxShadow: currentRole == 'customer'
                                       ? [
                                           BoxShadow(
-                                            color: AppColors.button.withValues(alpha: 0.2),
+                                            color: AppColors.button.withValues(
+                                              alpha: 0.2,
+                                            ),
                                             blurRadius: 8,
                                             offset: const Offset(0, 4),
                                           ),
@@ -682,14 +698,20 @@ class _HomeScreenState extends State<HomeScreen> {
                                       width: 48.w,
                                       height: 48.w,
                                       decoration: BoxDecoration(
-                                        color: currentRole == 'Customer'
-                                            ? AppColors.button.withValues(alpha: 0.15)
-                                            : Colors.grey.withValues(alpha: 0.1),
-                                        borderRadius: BorderRadius.circular(12.r),
+                                        color: currentRole == 'customer'
+                                            ? AppColors.button.withValues(
+                                                alpha: 0.15,
+                                              )
+                                            : Colors.grey.withValues(
+                                                alpha: 0.1,
+                                              ),
+                                        borderRadius: BorderRadius.circular(
+                                          12.r,
+                                        ),
                                       ),
                                       child: Icon(
                                         Icons.person_outline,
-                                        color: currentRole == 'Customer'
+                                        color: currentRole == 'customer'
                                             ? AppColors.button
                                             : Colors.grey[600],
                                         size: 24.sp,
@@ -698,14 +720,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                     SizedBox(width: 16.w),
                                     Expanded(
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             'Customer',
                                             style: TextStyle(
                                               fontSize: 16.sp,
                                               fontWeight: FontWeight.w600,
-                                              color: currentRole == 'Customer'
+                                              color: currentRole == 'customer'
                                                   ? AppColors.button
                                                   : Colors.black87,
                                             ),
@@ -723,8 +746,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                       ),
                                     ),
                                     AnimatedOpacity(
-                                      duration: const Duration(milliseconds: 200),
-                                      opacity: currentRole == 'Customer' ? 1.0 : 0.0,
+                                      duration: const Duration(
+                                        milliseconds: 200,
+                                      ),
+                                      opacity: currentRole == 'customer'
+                                          ? 1.0
+                                          : 0.0,
                                       child: Container(
                                         width: 28.w,
                                         height: 28.w,
@@ -746,7 +773,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             SizedBox(height: 16.h),
                             // Seller Option
                             InkWell(
-                              onTap: () => Navigator.pop(context, 'Seller'),
+                              onTap: () => Navigator.pop(context, 'seller'),
                               borderRadius: BorderRadius.circular(16.r),
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 200),
@@ -755,20 +782,22 @@ class _HomeScreenState extends State<HomeScreen> {
                                   vertical: 20.h,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: currentRole == 'Seller'
+                                  color: currentRole == 'seller'
                                       ? AppColors.button.withValues(alpha: 0.1)
                                       : Colors.white,
                                   borderRadius: BorderRadius.circular(16.r),
                                   border: Border.all(
-                                    color: currentRole == 'Seller'
+                                    color: currentRole == 'seller'
                                         ? AppColors.button
                                         : Colors.grey.withValues(alpha: 0.3),
-                                    width: currentRole == 'Seller' ? 2.w : 1.w,
+                                    width: currentRole == 'seller' ? 2.w : 1.w,
                                   ),
-                                  boxShadow: currentRole == 'Seller'
+                                  boxShadow: currentRole == 'seller'
                                       ? [
                                           BoxShadow(
-                                            color: AppColors.button.withValues(alpha: 0.2),
+                                            color: AppColors.button.withValues(
+                                              alpha: 0.2,
+                                            ),
                                             blurRadius: 8,
                                             offset: const Offset(0, 4),
                                           ),
@@ -781,14 +810,20 @@ class _HomeScreenState extends State<HomeScreen> {
                                       width: 48.w,
                                       height: 48.w,
                                       decoration: BoxDecoration(
-                                        color: currentRole == 'Seller'
-                                            ? AppColors.button.withValues(alpha: 0.15)
-                                            : Colors.grey.withValues(alpha: 0.1),
-                                        borderRadius: BorderRadius.circular(12.r),
+                                        color: currentRole == 'seller'
+                                            ? AppColors.button.withValues(
+                                                alpha: 0.15,
+                                              )
+                                            : Colors.grey.withValues(
+                                                alpha: 0.1,
+                                              ),
+                                        borderRadius: BorderRadius.circular(
+                                          12.r,
+                                        ),
                                       ),
                                       child: Icon(
                                         Icons.storefront_outlined,
-                                        color: currentRole == 'Seller'
+                                        color: currentRole == 'seller'
                                             ? AppColors.button
                                             : Colors.grey[600],
                                         size: 24.sp,
@@ -797,14 +832,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                     SizedBox(width: 16.w),
                                     Expanded(
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             'Seller',
                                             style: TextStyle(
                                               fontSize: 16.sp,
                                               fontWeight: FontWeight.w600,
-                                              color: currentRole == 'Seller'
+                                              color: currentRole == 'seller'
                                                   ? AppColors.button
                                                   : Colors.black87,
                                             ),
@@ -822,8 +858,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                       ),
                                     ),
                                     AnimatedOpacity(
-                                      duration: const Duration(milliseconds: 200),
-                                      opacity: currentRole == 'Seller' ? 1.0 : 0.0,
+                                      duration: const Duration(
+                                        milliseconds: 200,
+                                      ),
+                                      opacity: currentRole == 'seller'
+                                          ? 1.0
+                                          : 0.0,
                                       child: Container(
                                         width: 28.w,
                                         height: 28.w,
@@ -849,25 +889,68 @@ class _HomeScreenState extends State<HomeScreen> {
                   );
 
                   if (selectedRole != null && selectedRole != currentRole) {
-                    // Save to local storage
-                    await GetStorage().write(kKeyRole, selectedRole);
-                    
-                    // Update profile data
-                    if (mounted) {
-                      setState(() {
-                        if (_profileData != null) {
-                          _profileData!['role'] = selectedRole;
-                        }
-                      });
-                      
-                      // Show confirmation
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Role switched to $selectedRole'),
-                          backgroundColor: AppColors.button,
-                          duration: Duration(seconds: 2),
+                    // Check if switching to seller and is_seller is false
+                    if (selectedRole == 'seller' &&
+                        _profileData?['is_seller'] != true) {
+                      // Navigate to seller registration screen
+                      final result = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => SellerRegistrationScreen(),
                         ),
                       );
+
+                      // If registration was successful, reload profile
+                      if (result == true) {
+                        await _loadProfile();
+
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Successfully switched to seller role!',
+                              ),
+                              backgroundColor: AppColors.button,
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
+                        }
+                      }
+                    } else {
+                      // User is already a seller or switching to customer, call switch role API
+                      final result = await ProfileService.switchRole(
+                        role: selectedRole,
+                      );
+
+                      if (result['success']) {
+                        // Save to local storage
+                        await GetStorage().write(kKeyRole, selectedRole);
+
+                        // Reload profile to get updated data
+                        await _loadProfile();
+
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Role switched to $selectedRole'),
+                              backgroundColor: AppColors.button,
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
+                        }
+                      } else {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                result['message'] ?? 'Failed to switch role',
+                              ),
+                              backgroundColor: Colors.red,
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
+                        }
+                      }
                     }
                   }
                 },
@@ -877,7 +960,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 title: Text('Change Language'),
                 onTap: () async {
                   Navigator.pop(context);
-                  
+
                   // Show language selection dialog
                   final selectedLanguage = await showDialog<String>(
                     context: context,
@@ -933,7 +1016,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                   boxShadow: _currentLanguage == 'en'
                                       ? [
                                           BoxShadow(
-                                            color: AppColors.button.withValues(alpha: 0.2),
+                                            color: AppColors.button.withValues(
+                                              alpha: 0.2,
+                                            ),
                                             blurRadius: 8,
                                             offset: const Offset(0, 4),
                                           ),
@@ -947,9 +1032,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                       height: 48.w,
                                       decoration: BoxDecoration(
                                         color: _currentLanguage == 'en'
-                                            ? AppColors.button.withValues(alpha: 0.1)
-                                            : Colors.grey.withValues(alpha: 0.1),
-                                        borderRadius: BorderRadius.circular(12.r),
+                                            ? AppColors.button.withValues(
+                                                alpha: 0.1,
+                                              )
+                                            : Colors.grey.withValues(
+                                                alpha: 0.1,
+                                              ),
+                                        borderRadius: BorderRadius.circular(
+                                          12.r,
+                                        ),
                                       ),
                                       child: Center(
                                         child: Text(
@@ -961,7 +1052,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                     SizedBox(width: 16.w),
                                     Expanded(
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             'English',
@@ -986,8 +1078,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                       ),
                                     ),
                                     AnimatedOpacity(
-                                      duration: const Duration(milliseconds: 200),
-                                      opacity: _currentLanguage == 'en' ? 1.0 : 0.0,
+                                      duration: const Duration(
+                                        milliseconds: 200,
+                                      ),
+                                      opacity: _currentLanguage == 'en'
+                                          ? 1.0
+                                          : 0.0,
                                       child: Container(
                                         width: 28.w,
                                         height: 28.w,
@@ -1031,7 +1127,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                   boxShadow: _currentLanguage == 'bn'
                                       ? [
                                           BoxShadow(
-                                            color: AppColors.button.withValues(alpha: 0.2),
+                                            color: AppColors.button.withValues(
+                                              alpha: 0.2,
+                                            ),
                                             blurRadius: 8,
                                             offset: const Offset(0, 4),
                                           ),
@@ -1045,9 +1143,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                       height: 48.w,
                                       decoration: BoxDecoration(
                                         color: _currentLanguage == 'bn'
-                                            ? AppColors.button.withValues(alpha: 0.1)
-                                            : Colors.grey.withValues(alpha: 0.1),
-                                        borderRadius: BorderRadius.circular(12.r),
+                                            ? AppColors.button.withValues(
+                                                alpha: 0.1,
+                                              )
+                                            : Colors.grey.withValues(
+                                                alpha: 0.1,
+                                              ),
+                                        borderRadius: BorderRadius.circular(
+                                          12.r,
+                                        ),
                                       ),
                                       child: Center(
                                         child: Text(
@@ -1059,7 +1163,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                     SizedBox(width: 16.w),
                                     Expanded(
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             'Bangla',
@@ -1084,8 +1189,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                       ),
                                     ),
                                     AnimatedOpacity(
-                                      duration: const Duration(milliseconds: 200),
-                                      opacity: _currentLanguage == 'bn' ? 1.0 : 0.0,
+                                      duration: const Duration(
+                                        milliseconds: 200,
+                                      ),
+                                      opacity: _currentLanguage == 'bn'
+                                          ? 1.0
+                                          : 0.0,
                                       child: Container(
                                         width: 28.w,
                                         height: 28.w,
@@ -1110,22 +1219,23 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   );
 
-                  if (selectedLanguage != null && selectedLanguage != _currentLanguage) {
+                  if (selectedLanguage != null &&
+                      selectedLanguage != _currentLanguage) {
                     // Save to local storage
                     await GetStorage().write(kKeyLanguage, selectedLanguage);
-                    
+
                     // Update UI
                     setState(() {
                       _currentLanguage = selectedLanguage;
                     });
-                    
+
                     // Show confirmation
                     if (mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
-                            selectedLanguage == 'en' 
-                                ? 'Language changed to English' 
+                            selectedLanguage == 'en'
+                                ? 'Language changed to English'
                                 : 'ভাষা বাংলায় পরিবর্তিত হয়েছে',
                           ),
                           backgroundColor: AppColors.button,
@@ -1158,7 +1268,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         TextButton(
                           onPressed: () => Navigator.pop(context, true),
-                          child: Text('Logout', style: TextStyle(color: Colors.red)),
+                          child: Text(
+                            'Logout',
+                            style: TextStyle(color: Colors.red),
+                          ),
                         ),
                       ],
                     ),
@@ -1169,9 +1282,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     showDialog(
                       context: context,
                       barrierDismissible: false,
-                      builder: (context) => Center(
-                        child: CircularProgressIndicator(),
-                      ),
+                      builder: (context) =>
+                          Center(child: CircularProgressIndicator()),
                     );
 
                     // Call sign out API
@@ -1292,10 +1404,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     color: Colors.red,
                     shape: BoxShape.circle,
                   ),
-                  constraints: BoxConstraints(
-                    minWidth: 16,
-                    minHeight: 16,
-                  ),
+                  constraints: BoxConstraints(minWidth: 16, minHeight: 16),
                   child: Text(
                     '3',
                     style: TextStyle(
@@ -1335,10 +1444,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     color: Colors.red,
                     shape: BoxShape.circle,
                   ),
-                  constraints: BoxConstraints(
-                    minWidth: 16,
-                    minHeight: 16,
-                  ),
+                  constraints: BoxConstraints(minWidth: 16, minHeight: 16),
                   child: Text(
                     '5',
                     style: TextStyle(
@@ -1370,7 +1476,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       : _translate('Search Store...', 'দোকান খুঁজুন...'),
                   hintStyle: TextStyle(color: Colors.grey[400]),
                   prefixIcon: Icon(
-                    _searchType == 'product' ? Icons.search : Icons.store_outlined,
+                    _searchType == 'product'
+                        ? Icons.search
+                        : Icons.store_outlined,
                     color: AppColors.button,
                   ),
                   suffixIcon: IconButton(
@@ -1399,7 +1507,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                                 SizedBox(height: 8.h),
                                 Text(
-                                  _translate('Select what you want to search', 'আপনি কি খুঁজতে চান তা নির্বাচন করুন'),
+                                  _translate(
+                                    'Select what you want to search',
+                                    'আপনি কি খুঁজতে চান তা নির্বাচন করুন',
+                                  ),
                                   style: TextStyle(
                                     fontSize: 14.sp,
                                     color: Colors.grey[600],
@@ -1409,7 +1520,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                 SizedBox(height: 24.h),
                                 // Products Option
                                 InkWell(
-                                  onTap: () => Navigator.pop(context, 'product'),
+                                  onTap: () =>
+                                      Navigator.pop(context, 'product'),
                                   borderRadius: BorderRadius.circular(16.r),
                                   child: AnimatedContainer(
                                     duration: const Duration(milliseconds: 200),
@@ -1419,19 +1531,26 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                     decoration: BoxDecoration(
                                       color: _searchType == 'product'
-                                          ? AppColors.button.withValues(alpha: 0.1)
+                                          ? AppColors.button.withValues(
+                                              alpha: 0.1,
+                                            )
                                           : Colors.white,
                                       borderRadius: BorderRadius.circular(16.r),
                                       border: Border.all(
                                         color: _searchType == 'product'
                                             ? AppColors.button
-                                            : Colors.grey.withValues(alpha: 0.3),
-                                        width: _searchType == 'product' ? 2.w : 1.w,
+                                            : Colors.grey.withValues(
+                                                alpha: 0.3,
+                                              ),
+                                        width: _searchType == 'product'
+                                            ? 2.w
+                                            : 1.w,
                                       ),
                                       boxShadow: _searchType == 'product'
                                           ? [
                                               BoxShadow(
-                                                color: AppColors.button.withValues(alpha: 0.2),
+                                                color: AppColors.button
+                                                    .withValues(alpha: 0.2),
                                                 blurRadius: 8,
                                                 offset: const Offset(0, 4),
                                               ),
@@ -1445,9 +1564,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                           height: 48.w,
                                           decoration: BoxDecoration(
                                             color: _searchType == 'product'
-                                                ? AppColors.button.withValues(alpha: 0.15)
-                                                : Colors.grey.withValues(alpha: 0.1),
-                                            borderRadius: BorderRadius.circular(12.r),
+                                                ? AppColors.button.withValues(
+                                                    alpha: 0.15,
+                                                  )
+                                                : Colors.grey.withValues(
+                                                    alpha: 0.1,
+                                                  ),
+                                            borderRadius: BorderRadius.circular(
+                                              12.r,
+                                            ),
                                           ),
                                           child: Icon(
                                             Icons.shopping_bag_outlined,
@@ -1460,21 +1585,26 @@ class _HomeScreenState extends State<HomeScreen> {
                                         SizedBox(width: 16.w),
                                         Expanded(
                                           child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             children: [
                                               Text(
                                                 _translate('Products', 'পণ্য'),
                                                 style: TextStyle(
                                                   fontSize: 16.sp,
                                                   fontWeight: FontWeight.w600,
-                                                  color: _searchType == 'product'
+                                                  color:
+                                                      _searchType == 'product'
                                                       ? AppColors.button
                                                       : Colors.black87,
                                                 ),
                                               ),
                                               SizedBox(height: 4.h),
                                               Text(
-                                                _translate('Search for products', 'পণ্য খুঁজুন'),
+                                                _translate(
+                                                  'Search for products',
+                                                  'পণ্য খুঁজুন',
+                                                ),
                                                 style: TextStyle(
                                                   fontSize: 14.sp,
                                                   fontWeight: FontWeight.w400,
@@ -1485,8 +1615,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                           ),
                                         ),
                                         AnimatedOpacity(
-                                          duration: const Duration(milliseconds: 200),
-                                          opacity: _searchType == 'product' ? 1.0 : 0.0,
+                                          duration: const Duration(
+                                            milliseconds: 200,
+                                          ),
+                                          opacity: _searchType == 'product'
+                                              ? 1.0
+                                              : 0.0,
                                           child: Container(
                                             width: 28.w,
                                             height: 28.w,
@@ -1518,19 +1652,26 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                     decoration: BoxDecoration(
                                       color: _searchType == 'store'
-                                          ? AppColors.button.withValues(alpha: 0.1)
+                                          ? AppColors.button.withValues(
+                                              alpha: 0.1,
+                                            )
                                           : Colors.white,
                                       borderRadius: BorderRadius.circular(16.r),
                                       border: Border.all(
                                         color: _searchType == 'store'
                                             ? AppColors.button
-                                            : Colors.grey.withValues(alpha: 0.3),
-                                        width: _searchType == 'store' ? 2.w : 1.w,
+                                            : Colors.grey.withValues(
+                                                alpha: 0.3,
+                                              ),
+                                        width: _searchType == 'store'
+                                            ? 2.w
+                                            : 1.w,
                                       ),
                                       boxShadow: _searchType == 'store'
                                           ? [
                                               BoxShadow(
-                                                color: AppColors.button.withValues(alpha: 0.2),
+                                                color: AppColors.button
+                                                    .withValues(alpha: 0.2),
                                                 blurRadius: 8,
                                                 offset: const Offset(0, 4),
                                               ),
@@ -1544,9 +1685,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                           height: 48.w,
                                           decoration: BoxDecoration(
                                             color: _searchType == 'shop'
-                                                ? AppColors.button.withValues(alpha: 0.15)
-                                                : Colors.grey.withValues(alpha: 0.1),
-                                            borderRadius: BorderRadius.circular(12.r),
+                                                ? AppColors.button.withValues(
+                                                    alpha: 0.15,
+                                                  )
+                                                : Colors.grey.withValues(
+                                                    alpha: 0.1,
+                                                  ),
+                                            borderRadius: BorderRadius.circular(
+                                              12.r,
+                                            ),
                                           ),
                                           child: Icon(
                                             Icons.store_outlined,
@@ -1559,7 +1706,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                         SizedBox(width: 16.w),
                                         Expanded(
                                           child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             children: [
                                               Text(
                                                 _translate('Store', 'দোকান'),
@@ -1573,7 +1721,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                               ),
                                               SizedBox(height: 4.h),
                                               Text(
-                                                _translate('Search for store', 'দোকান খুঁজুন'),
+                                                _translate(
+                                                  'Search for store',
+                                                  'দোকান খুঁজুন',
+                                                ),
                                                 style: TextStyle(
                                                   fontSize: 14.sp,
                                                   fontWeight: FontWeight.w400,
@@ -1584,8 +1735,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                           ),
                                         ),
                                         AnimatedOpacity(
-                                          duration: const Duration(milliseconds: 200),
-                                          opacity: _searchType == 'shop' ? 1.0 : 0.0,
+                                          duration: const Duration(
+                                            milliseconds: 200,
+                                          ),
+                                          opacity: _searchType == 'shop'
+                                              ? 1.0
+                                              : 0.0,
                                           child: Container(
                                             width: 28.w,
                                             height: 28.w,
@@ -1615,13 +1770,19 @@ class _HomeScreenState extends State<HomeScreen> {
                           _searchType = selectedType;
                           _searchController.clear();
                         });
-                        
+
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
                               selectedType == 'product'
-                                  ? _translate('Search mode: Products', 'অনুসন্ধান মোড: পণ্য')
-                                  : _translate('Search mode: Store', 'অনুসন্ধান মোড: দোকান'),
+                                  ? _translate(
+                                      'Search mode: Products',
+                                      'অনুসন্ধান মোড: পণ্য',
+                                    )
+                                  : _translate(
+                                      'Search mode: Store',
+                                      'অনুসন্ধান মোড: দোকান',
+                                    ),
                             ),
                             backgroundColor: AppColors.button,
                             duration: Duration(seconds: 2),
@@ -1636,7 +1797,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     borderRadius: BorderRadius.circular(12.r),
                     borderSide: BorderSide.none,
                   ),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 16.w,
+                    vertical: 14.h,
+                  ),
                 ),
                 onSubmitted: (value) {
                   _handleSearch(value);
@@ -1647,7 +1811,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 },
               ),
             ),
-            
+
             // Search Results Section
             if (_showSearchResults)
               Padding(
@@ -1660,8 +1824,14 @@ class _HomeScreenState extends State<HomeScreen> {
                       children: [
                         Text(
                           _searchType == 'product'
-                              ? _translate('Search Results - Products', 'অনুসন্ধান ফলাফল - পণ্য')
-                              : _translate('Search Results - Stores', 'অনুসন্ধান ফলাফল - দোকান'),
+                              ? _translate(
+                                  'Search Results - Products',
+                                  'অনুসন্ধান ফলাফল - পণ্য',
+                                )
+                              : _translate(
+                                  'Search Results - Stores',
+                                  'অনুসন্ধান ফলাফল - দোকান',
+                                ),
                           style: TextStyle(
                             fontSize: 18.sp,
                             fontWeight: FontWeight.bold,
@@ -1691,153 +1861,161 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           )
                         : _searchResults.isEmpty
-                            ? Center(
-                                child: Padding(
-                                  padding: EdgeInsets.all(24.h),
-                                  child: Text(
-                                    _translate('No results found', 'কোন ফলাফল পাওয়া যায়নি'),
-                                    style: TextStyle(
-                                      color: Colors.grey[600],
-                                      fontSize: 16.sp,
-                                    ),
-                                  ),
+                        ? Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(24.h),
+                              child: Text(
+                                _translate(
+                                  'No results found',
+                                  'কোন ফলাফল পাওয়া যায়নি',
                                 ),
-                              )
-                            : _searchType == 'product'
-                                ? _buildProductSearchResults()
-                                : _buildStoreSearchResults(),
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontSize: 16.sp,
+                                ),
+                              ),
+                            ),
+                          )
+                        : _searchType == 'product'
+                        ? _buildProductSearchResults()
+                        : _buildStoreSearchResults(),
                     SizedBox(height: 16.h),
                   ],
                 ),
               ),
-            
+
             // Banner Section
             SizedBox(
               height: 140.h,
               child: _isLoadingBanners
                   ? Center(
-                      child: CircularProgressIndicator(
-                        color: AppColors.button,
-                      ),
+                      child: CircularProgressIndicator(color: AppColors.button),
                     )
                   : _banners.isEmpty
-                      ? Container(
+                  ? Container(
+                      margin: EdgeInsets.symmetric(horizontal: 16.w),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            AppColors.button,
+                            AppColors.button.withOpacity(0.7),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(16.r),
+                      ),
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.image_not_supported,
+                              size: 48.sp,
+                              color: Colors.white,
+                            ),
+                            SizedBox(height: 12.h),
+                            Text(
+                              'No advertisements available',
+                              style: TextStyle(
+                                fontSize: 16.sp,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  : PageView.builder(
+                      itemCount: _banners.length,
+                      onPageChanged: (index) {
+                        setState(() {
+                          _currentBannerIndex = index;
+                        });
+                      },
+                      itemBuilder: (context, index) {
+                        final banner = _banners[index];
+                        return Container(
                           margin: EdgeInsets.symmetric(horizontal: 16.w),
                           decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                AppColors.button,
-                                AppColors.button.withOpacity(0.7),
-                              ],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
                             borderRadius: BorderRadius.circular(16.r),
-                          ),
-                          child: Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.image_not_supported,
-                                  size: 48.sp,
-                                  color: Colors.white,
-                                ),
-                                SizedBox(height: 12.h),
-                                Text(
-                                  'No advertisements available',
-                                  style: TextStyle(
-                                    fontSize: 16.sp,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        )
-                      : PageView.builder(
-                          itemCount: _banners.length,
-                          onPageChanged: (index) {
-                            setState(() {
-                              _currentBannerIndex = index;
-                            });
-                          },
-                          itemBuilder: (context, index) {
-                            final banner = _banners[index];
-                            return Container(
-                              margin: EdgeInsets.symmetric(horizontal: 16.w),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(16.r),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.1),
-                                    blurRadius: 8,
-                                    offset: Offset(0, 4),
-                                  ),
-                                ],
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.1),
+                                blurRadius: 8,
+                                offset: Offset(0, 4),
                               ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(16.r),
-                                child: Image.network(
-                                  '${imageUrl}${banner['banner_image']}',
-                                  fit: BoxFit.cover,
-                                  width: double.infinity,
-                                  loadingBuilder: (context, child, loadingProgress) {
+                            ],
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(16.r),
+                            child: Image.network(
+                              '${imageUrl}${banner['banner_image']}',
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              loadingBuilder:
+                                  (context, child, loadingProgress) {
                                     if (loadingProgress == null) return child;
                                     return Container(
                                       color: AppColors.button.withOpacity(0.1),
                                       child: Center(
                                         child: CircularProgressIndicator(
-                                          value: loadingProgress.expectedTotalBytes != null
-                                              ? loadingProgress.cumulativeBytesLoaded /
-                                                  loadingProgress.expectedTotalBytes!
+                                          value:
+                                              loadingProgress
+                                                      .expectedTotalBytes !=
+                                                  null
+                                              ? loadingProgress
+                                                        .cumulativeBytesLoaded /
+                                                    loadingProgress
+                                                        .expectedTotalBytes!
                                               : null,
                                           color: AppColors.button,
                                         ),
                                       ),
                                     );
                                   },
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Container(
-                                      decoration: BoxDecoration(
-                                        gradient: LinearGradient(
-                                          colors: [
-                                            AppColors.button,
-                                            AppColors.c28B446,
-                                          ],
-                                          begin: Alignment.topLeft,
-                                          end: Alignment.bottomRight,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Container(
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        AppColors.button,
+                                        AppColors.c28B446,
+                                      ],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    ),
+                                  ),
+                                  child: Center(
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.broken_image,
+                                          size: 48.sp,
+                                          color: Colors.white,
                                         ),
-                                      ),
-                                      child: Center(
-                                        child: Column(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: [
-                                            Icon(
-                                              Icons.broken_image,
-                                              size: 48.sp,
-                                              color: Colors.white,
-                                            ),
-                                            SizedBox(height: 8.h),
-                                            Text(
-                                              'Image not available',
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 14.sp,
-                                              ),
-                                            ),
-                                          ],
+                                        SizedBox(height: 8.h),
+                                        Text(
+                                          'Image not available',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 14.sp,
+                                          ),
                                         ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                            );
-                          },
-                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        );
+                      },
+                    ),
             ),
-            
+
             // Banner Indicators
             SizedBox(height: 12.h),
             Row(
@@ -1849,15 +2027,17 @@ class _HomeScreenState extends State<HomeScreen> {
                   width: _currentBannerIndex == index ? 24.w : 8.w,
                   height: 8.h,
                   decoration: BoxDecoration(
-                    color: _currentBannerIndex == index ? AppColors.button : Colors.grey[300],
+                    color: _currentBannerIndex == index
+                        ? AppColors.button
+                        : Colors.grey[300],
                     borderRadius: BorderRadius.circular(4.r),
                   ),
                 ),
               ),
             ),
-            
+
             SizedBox(height: 24.h),
-            
+
             // Store Section
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 16.w),
@@ -1875,7 +2055,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   TextButton(
                     onPressed: () {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(_translate('View all stores coming soon', 'সব দোকান শীঘ্রই আসছে'))),
+                        SnackBar(
+                          content: Text(
+                            _translate(
+                              'View all stores coming soon',
+                              'সব দোকান শীঘ্রই আসছে',
+                            ),
+                          ),
+                        ),
                       );
                     },
                     child: Text(
@@ -1886,127 +2073,145 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
             ),
-            
+
             SizedBox(height: 8.h),
-            
+
             SizedBox(
               height: 110.h,
               child: _isLoadingStores
                   ? Center(
-                      child: CircularProgressIndicator(
-                        color: AppColors.button,
-                      ),
+                      child: CircularProgressIndicator(color: AppColors.button),
                     )
                   : _stores.isEmpty
-                      ? Center(
-                          child: Text(
-                            _translate('No stores available', 'কোন দোকান উপলব্ধ নেই'),
-                            style: TextStyle(
-                              color: Colors.grey[600],
-                              fontSize: 14.sp,
-                            ),
-                          ),
-                        )
-                      : ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          padding: EdgeInsets.symmetric(horizontal: 12.w),
-                          itemCount: _stores.length,
-                          itemBuilder: (context, index) {
-                            final store = _stores[index];
-                            // Only show stores that have a store_name (are sellers)
-                            if (store['store_name'] == null || store['store_name'].toString().isEmpty) {
-                              return SizedBox.shrink();
-                            }
-                            return GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => StoreDetailsScreen(storeData: store),
-                                  ),
-                                );
-                              },
-                              child: Container(
-                                width: 120.w,
-                                margin: EdgeInsets.symmetric(horizontal: 4.w),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(12.r),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.08),
-                                      blurRadius: 8,
-                                      offset: Offset(0, 2),
-                                    ),
-                                  ],
-                                ),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    CircleAvatar(
-                                      radius: 30.r,
-                                      backgroundColor: AppColors.button.withValues(alpha: 0.1),
-                                      backgroundImage: store['avatar'] != null && store['avatar'].toString().isNotEmpty
-                                          ? NetworkImage('${imageUrl}${store['avatar']}')
-                                          : null,
-                                      child: store['avatar'] == null || store['avatar'].toString().isEmpty
-                                          ? Icon(
-                                              Icons.store,
-                                              size: 30.sp,
-                                              color: AppColors.button,
-                                            )
-                                          : null,
-                                    ),
-                                    SizedBox(height: 6.h),
-                                    Padding(
-                                      padding: EdgeInsets.symmetric(horizontal: 6.w),
-                                      child: Text(
-                                        store['name'] ?? 'Store',
-                                        style: TextStyle(
-                                          fontSize: 12.sp,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.black87,
-                                        ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ),
-                                    SizedBox(height: 2.h),
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Icon(Icons.star, color: Colors.amber, size: 12.sp),
-                                        SizedBox(width: 2.w),
-                                        Text(
-                                          (store['avg_rating'] ?? 0.0).toString(),
-                                          style: TextStyle(
-                                            fontSize: 11.sp,
-                                            color: Colors.grey[600],
-                                          ),
-                                        ),
-                                        if (store['total_reviews'] != null && store['total_reviews'] > 0) ...[
-                                          SizedBox(width: 2.w),
-                                          Text(
-                                            '(${store['total_reviews']})',
-                                            style: TextStyle(
-                                              fontSize: 10.sp,
-                                              color: Colors.grey[500],
-                                            ),
-                                          ),
-                                        ],
-                                      ],
-                                    ),
-                                  ],
-                                ),
+                  ? Center(
+                      child: Text(
+                        _translate(
+                          'No stores available',
+                          'কোন দোকান উপলব্ধ নেই',
+                        ),
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 14.sp,
+                        ),
+                      ),
+                    )
+                  : ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      padding: EdgeInsets.symmetric(horizontal: 12.w),
+                      itemCount: _stores.length,
+                      itemBuilder: (context, index) {
+                        final store = _stores[index];
+                        // Only show stores that have a store_name (are sellers)
+                        if (store['store_name'] == null ||
+                            store['store_name'].toString().isEmpty) {
+                          return SizedBox.shrink();
+                        }
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    StoreDetailsScreen(storeData: store),
                               ),
                             );
                           },
-                        ),
+                          child: Container(
+                            width: 120.w,
+                            margin: EdgeInsets.symmetric(horizontal: 4.w),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(12.r),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.08),
+                                  blurRadius: 8,
+                                  offset: Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                CircleAvatar(
+                                  radius: 30.r,
+                                  backgroundColor: AppColors.button.withValues(
+                                    alpha: 0.1,
+                                  ),
+                                  backgroundImage:
+                                      store['avatar'] != null &&
+                                          store['avatar'].toString().isNotEmpty
+                                      ? NetworkImage(
+                                          '${imageUrl}${store['avatar']}',
+                                        )
+                                      : null,
+                                  child:
+                                      store['avatar'] == null ||
+                                          store['avatar'].toString().isEmpty
+                                      ? Icon(
+                                          Icons.store,
+                                          size: 30.sp,
+                                          color: AppColors.button,
+                                        )
+                                      : null,
+                                ),
+                                SizedBox(height: 6.h),
+                                Padding(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 6.w,
+                                  ),
+                                  child: Text(
+                                    store['name'] ?? 'Store',
+                                    style: TextStyle(
+                                      fontSize: 12.sp,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black87,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                                SizedBox(height: 2.h),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.star,
+                                      color: Colors.amber,
+                                      size: 12.sp,
+                                    ),
+                                    SizedBox(width: 2.w),
+                                    Text(
+                                      (store['avg_rating'] ?? 0.0).toString(),
+                                      style: TextStyle(
+                                        fontSize: 11.sp,
+                                        color: Colors.grey[600],
+                                      ),
+                                    ),
+                                    if (store['total_reviews'] != null &&
+                                        store['total_reviews'] > 0) ...[
+                                      SizedBox(width: 2.w),
+                                      Text(
+                                        '(${store['total_reviews']})',
+                                        style: TextStyle(
+                                          fontSize: 10.sp,
+                                          color: Colors.grey[500],
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
             ),
-            
+
             SizedBox(height: 24.h),
-            
+
             // Categories Section
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 16.w),
@@ -2019,9 +2224,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
-            
+
             SizedBox(height: 8.h),
-            
+
             SizedBox(
               height: 90.h,
               child: ListView.builder(
@@ -2030,9 +2235,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 itemCount: _categories.length,
                 itemBuilder: (context, index) {
                   final category = _categories[index];
-                  final categoryName = _translate(category['nameEn'], category['nameBn']);
+                  final categoryName = _translate(
+                    category['nameEn'],
+                    category['nameBn'],
+                  );
                   final isSelected = _selectedCategoryId == category['id'];
-                  
+
                   return GestureDetector(
                     onTap: () {
                       setState(() {
@@ -2041,7 +2249,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       // Filter products by category
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('${_translate('Filtering by', 'ফিল্টার করা হচ্ছে')} $categoryName...'),
+                          content: Text(
+                            '${_translate('Filtering by', 'ফিল্টার করা হচ্ছে')} $categoryName...',
+                          ),
                           duration: Duration(seconds: 1),
                         ),
                       );
@@ -2053,7 +2263,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         color: isSelected ? category['color'] : Colors.white,
                         borderRadius: BorderRadius.circular(12.r),
                         border: Border.all(
-                          color: isSelected ? category['color'] : Colors.grey[300]!,
+                          color: isSelected
+                              ? category['color']
+                              : Colors.grey[300]!,
                           width: isSelected ? 2 : 1,
                         ),
                         boxShadow: [
@@ -2070,7 +2282,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           Icon(
                             category['icon'],
                             size: 28.sp,
-                            color: isSelected ? Colors.white : category['color'],
+                            color: isSelected
+                                ? Colors.white
+                                : category['color'],
                           ),
                           SizedBox(height: 6.h),
                           Text(
@@ -2091,9 +2305,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 },
               ),
             ),
-            
+
             SizedBox(height: 16.h),
-            
+
             // Products Section
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 16.w),
@@ -2109,23 +2323,24 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   Text(
-                    _selectedCategoryId == 0 
+                    _selectedCategoryId == 0
                         ? _translate('All Products', 'সব পণ্য')
                         : _translate(
-                            _categories.firstWhere((c) => c['id'] == _selectedCategoryId)['nameEn'],
-                            _categories.firstWhere((c) => c['id'] == _selectedCategoryId)['nameBn'],
+                            _categories.firstWhere(
+                              (c) => c['id'] == _selectedCategoryId,
+                            )['nameEn'],
+                            _categories.firstWhere(
+                              (c) => c['id'] == _selectedCategoryId,
+                            )['nameBn'],
                           ),
-                    style: TextStyle(
-                      fontSize: 13.sp,
-                      color: Colors.grey[600],
-                    ),
+                    style: TextStyle(fontSize: 13.sp, color: Colors.grey[600]),
                   ),
                 ],
               ),
             ),
-            
+
             SizedBox(height: 12.h),
-            
+
             // Products Grid (Placeholder for now)
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 16.w),
@@ -2160,7 +2375,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           height: 120.h,
                           decoration: BoxDecoration(
                             color: Colors.grey[200],
-                            borderRadius: BorderRadius.vertical(top: Radius.circular(12.r)),
+                            borderRadius: BorderRadius.vertical(
+                              top: Radius.circular(12.r),
+                            ),
                           ),
                           child: Center(
                             child: Icon(
@@ -2197,7 +2414,11 @@ class _HomeScreenState extends State<HomeScreen> {
                               SizedBox(height: 4.h),
                               Row(
                                 children: [
-                                  Icon(Icons.star, size: 12.sp, color: Colors.amber),
+                                  Icon(
+                                    Icons.star,
+                                    size: 12.sp,
+                                    color: Colors.amber,
+                                  ),
                                   SizedBox(width: 4.w),
                                   Text(
                                     '4.5',
@@ -2217,7 +2438,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 },
               ),
             ),
-            
+
             SizedBox(height: 24.h),
           ],
         ),
