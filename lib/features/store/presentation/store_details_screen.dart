@@ -1,16 +1,18 @@
 import 'package:final_year_project_frontend/gen/colors.gen.dart';
 import 'package:final_year_project_frontend/networks/endpoints.dart';
 import 'package:final_year_project_frontend/networks/search_service.dart';
+import 'package:final_year_project_frontend/networks/store_service.dart';
 import 'package:final_year_project_frontend/constants/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class StoreDetailsScreen extends StatefulWidget {
-  final Map<String, dynamic> storeData;
+  final int storeId;
+  final Map<String, dynamic>?
+  storeData; // Optional - will be fetched if not provided
 
-  const StoreDetailsScreen({super.key, required this.storeData});
+  const StoreDetailsScreen({super.key, required this.storeId, this.storeData});
 
   @override
   State<StoreDetailsScreen> createState() => _StoreDetailsScreenState();
@@ -19,12 +21,22 @@ class StoreDetailsScreen extends StatefulWidget {
 class _StoreDetailsScreenState extends State<StoreDetailsScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _currentLanguage = 'en';
-  
+
+  // Store data
+  Map<String, dynamic>? _storeData;
+  bool _isLoadingStore = false;
+  String? _storeError;
+
   // Search results
   List<Map<String, dynamic>> _searchResults = [];
   bool _isSearching = false;
   bool _showSearchResults = false;
-  
+
+  // Products data
+  List<Map<String, dynamic>> _products = [];
+  bool _isLoadingProducts = false;
+  String? _productsError;
+
   // Categories
   int _selectedCategoryId = 0; // 0 means ALL
   final List<Map<String, dynamic>> _categories = [
@@ -33,28 +45,28 @@ class _StoreDetailsScreenState extends State<StoreDetailsScreen> {
       'nameEn': 'ALL',
       'nameBn': 'সব',
       'icon': Icons.grid_view,
-      'color': AppColors.button
+      'color': AppColors.button,
     },
     {
       'id': 1,
-      'nameEn': 'Seeds',
+      'nameEn': 'Seed',
       'nameBn': 'বীজ',
       'icon': Icons.eco,
-      'color': Color(0xFF8BC34A)
+      'color': Color(0xFF8BC34A),
     },
     {
       'id': 2,
       'nameBn': 'সার',
       'nameEn': 'Fertilizer',
       'icon': Icons.local_florist,
-      'color': Color(0xFF795548)
+      'color': Color(0xFF795548),
     },
     {
       'id': 3,
       'nameEn': 'Pesticide',
       'nameBn': 'কীটনাশক',
       'icon': Icons.bug_report,
-      'color': Color(0xFF009688)
+      'color': Color(0xFF009688),
     },
   ];
 
@@ -62,6 +74,45 @@ class _StoreDetailsScreenState extends State<StoreDetailsScreen> {
   void initState() {
     super.initState();
     _loadLanguage();
+    _loadStoreDetails();
+    _loadProducts(); // Load products on init
+  }
+
+  Future<void> _loadStoreDetails() async {
+    // Use provided data if available, otherwise fetch from API
+    if (widget.storeData != null) {
+      setState(() {
+        _storeData = widget.storeData;
+      });
+      return;
+    }
+
+    setState(() {
+      _isLoadingStore = true;
+      _storeError = null;
+    });
+
+    try {
+      final result = await StoreService.getStoreDetails(widget.storeId);
+
+      if (mounted) {
+        setState(() {
+          _isLoadingStore = false;
+          if (result['success']) {
+            _storeData = result['data'];
+          } else {
+            _storeError = result['message'];
+          }
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoadingStore = false;
+          _storeError = 'Failed to load store details';
+        });
+      }
+    }
   }
 
   Future<void> _loadLanguage() async {
@@ -75,6 +126,54 @@ class _StoreDetailsScreenState extends State<StoreDetailsScreen> {
 
   String _translate(String en, String bn) {
     return _currentLanguage == 'bn' ? bn : en;
+  }
+
+  Future<void> _loadProducts() async {
+    setState(() {
+      _isLoadingProducts = true;
+      _productsError = null;
+    });
+
+    try {
+      // Get category name from selected category
+      String? categoryName;
+      if (_selectedCategoryId != 0) {
+        final selectedCategory = _categories.firstWhere(
+          (cat) => cat['id'] == _selectedCategoryId,
+          orElse: () => {},
+        );
+        categoryName = selectedCategory['nameEn']?.toString().toLowerCase();
+      }
+
+      // Get search query if searching
+      String? productName = _searchController.text.isNotEmpty
+          ? _searchController.text
+          : null;
+
+      final result = await StoreService.getStoreProducts(
+        storeId: widget.storeId,
+        categoryName: categoryName,
+        productName: productName,
+      );
+
+      if (mounted) {
+        setState(() {
+          _isLoadingProducts = false;
+          if (result['success']) {
+            _products = List<Map<String, dynamic>>.from(result['data'] ?? []);
+          } else {
+            _productsError = result['message'];
+          }
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoadingProducts = false;
+          _productsError = 'Failed to load products';
+        });
+      }
+    }
   }
 
   Future<void> _handleSearch(String query) async {
@@ -102,7 +201,9 @@ class _StoreDetailsScreenState extends State<StoreDetailsScreen> {
         setState(() {
           _isSearching = false;
           if (result['success']) {
-            _searchResults = List<Map<String, dynamic>>.from(result['data'] ?? []);
+            _searchResults = List<Map<String, dynamic>>.from(
+              result['data'] ?? [],
+            );
           } else {
             _searchResults = [];
           }
@@ -158,7 +259,11 @@ class _StoreDetailsScreenState extends State<StoreDetailsScreen> {
                     return Container(
                       height: 120.h,
                       color: Colors.grey[200],
-                      child: Icon(Icons.image_not_supported, size: 40.sp, color: Colors.grey),
+                      child: Icon(
+                        Icons.image_not_supported,
+                        size: 40.sp,
+                        color: Colors.grey,
+                      ),
                     );
                   },
                 ),
@@ -229,313 +334,494 @@ class _StoreDetailsScreenState extends State<StoreDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final storeOwner = widget.storeData['user'] ?? {};
-    
+    // Show loading state
+    if (_isLoadingStore) {
+      return Scaffold(
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back, color: AppColors.button),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ),
+        body: Center(child: CircularProgressIndicator(color: AppColors.button)),
+      );
+    }
+
+    // Show error state
+    if (_storeError != null || _storeData == null) {
+      return Scaffold(
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back, color: AppColors.button),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.error_outline, size: 64.sp, color: Colors.red),
+              SizedBox(height: 16.h),
+              Text(
+                _storeError ?? 'Failed to load store details',
+                style: TextStyle(fontSize: 16.sp, color: Colors.red),
+              ),
+              SizedBox(height: 16.h),
+              ElevatedButton(
+                onPressed: _loadStoreDetails,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.button,
+                ),
+                child: Text('Retry', style: TextStyle(color: Colors.white)),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.grey[50],
       body: CustomScrollView(
         slivers: [
-          // Custom App Bar with Store Info
+          // Store Cover Photo Banner Header
           SliverAppBar(
-            expandedHeight: widget.storeData['store_description'] != null ? 200.h : 140.h,
+            expandedHeight: 280.h,
             pinned: true,
-            backgroundColor: Colors.white,
-            leading: IconButton(
-              icon: Icon(Icons.arrow_back, color: Color(0xFF0B7F22)),
-              onPressed: () => Navigator.pop(context),
+            backgroundColor: AppColors.button,
+            leading: Container(
+              margin: EdgeInsets.all(8.w),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 4,
+                  ),
+                ],
+              ),
+              child: IconButton(
+                icon: Icon(
+                  Icons.arrow_back,
+                  color: AppColors.button,
+                  size: 20.sp,
+                ),
+                onPressed: () => Navigator.pop(context),
+                padding: EdgeInsets.zero,
+              ),
             ),
             flexibleSpace: FlexibleSpaceBar(
-              background: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                ),
-                child: SafeArea(
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(60.w, 8.h, 16.w, 8.h),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Store Owner Avatar
-                            CircleAvatar(
-                              radius: 30.r,
-                              backgroundColor: Colors.white,
-                              backgroundImage: storeOwner['avatar'] != null
-                                  ? NetworkImage('${imageUrl}${storeOwner['avatar']}')
-                                  : null,
-                              child: storeOwner['avatar'] == null
-                                  ? Icon(
-                                      Icons.store,
-                                      size: 30.sp,
-                                      color: AppColors.button,
-                                    )
-                                  : null,
-                            ),
-                            SizedBox(width: 12.w),
-                            // Store Info
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Store Name
-                              Text(
-                                widget.storeData['store_name'] ?? 'Store Name',
-                                style: TextStyle(
-                                  fontSize: 16.sp,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xFF0B7F22),
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              SizedBox(height: 2.h),
-                              // Owner Name
-                              Text(
-                                storeOwner['name'] ?? 'Owner Name',
-                                style: TextStyle(
-                                  fontSize: 12.sp,
-                                  color: Color(0xFF0B7F22).withOpacity(0.8),
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              SizedBox(height: 2.h),
-                              // Address
-                              Row(
-                                children: [
-                                  Icon(Icons.location_on, size: 12.sp, color: Color(0xFF0B7F22).withOpacity(0.8)),
-                                  SizedBox(width: 4.w),
-                                  Expanded(
-                                    child: Text(
-                                      widget.storeData['store_address'] ?? 'Address not available',
-                                      style: TextStyle(
-                                        fontSize: 11.sp,
-                                        color: Color(0xFF0B7F22).withOpacity(0.7),
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 2.h),
-                              // Phone with action buttons
-                              Row(
-                                children: [
-                                  Icon(Icons.phone, size: 12.sp, color: Color(0xFF0B7F22).withOpacity(0.8)),
-                                  SizedBox(width: 4.w),
-                                  Expanded(
-                                    child: Text(
-                                      widget.storeData['store_contact_number'] ?? 'N/A',
-                                      style: TextStyle(
-                                        fontSize: 11.sp,
-                                        color: Color(0xFF0B7F22).withOpacity(0.7),
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                  SizedBox(width: 4.w),
-                                  // WhatsApp Button
-                                  InkWell(
-                                    onTap: () async {
-                                      final phone = widget.storeData['store_contact_number'] ?? '';
-                                      if (phone.isNotEmpty) {
-                                        try {
-                                          final cleanPhone = phone.replaceAll(RegExp(r'[^\d+]'), '');
-                                          final whatsappUrl = Uri.parse('https://wa.me/$cleanPhone');
-                                          
-                                          if (await canLaunchUrl(whatsappUrl)) {
-                                            await launchUrl(whatsappUrl, mode: LaunchMode.externalApplication);
-                                          } else {
-                                            if (mounted) {
-                                              ScaffoldMessenger.of(context).showSnackBar(
-                                                SnackBar(
-                                                  content: Text('WhatsApp is not installed'),
-                                                  backgroundColor: Colors.red,
-                                                ),
-                                              );
-                                            }
-                                          }
-                                        } catch (e) {
-                                          if (mounted) {
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              SnackBar(
-                                                content: Text('Could not open WhatsApp'),
-                                                backgroundColor: Colors.red,
-                                              ),
-                                            );
-                                          }
-                                        }
-                                      }
-                                    },
-                                    child: Container(
-                                      padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 4.h),
-                                      decoration: BoxDecoration(
-                                        color: Color(0xFF25D366),
-                                        borderRadius: BorderRadius.circular(6.r),
-                                      ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Icon(Icons.chat, size: 12.sp, color: Colors.white),
-                                          SizedBox(width: 2.w),
-                                          Text(
-                                            'WhatsApp',
-                                            style: TextStyle(
-                                              fontSize: 10.sp,
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(width: 4.w),
-                                  // IMO Button
-                                  InkWell(
-                                    onTap: () async {
-                                      final phone = widget.storeData['store_contact_number'] ?? '';
-                                      if (phone.isNotEmpty) {
-                                        try {
-                                          final cleanPhone = phone.replaceAll(RegExp(r'[^\d+]'), '');
-                                          final imoUrl = Uri.parse('imo:$cleanPhone');
-                                          
-                                          if (await canLaunchUrl(imoUrl)) {
-                                            await launchUrl(imoUrl, mode: LaunchMode.externalApplication);
-                                          } else {
-                                            if (mounted) {
-                                              ScaffoldMessenger.of(context).showSnackBar(
-                                                SnackBar(
-                                                  content: Text('IMO is not installed'),
-                                                  backgroundColor: Colors.red,
-                                                ),
-                                              );
-                                            }
-                                          }
-                                        } catch (e) {
-                                          if (mounted) {
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              SnackBar(
-                                                content: Text('Could not open IMO'),
-                                                backgroundColor: Colors.red,
-                                              ),
-                                            );
-                                          }
-                                        }
-                                      }
-                                    },
-                                    child: Container(
-                                      padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 4.h),
-                                      decoration: BoxDecoration(
-                                        color: Color(0xFF4B9EE3),
-                                        borderRadius: BorderRadius.circular(6.r),
-                                      ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Icon(Icons.videocam, size: 12.sp, color: Colors.white),
-                                          SizedBox(width: 2.w),
-                                          Text(
-                                            'IMO',
-                                            style: TextStyle(
-                                              fontSize: 10.sp,
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                          ],
-                        ),
-                        // About Store section
-                        if (widget.storeData['store_description'] != null) ...[
-                          SizedBox(height: 12.h),
-                          Container(
-                            padding: EdgeInsets.all(12.w),
-                            decoration: BoxDecoration(
-                              // color: Color(0xFF0B7F22).withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(8.r),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  _translate('About Store', 'দোকান সম্পর্কে'),
-                                  style: TextStyle(
-                                    fontSize: 13.sp,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF0B7F22),
-                                  ),
-                                ),
-                                SizedBox(height: 6.h),
-                                Text(
-                                  widget.storeData['store_description'],
-                                  style: TextStyle(
-                                    fontSize: 12.sp,
-                                    color: Color(0xFF0B7F22).withOpacity(0.8),
-                                    height: 1.4,
-                                  ),
-                                  maxLines: 3,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
+              background: Stack(
+                fit: StackFit.expand,
+                children: [
+                  // Cover Photo
+                  if (_storeData!['store_cover_photo'] != null)
+                    Image.network(
+                      '${imageUrl}${_storeData!['store_cover_photo']}',
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                AppColors.button.withOpacity(0.8),
+                                AppColors.button,
                               ],
                             ),
                           ),
+                          child: Center(
+                            child: Icon(
+                              Icons.store,
+                              size: 80.sp,
+                              color: Colors.white.withOpacity(0.3),
+                            ),
+                          ),
+                        );
+                      },
+                    )
+                  else
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            AppColors.button.withOpacity(0.8),
+                            AppColors.button,
+                          ],
+                        ),
+                      ),
+                      child: Center(
+                        child: Icon(
+                          Icons.store,
+                          size: 80.sp,
+                          color: Colors.white.withOpacity(0.3),
+                        ),
+                      ),
+                    ),
+                  // Gradient Overlay for better text visibility
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          Colors.black.withOpacity(0.7),
                         ],
-                      ],
+                      ),
                     ),
                   ),
-                ),
+                  // Store Info Overlay
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: Container(
+                      padding: EdgeInsets.all(20.w),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Store Name
+                          Text(
+                            _storeData!['store_name'] ?? 'Store Name',
+                            style: TextStyle(
+                              fontSize: 26.sp,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              shadows: [
+                                Shadow(
+                                  color: Colors.black.withOpacity(0.5),
+                                  blurRadius: 4,
+                                ),
+                              ],
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          SizedBox(height: 8.h),
+                          // Owner Name
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.person,
+                                size: 16.sp,
+                                color: Colors.white.withOpacity(0.9),
+                              ),
+                              SizedBox(width: 6.w),
+                              Text(
+                                _storeData!['name'] ?? 'Owner Name',
+                                style: TextStyle(
+                                  fontSize: 15.sp,
+                                  color: Colors.white.withOpacity(0.95),
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 10.h),
+                          // Rating and Reviews
+                          Row(
+                            children: [
+                              Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 10.w,
+                                  vertical: 6.h,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.amber,
+                                  borderRadius: BorderRadius.circular(20.r),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.2),
+                                      blurRadius: 4,
+                                      offset: Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.star,
+                                      size: 18.sp,
+                                      color: Colors.white,
+                                    ),
+                                    SizedBox(width: 4.w),
+                                    Text(
+                                      '${_storeData!['avg_rating']?.toStringAsFixed(1) ?? 'N/A'}',
+                                      style: TextStyle(
+                                        fontSize: 15.sp,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(width: 10.w),
+                              Text(
+                                '${_storeData!['total_reviews'] ?? 0} ${_translate('reviews', 'রিভিউ')}',
+                                style: TextStyle(
+                                  fontSize: 14.sp,
+                                  color: Colors.white.withOpacity(0.95),
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
-          
+
           // Content
           SliverToBoxAdapter(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(height: 16.h),
-                
+
+                // Contact Info Card
+                Container(
+                  margin: EdgeInsets.symmetric(horizontal: 16.w),
+                  padding: EdgeInsets.all(20.w),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16.r),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _translate('Contact Information', 'যোগাযোগের তথ্য'),
+                        style: TextStyle(
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.button,
+                        ),
+                      ),
+                      SizedBox(height: 20.h),
+                      // Phone Number
+                      Row(
+                        children: [
+                          Container(
+                            padding: EdgeInsets.all(12.w),
+                            decoration: BoxDecoration(
+                              color: AppColors.button.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12.r),
+                            ),
+                            child: Icon(
+                              Icons.phone,
+                              size: 24.sp,
+                              color: AppColors.button,
+                            ),
+                          ),
+                          SizedBox(width: 16.w),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  _translate('Phone Number', 'ফোন নম্বর'),
+                                  style: TextStyle(
+                                    fontSize: 12.sp,
+                                    color: Colors.grey[600],
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                SizedBox(height: 4.h),
+                                Text(
+                                  _storeData!['phone_number'] ?? 'N/A',
+                                  style: TextStyle(
+                                    fontSize: 16.sp,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 20.h),
+                      // Message Seller Button
+                      InkWell(
+                        onTap: () {
+                          // TODO: Navigate to messaging screen
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                _translate(
+                                  'Messaging feature coming soon!',
+                                  'মেসেজিং সুবিধা শীঘ্রই আসছে!',
+                                ),
+                              ),
+                              backgroundColor: AppColors.button,
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          width: double.infinity,
+                          padding: EdgeInsets.symmetric(vertical: 16.h),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                AppColors.button,
+                                AppColors.button.withOpacity(0.8),
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(12.r),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.button.withOpacity(0.3),
+                                blurRadius: 8,
+                                offset: Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.message_rounded,
+                                size: 22.sp,
+                                color: Colors.white,
+                              ),
+                              SizedBox(width: 12.w),
+                              Text(
+                                _translate(
+                                  'Message Seller',
+                                  'বিক্রেতাকে মেসেজ করুন',
+                                ),
+                                style: TextStyle(
+                                  fontSize: 16.sp,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // About Store section
+                if (_storeData!['store_description'] != null) ...[
+                  SizedBox(height: 16.h),
+                  Container(
+                    margin: EdgeInsets.symmetric(horizontal: 16.w),
+                    padding: EdgeInsets.all(20.w),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16.r),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 10,
+                          offset: Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _translate('About Store', 'দোকান সম্পর্কে'),
+                          style: TextStyle(
+                            fontSize: 18.sp,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.button,
+                          ),
+                        ),
+                        SizedBox(height: 12.h),
+                        Text(
+                          _storeData!['store_description'],
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            color: Colors.black87,
+                            height: 1.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+
+                SizedBox(height: 16.h),
+
                 // Search Bar
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16.w),
                   child: TextField(
                     controller: _searchController,
                     decoration: InputDecoration(
-                      hintText: _translate('Search products in this store...', 'এই দোকানে পণ্য খুঁজুন...'),
+                      hintText: _translate(
+                        'Search products in this store...',
+                        'এই দোকানে পণ্য খুঁজুন...',
+                      ),
                       hintStyle: TextStyle(color: Colors.grey[400]),
                       prefixIcon: Icon(Icons.search, color: AppColors.button),
                       filled: true,
-                      fillColor: Colors.grey[100],
+                      fillColor: Colors.white,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12.r),
                         borderSide: BorderSide.none,
                       ),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                        borderSide: BorderSide(
+                          color: Colors.grey.shade200,
+                          width: 1,
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                        borderSide: BorderSide(
+                          color: AppColors.button,
+                          width: 2,
+                        ),
+                      ),
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: 16.w,
+                        vertical: 14.h,
+                      ),
                     ),
                     onChanged: (value) {
                       _handleSearch(value);
                     },
                   ),
                 ),
-                
+
                 // Search Results Section
                 if (_showSearchResults)
                   Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 16.w,
+                      vertical: 8.h,
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -573,24 +859,27 @@ class _StoreDetailsScreenState extends State<StoreDetailsScreen> {
                                 ),
                               )
                             : _searchResults.isEmpty
-                                ? Center(
-                                    child: Padding(
-                                      padding: EdgeInsets.all(24.h),
-                                      child: Text(
-                                        _translate('No products found', 'কোন পণ্য পাওয়া যায়নি'),
-                                        style: TextStyle(
-                                          color: Colors.grey[600],
-                                          fontSize: 16.sp,
-                                        ),
-                                      ),
+                            ? Center(
+                                child: Padding(
+                                  padding: EdgeInsets.all(24.h),
+                                  child: Text(
+                                    _translate(
+                                      'No products found',
+                                      'কোন পণ্য পাওয়া যায়নি',
                                     ),
-                                  )
-                                : _buildProductSearchResults(),
+                                    style: TextStyle(
+                                      color: Colors.grey[600],
+                                      fontSize: 16.sp,
+                                    ),
+                                  ),
+                                ),
+                              )
+                            : _buildProductSearchResults(),
                         SizedBox(height: 16.h),
                       ],
                     ),
                   ),
-                
+
                 // Categories Section
                 if (!_showSearchResults) ...[
                   SizedBox(height: 16.h),
@@ -605,9 +894,9 @@ class _StoreDetailsScreenState extends State<StoreDetailsScreen> {
                       ),
                     ),
                   ),
-                  
+
                   SizedBox(height: 8.h),
-                  
+
                   SizedBox(
                     height: 90.h,
                     child: ListView.builder(
@@ -616,30 +905,33 @@ class _StoreDetailsScreenState extends State<StoreDetailsScreen> {
                       itemCount: _categories.length,
                       itemBuilder: (context, index) {
                         final category = _categories[index];
-                        final categoryName = _translate(category['nameEn'], category['nameBn']);
-                        final isSelected = _selectedCategoryId == category['id'];
-                        
+                        final categoryName = _translate(
+                          category['nameEn'],
+                          category['nameBn'],
+                        );
+                        final isSelected =
+                            _selectedCategoryId == category['id'];
+
                         return GestureDetector(
                           onTap: () {
                             setState(() {
                               _selectedCategoryId = category['id'];
                             });
-                            // Filter products by category
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('Filtering by: $categoryName'),
-                                duration: Duration(seconds: 1),
-                              ),
-                            );
+                            // Reload products when category changes
+                            _loadProducts();
                           },
                           child: Container(
                             width: 90.w,
                             margin: EdgeInsets.symmetric(horizontal: 4.w),
                             decoration: BoxDecoration(
-                              color: isSelected ? category['color'] : Colors.white,
+                              color: isSelected
+                                  ? category['color']
+                                  : Colors.white,
                               borderRadius: BorderRadius.circular(12.r),
                               border: Border.all(
-                                color: isSelected ? category['color'] : Colors.grey.shade300,
+                                color: isSelected
+                                    ? category['color']
+                                    : Colors.grey.shade300,
                                 width: 2.w,
                               ),
                               boxShadow: [
@@ -656,7 +948,9 @@ class _StoreDetailsScreenState extends State<StoreDetailsScreen> {
                                 Icon(
                                   category['icon'],
                                   size: 32.sp,
-                                  color: isSelected ? Colors.white : category['color'],
+                                  color: isSelected
+                                      ? Colors.white
+                                      : category['color'],
                                 ),
                                 SizedBox(height: 6.h),
                                 Text(
@@ -664,7 +958,9 @@ class _StoreDetailsScreenState extends State<StoreDetailsScreen> {
                                   style: TextStyle(
                                     fontSize: 12.sp,
                                     fontWeight: FontWeight.w600,
-                                    color: isSelected ? Colors.white : Colors.black87,
+                                    color: isSelected
+                                        ? Colors.white
+                                        : Colors.black87,
                                   ),
                                   textAlign: TextAlign.center,
                                   maxLines: 1,
@@ -677,9 +973,9 @@ class _StoreDetailsScreenState extends State<StoreDetailsScreen> {
                       },
                     ),
                   ),
-                  
+
                   SizedBox(height: 16.h),
-                  
+
                   // Products Section
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 16.w),
@@ -692,81 +988,193 @@ class _StoreDetailsScreenState extends State<StoreDetailsScreen> {
                       ),
                     ),
                   ),
-                  
+
                   SizedBox(height: 12.h),
-                  
-                  // Products Grid (Placeholder)
+
+                  // Products Grid
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 16.w),
-                    child: GridView.builder(
-                      shrinkWrap: true,
-                      physics: NeverScrollableScrollPhysics(),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        crossAxisSpacing: 12.w,
-                        mainAxisSpacing: 12.h,
-                        childAspectRatio: 0.75,
-                      ),
-                      itemCount: 6, // Placeholder count
-                      itemBuilder: (context, index) {
-                        return Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12.r),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
-                                blurRadius: 8,
-                                offset: Offset(0, 2),
+                    child: _isLoadingProducts
+                        ? Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(32.h),
+                              child: CircularProgressIndicator(
+                                color: AppColors.button,
                               ),
-                            ],
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Product Image Placeholder
-                              Container(
-                                height: 120.h,
+                            ),
+                          )
+                        : _productsError != null
+                        ? Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(32.h),
+                              child: Column(
+                                children: [
+                                  Icon(
+                                    Icons.error_outline,
+                                    size: 48.sp,
+                                    color: Colors.red,
+                                  ),
+                                  SizedBox(height: 16.h),
+                                  Text(
+                                    _productsError!,
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(color: Colors.red),
+                                  ),
+                                  SizedBox(height: 16.h),
+                                  ElevatedButton(
+                                    onPressed: _loadProducts,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppColors.button,
+                                    ),
+                                    child: Text(
+                                      _translate('Retry', 'আবার চেষ্টা করুন'),
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+                        : _products.isEmpty
+                        ? Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(32.h),
+                              child: Text(
+                                _translate(
+                                  'No products found',
+                                  'কোন পণ্য পাওয়া যায়নি',
+                                ),
+                                style: TextStyle(
+                                  fontSize: 16.sp,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                            ),
+                          )
+                        : GridView.builder(
+                            shrinkWrap: true,
+                            physics: NeverScrollableScrollPhysics(),
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 2,
+                                  crossAxisSpacing: 12.w,
+                                  mainAxisSpacing: 12.h,
+                                  childAspectRatio: 0.75,
+                                ),
+                            itemCount: _products.length,
+                            itemBuilder: (context, index) {
+                              final product = _products[index];
+                              return Container(
                                 decoration: BoxDecoration(
-                                  color: Colors.grey[200],
-                                  borderRadius: BorderRadius.vertical(top: Radius.circular(12.r)),
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(12.r),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.05),
+                                      blurRadius: 8,
+                                      offset: Offset(0, 2),
+                                    ),
+                                  ],
                                 ),
-                                child: Center(
-                                  child: Icon(Icons.image, size: 40.sp, color: Colors.grey),
-                                ),
-                              ),
-                              Padding(
-                                padding: EdgeInsets.all(8.w),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
-                                      'Product ${index + 1}',
-                                      style: TextStyle(
-                                        fontSize: 14.sp,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.black87,
+                                    // Product Image
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.vertical(
+                                        top: Radius.circular(12.r),
                                       ),
+                                      child: product['thumbnail'] != null
+                                          ? Image.network(
+                                              '${imageUrl}${product['thumbnail']}',
+                                              height: 120.h,
+                                              width: double.infinity,
+                                              fit: BoxFit.cover,
+                                              errorBuilder:
+                                                  (context, error, stackTrace) {
+                                                    return Container(
+                                                      height: 120.h,
+                                                      color: Colors.grey[200],
+                                                      child: Icon(
+                                                        Icons
+                                                            .image_not_supported,
+                                                        size: 40.sp,
+                                                        color: Colors.grey,
+                                                      ),
+                                                    );
+                                                  },
+                                            )
+                                          : Container(
+                                              height: 120.h,
+                                              color: Colors.grey[200],
+                                              child: Icon(
+                                                Icons.image,
+                                                size: 40.sp,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
                                     ),
-                                    SizedBox(height: 4.h),
-                                    Text(
-                                      '৳${(index + 1) * 100}',
-                                      style: TextStyle(
-                                        fontSize: 16.sp,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppColors.button,
+                                    Padding(
+                                      padding: EdgeInsets.all(8.w),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            product['name'] ?? 'Product',
+                                            style: TextStyle(
+                                              fontSize: 14.sp,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.black87,
+                                            ),
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          SizedBox(height: 4.h),
+                                          Row(
+                                            children: [
+                                              if (product['discount_price'] !=
+                                                  null) ...[
+                                                Text(
+                                                  '৳${product['discount_price']}',
+                                                  style: TextStyle(
+                                                    fontSize: 16.sp,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: AppColors.button,
+                                                  ),
+                                                ),
+                                                SizedBox(width: 6.w),
+                                                Text(
+                                                  '৳${product['price']}',
+                                                  style: TextStyle(
+                                                    fontSize: 12.sp,
+                                                    color: Colors.grey,
+                                                    decoration: TextDecoration
+                                                        .lineThrough,
+                                                  ),
+                                                ),
+                                              ] else ...[
+                                                Text(
+                                                  '৳${product['price']}',
+                                                  style: TextStyle(
+                                                    fontSize: 16.sp,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: AppColors.button,
+                                                  ),
+                                                ),
+                                              ],
+                                            ],
+                                          ),
+                                        ],
                                       ),
                                     ),
                                   ],
                                 ),
-                              ),
-                            ],
+                              );
+                            },
                           ),
-                        );
-                      },
-                    ),
                   ),
-                  
+
                   SizedBox(height: 24.h),
                 ],
               ],

@@ -25,11 +25,13 @@ class SearchService {
 
       if (response.statusCode == 200) {
         final responseData = response.data;
-        
+
         if (responseData['success'] == true) {
           return {
             'success': true,
-            'message': responseData['message'] ?? 'Search results retrieved successfully',
+            'message':
+                responseData['message'] ??
+                'Search results retrieved successfully',
             'data': responseData['data'] ?? [],
           };
         } else {
@@ -53,7 +55,7 @@ class SearchService {
       }
 
       String errorMessage = 'Failed to search';
-      
+
       if (e.response?.data != null) {
         if (e.response?.data is Map) {
           errorMessage = e.response?.data['message'] ?? errorMessage;
@@ -65,11 +67,81 @@ class SearchService {
         errorMessage = 'No internet connection';
       }
 
+      return {'success': false, 'message': errorMessage, 'data': []};
+    } catch (e) {
+      if (kDebugMode) {
+        print('Unexpected Error: $e');
+      }
       return {
         'success': false,
-        'message': errorMessage,
+        'message': 'An unexpected error occurred',
         'data': [],
       };
+    }
+  }
+
+  // Get products by category
+  static Future<Map<String, dynamic>> getProductsByCategory({
+    String categoryName = 'all', // 'all', 'seed', 'fertilizer', 'pesticide'
+  }) async {
+    try {
+      if (kDebugMode) {
+        print('Get Products Request - categoryName: $categoryName');
+      }
+
+      final response = await getHttp(
+        '${Endpoints.searchProductAndSeller}?category_name=$categoryName',
+        null,
+      );
+
+      if (kDebugMode) {
+        print('Get Products Response: ${response.data}');
+      }
+
+      if (response.statusCode == 200) {
+        final responseData = response.data;
+
+        if (responseData['success'] == true) {
+          return {
+            'success': true,
+            'message':
+                responseData['message'] ?? 'Products retrieved successfully',
+            'data': responseData['data'] ?? [],
+          };
+        } else {
+          return {
+            'success': false,
+            'message': responseData['message'] ?? 'No products found',
+            'data': [],
+          };
+        }
+      } else {
+        return {
+          'success': false,
+          'message': 'Server error: ${response.statusCode}',
+          'data': [],
+        };
+      }
+    } on DioException catch (e) {
+      if (kDebugMode) {
+        print('Get Products Error: ${e.message}');
+        print('Error Response: ${e.response?.data}');
+      }
+
+      String errorMessage = 'Failed to load products';
+
+      if (e.response?.data != null) {
+        if (e.response?.data is Map) {
+          errorMessage = e.response?.data['message'] ?? errorMessage;
+        }
+      } else if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout) {
+        errorMessage = 'Connection timeout. Please try again.';
+      } else if (e.type == DioExceptionType.connectionError) {
+        errorMessage = 'No internet connection';
+      }
+
+      return {'success': false, 'message': errorMessage, 'data': []};
     } catch (e) {
       if (kDebugMode) {
         print('Unexpected Error: $e');

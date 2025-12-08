@@ -1,8 +1,10 @@
 // ignore_for_file: constant_identifier_names, unnecessary_string_interpolations
 
-const String url = "https://test.drinkwithme.click/api/";
+// const String url = "https://test.drinkwithme.click/api/";
+const String url = "http://172.16.200.94:8000/api/";
 
-const String imageUrl = "https://test.drinkwithme.click/";
+// const String imageUrl = "https://test.drinkwithme.click/";
+const String imageUrl = "http://172.16.200.94:8000";
 // String imageUrl = String.fromEnvironment("IMAGE_URL");
 
 final class NetworkConstants {
@@ -40,6 +42,8 @@ final class Endpoints {
 
   // stores
   static const String storeList = "store-list/";
+  static const String storeDetails ="store-details/"; 
+  static const String storeProducts = "store-products/"; 
 
   // search
   static const String searchProductAndSeller = "search-product-and-seller/";
