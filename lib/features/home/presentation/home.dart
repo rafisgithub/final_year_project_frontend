@@ -6,6 +6,7 @@ import 'package:final_year_project_frontend/networks/store_service.dart';
 import 'package:final_year_project_frontend/networks/search_service.dart';
 import 'package:final_year_project_frontend/networks/endpoints.dart';
 import 'package:final_year_project_frontend/features/store/presentation/store_details_screen.dart';
+import 'package:final_year_project_frontend/features/product/presentation/product_details_screen.dart';
 import 'package:final_year_project_frontend/features/sign_up/seller_registration_screen.dart';
 import 'package:final_year_project_frontend/helpers/all_routes.dart';
 import 'package:final_year_project_frontend/constants/app_constants.dart';
@@ -2441,153 +2442,167 @@ class _HomeScreenState extends State<HomeScreen> {
                             product['discount_price'] != null &&
                             product['discount_price'] != product['price'];
 
-                        return Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12.r),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.08),
-                                blurRadius: 8,
-                                offset: Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Product Image
-                              ClipRRect(
-                                borderRadius: BorderRadius.vertical(
-                                  top: Radius.circular(12.r),
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ProductDetailsScreen(
+                                  productId: product['id'],
                                 ),
-                                child: Stack(
-                                  children: [
-                                    Image.network(
-                                      '${imageUrl}${product['thumbnail']}',
-                                      height: 120.h,
-                                      width: double.infinity,
-                                      fit: BoxFit.cover,
-                                      errorBuilder:
-                                          (context, error, stackTrace) {
-                                            return Container(
-                                              height: 120.h,
-                                              color: Colors.grey[200],
-                                              child: Icon(
-                                                Icons.image_not_supported,
-                                                size: 40.sp,
-                                                color: Colors.grey[400],
+                              ),
+                            );
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(12.r),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.08),
+                                  blurRadius: 8,
+                                  offset: Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Product Image
+                                ClipRRect(
+                                  borderRadius: BorderRadius.vertical(
+                                    top: Radius.circular(12.r),
+                                  ),
+                                  child: Stack(
+                                    children: [
+                                      Image.network(
+                                        '${imageUrl}${product['thumbnail']}',
+                                        height: 120.h,
+                                        width: double.infinity,
+                                        fit: BoxFit.cover,
+                                        errorBuilder:
+                                            (context, error, stackTrace) {
+                                              return Container(
+                                                height: 120.h,
+                                                color: Colors.grey[200],
+                                                child: Icon(
+                                                  Icons.image_not_supported,
+                                                  size: 40.sp,
+                                                  color: Colors.grey[400],
+                                                ),
+                                              );
+                                            },
+                                      ),
+                                      // Discount Badge
+                                      if (hasDiscount)
+                                        Positioned(
+                                          top: 8.h,
+                                          right: 8.w,
+                                          child: Container(
+                                            padding: EdgeInsets.symmetric(
+                                              horizontal: 8.w,
+                                              vertical: 4.h,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: Colors.red,
+                                              borderRadius:
+                                                  BorderRadius.circular(8.r),
+                                            ),
+                                            child: Text(
+                                              '${((1 - (double.parse(product['discount_price'].toString()) / double.parse(product['price'].toString()))) * 100).toStringAsFixed(0)}%',
+                                              style: TextStyle(
+                                                fontSize: 10.sp,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.white,
                                               ),
-                                            );
-                                          },
-                                    ),
-                                    // Discount Badge
-                                    if (hasDiscount)
-                                      Positioned(
-                                        top: 8.h,
-                                        right: 8.w,
-                                        child: Container(
-                                          padding: EdgeInsets.symmetric(
-                                            horizontal: 8.w,
-                                            vertical: 4.h,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: Colors.red,
-                                            borderRadius: BorderRadius.circular(
-                                              8.r,
-                                            ),
-                                          ),
-                                          child: Text(
-                                            '${((1 - (double.parse(product['discount_price'].toString()) / double.parse(product['price'].toString()))) * 100).toStringAsFixed(0)}%',
-                                            style: TextStyle(
-                                              fontSize: 10.sp,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.white,
                                             ),
                                           ),
                                         ),
-                                      ),
-                                    // Stock Badge
-                                    if (product['stock'] != null &&
-                                        product['stock'] < 10)
-                                      Positioned(
-                                        top: 8.h,
-                                        left: 8.w,
-                                        child: Container(
-                                          padding: EdgeInsets.symmetric(
-                                            horizontal: 8.w,
-                                            vertical: 4.h,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: Colors.orange,
-                                            borderRadius: BorderRadius.circular(
-                                              8.r,
+                                      // Stock Badge
+                                      if (product['stock'] != null &&
+                                          product['stock'] < 10)
+                                        Positioned(
+                                          top: 8.h,
+                                          left: 8.w,
+                                          child: Container(
+                                            padding: EdgeInsets.symmetric(
+                                              horizontal: 8.w,
+                                              vertical: 4.h,
                                             ),
-                                          ),
-                                          child: Text(
-                                            _translate('Low Stock', 'স্টক কম'),
-                                            style: TextStyle(
-                                              fontSize: 9.sp,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.white,
+                                            decoration: BoxDecoration(
+                                              color: Colors.orange,
+                                              borderRadius:
+                                                  BorderRadius.circular(8.r),
+                                            ),
+                                            child: Text(
+                                              _translate(
+                                                'Low Stock',
+                                                'স্টক কম',
+                                              ),
+                                              style: TextStyle(
+                                                fontSize: 9.sp,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.white,
+                                              ),
                                             ),
                                           ),
                                         ),
-                                      ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
-                              ),
-                              Padding(
-                                padding: EdgeInsets.all(8.w),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      product['name'] ?? '',
-                                      style: TextStyle(
-                                        fontSize: 13.sp,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.black87,
+                                Padding(
+                                  padding: EdgeInsets.all(8.w),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        product['name'] ?? '',
+                                        style: TextStyle(
+                                          fontSize: 13.sp,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black87,
+                                        ),
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
                                       ),
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    SizedBox(height: 4.h),
-                                    Row(
-                                      children: [
-                                        if (hasDiscount)
+                                      SizedBox(height: 4.h),
+                                      Row(
+                                        children: [
+                                          if (hasDiscount)
+                                            Text(
+                                              '৳${product['discount_price']}',
+                                              style: TextStyle(
+                                                fontSize: 14.sp,
+                                                fontWeight: FontWeight.bold,
+                                                color: AppColors.button,
+                                              ),
+                                            ),
+                                          if (hasDiscount) SizedBox(width: 6.w),
                                           Text(
-                                            '৳${product['discount_price']}',
+                                            '৳${product['price']}',
                                             style: TextStyle(
-                                              fontSize: 14.sp,
-                                              fontWeight: FontWeight.bold,
-                                              color: AppColors.button,
+                                              fontSize: hasDiscount
+                                                  ? 11.sp
+                                                  : 14.sp,
+                                              fontWeight: hasDiscount
+                                                  ? FontWeight.normal
+                                                  : FontWeight.bold,
+                                              color: hasDiscount
+                                                  ? Colors.grey
+                                                  : AppColors.button,
+                                              decoration: hasDiscount
+                                                  ? TextDecoration.lineThrough
+                                                  : TextDecoration.none,
                                             ),
                                           ),
-                                        if (hasDiscount) SizedBox(width: 6.w),
-                                        Text(
-                                          '৳${product['price']}',
-                                          style: TextStyle(
-                                            fontSize: hasDiscount
-                                                ? 11.sp
-                                                : 14.sp,
-                                            fontWeight: hasDiscount
-                                                ? FontWeight.normal
-                                                : FontWeight.bold,
-                                            color: hasDiscount
-                                                ? Colors.grey
-                                                : AppColors.button,
-                                            decoration: hasDiscount
-                                                ? TextDecoration.lineThrough
-                                                : TextDecoration.none,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
+                                        ],
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         );
                       },

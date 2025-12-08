@@ -2,6 +2,7 @@ import 'package:final_year_project_frontend/gen/colors.gen.dart';
 import 'package:final_year_project_frontend/networks/endpoints.dart';
 import 'package:final_year_project_frontend/networks/search_service.dart';
 import 'package:final_year_project_frontend/networks/store_service.dart';
+import 'package:final_year_project_frontend/features/product/presentation/product_details_screen.dart';
 import 'package:final_year_project_frontend/constants/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -232,94 +233,107 @@ class _StoreDetailsScreenState extends State<StoreDetailsScreen> {
       itemCount: _searchResults.length,
       itemBuilder: (context, index) {
         final product = _searchResults[index];
-        return Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12.r),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 8,
-                offset: Offset(0, 2),
+        return GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) =>
+                    ProductDetailsScreen(productId: product['id']),
               ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Product Image
-              ClipRRect(
-                borderRadius: BorderRadius.vertical(top: Radius.circular(12.r)),
-                child: Image.network(
-                  '${imageUrl}${product['thumbnail']}',
-                  height: 120.h,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      height: 120.h,
-                      color: Colors.grey[200],
-                      child: Icon(
-                        Icons.image_not_supported,
-                        size: 40.sp,
-                        color: Colors.grey,
-                      ),
-                    );
-                  },
+            );
+          },
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12.r),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 8,
+                  offset: Offset(0, 2),
                 ),
-              ),
-              Padding(
-                padding: EdgeInsets.all(8.w),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      product['name'] ?? '',
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    SizedBox(height: 4.h),
-                    Row(
-                      children: [
-                        if (product['discount_price'] != null)
-                          Text(
-                            '৳${product['discount_price']}',
-                            style: TextStyle(
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.button,
-                            ),
-                          ),
-                        SizedBox(width: 6.w),
-                        if (product['discount_price'] != null)
-                          Text(
-                            '৳${product['price']}',
-                            style: TextStyle(
-                              fontSize: 12.sp,
-                              color: Colors.grey,
-                              decoration: TextDecoration.lineThrough,
-                            ),
-                          ),
-                        if (product['discount_price'] == null)
-                          Text(
-                            '৳${product['price']}',
-                            style: TextStyle(
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.button,
-                            ),
-                          ),
-                      ],
-                    ),
-                  ],
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Product Image
+                ClipRRect(
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(12.r),
+                  ),
+                  child: Image.network(
+                    '${imageUrl}${product['thumbnail']}',
+                    height: 120.h,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        height: 120.h,
+                        color: Colors.grey[200],
+                        child: Icon(
+                          Icons.image_not_supported,
+                          size: 40.sp,
+                          color: Colors.grey,
+                        ),
+                      );
+                    },
+                  ),
                 ),
-              ),
-            ],
+                Padding(
+                  padding: EdgeInsets.all(8.w),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        product['name'] ?? '',
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      SizedBox(height: 4.h),
+                      Row(
+                        children: [
+                          if (product['discount_price'] != null)
+                            Text(
+                              '৳${product['discount_price']}',
+                              style: TextStyle(
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.button,
+                              ),
+                            ),
+                          SizedBox(width: 6.w),
+                          if (product['discount_price'] != null)
+                            Text(
+                              '৳${product['price']}',
+                              style: TextStyle(
+                                fontSize: 12.sp,
+                                color: Colors.grey,
+                                decoration: TextDecoration.lineThrough,
+                              ),
+                            ),
+                          if (product['discount_price'] == null)
+                            Text(
+                              '৳${product['price']}',
+                              style: TextStyle(
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.button,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -1064,111 +1078,131 @@ class _StoreDetailsScreenState extends State<StoreDetailsScreen> {
                             itemCount: _products.length,
                             itemBuilder: (context, index) {
                               final product = _products[index];
-                              return Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(12.r),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.05),
-                                      blurRadius: 8,
-                                      offset: Offset(0, 2),
+                              return GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          ProductDetailsScreen(
+                                            productId: product['id'],
+                                          ),
                                     ),
-                                  ],
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    // Product Image
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.vertical(
-                                        top: Radius.circular(12.r),
+                                  );
+                                },
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(12.r),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.05),
+                                        blurRadius: 8,
+                                        offset: Offset(0, 2),
                                       ),
-                                      child: product['thumbnail'] != null
-                                          ? Image.network(
-                                              '${imageUrl}${product['thumbnail']}',
-                                              height: 120.h,
-                                              width: double.infinity,
-                                              fit: BoxFit.cover,
-                                              errorBuilder:
-                                                  (context, error, stackTrace) {
-                                                    return Container(
-                                                      height: 120.h,
-                                                      color: Colors.grey[200],
-                                                      child: Icon(
-                                                        Icons
-                                                            .image_not_supported,
-                                                        size: 40.sp,
-                                                        color: Colors.grey,
-                                                      ),
-                                                    );
-                                                  },
-                                            )
-                                          : Container(
-                                              height: 120.h,
-                                              color: Colors.grey[200],
-                                              child: Icon(
-                                                Icons.image,
-                                                size: 40.sp,
-                                                color: Colors.grey,
+                                    ],
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      // Product Image
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.vertical(
+                                          top: Radius.circular(12.r),
+                                        ),
+                                        child: product['thumbnail'] != null
+                                            ? Image.network(
+                                                '${imageUrl}${product['thumbnail']}',
+                                                height: 120.h,
+                                                width: double.infinity,
+                                                fit: BoxFit.cover,
+                                                errorBuilder:
+                                                    (
+                                                      context,
+                                                      error,
+                                                      stackTrace,
+                                                    ) {
+                                                      return Container(
+                                                        height: 120.h,
+                                                        color: Colors.grey[200],
+                                                        child: Icon(
+                                                          Icons
+                                                              .image_not_supported,
+                                                          size: 40.sp,
+                                                          color: Colors.grey,
+                                                        ),
+                                                      );
+                                                    },
+                                              )
+                                            : Container(
+                                                height: 120.h,
+                                                color: Colors.grey[200],
+                                                child: Icon(
+                                                  Icons.image,
+                                                  size: 40.sp,
+                                                  color: Colors.grey,
+                                                ),
                                               ),
-                                            ),
-                                    ),
-                                    Padding(
-                                      padding: EdgeInsets.all(8.w),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            product['name'] ?? 'Product',
-                                            style: TextStyle(
-                                              fontSize: 14.sp,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.black87,
-                                            ),
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                          SizedBox(height: 4.h),
-                                          Row(
-                                            children: [
-                                              if (product['discount_price'] !=
-                                                  null) ...[
-                                                Text(
-                                                  '৳${product['discount_price']}',
-                                                  style: TextStyle(
-                                                    fontSize: 16.sp,
-                                                    fontWeight: FontWeight.bold,
-                                                    color: AppColors.button,
-                                                  ),
-                                                ),
-                                                SizedBox(width: 6.w),
-                                                Text(
-                                                  '৳${product['price']}',
-                                                  style: TextStyle(
-                                                    fontSize: 12.sp,
-                                                    color: Colors.grey,
-                                                    decoration: TextDecoration
-                                                        .lineThrough,
-                                                  ),
-                                                ),
-                                              ] else ...[
-                                                Text(
-                                                  '৳${product['price']}',
-                                                  style: TextStyle(
-                                                    fontSize: 16.sp,
-                                                    fontWeight: FontWeight.bold,
-                                                    color: AppColors.button,
-                                                  ),
-                                                ),
-                                              ],
-                                            ],
-                                          ),
-                                        ],
                                       ),
-                                    ),
-                                  ],
+                                      Padding(
+                                        padding: EdgeInsets.all(8.w),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              product['name'] ?? 'Product',
+                                              style: TextStyle(
+                                                fontSize: 14.sp,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.black87,
+                                              ),
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                            SizedBox(height: 4.h),
+                                            Row(
+                                              children: [
+                                                if (product['discount_price'] !=
+                                                    null) ...[
+                                                  Text(
+                                                    '৳${product['discount_price']}',
+                                                    style: TextStyle(
+                                                      fontSize: 16.sp,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color: AppColors.button,
+                                                    ),
+                                                  ),
+                                                  SizedBox(width: 6.w),
+                                                  Text(
+                                                    '৳${product['price']}',
+                                                    style: TextStyle(
+                                                      fontSize: 12.sp,
+                                                      color: Colors.grey,
+                                                      decoration: TextDecoration
+                                                          .lineThrough,
+                                                    ),
+                                                  ),
+                                                ] else ...[
+                                                  Text(
+                                                    '৳${product['price']}',
+                                                    style: TextStyle(
+                                                      fontSize: 16.sp,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color: AppColors.button,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               );
                             },

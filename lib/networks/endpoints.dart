@@ -42,9 +42,12 @@ final class Endpoints {
 
   // stores
   static const String storeList = "store-list/";
-  static const String storeDetails ="store-details/"; 
-  static const String storeProducts = "store-products/"; 
+  static const String storeDetails = "store-details/";
+  static const String storeProducts = "store-products/";
 
   // search
   static const String searchProductAndSeller = "search-product-and-seller/";
+
+  // products
+  static const String productDetails = "product-details/";
 }
