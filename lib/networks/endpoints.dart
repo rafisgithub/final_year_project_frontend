@@ -35,7 +35,7 @@ final class Endpoints {
   static const String profileGet = "profile-get/";
   static const String avatarUpdate = "avatar-update/";
   static const String switchRole = "switch-role/";
-  static const String sellerRegistration = "seller-registration/";
+  static const String profileUpdate = "profile-update/";
 
   // advertisements
   static const String advertisements = "advertisements/";

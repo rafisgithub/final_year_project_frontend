@@ -235,8 +235,8 @@ class ProfileService {
         ),
       });
 
-      final response = await dio_helper.postHttpFormData(
-        Endpoints.sellerRegistration,
+      final response = await dio_helper.putHttpFormData(
+        '${Endpoints.profileUpdate}?role=seller',
         formData,
       );
 
