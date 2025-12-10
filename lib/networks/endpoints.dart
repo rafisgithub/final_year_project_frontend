@@ -31,6 +31,8 @@ final class Endpoints {
   static const String resetPassword = "reset-password/";
   static const String signout = "signout/";
 
+  static const String googleAuth = "google-auth/";
+
   // profile
   static const String profileGet = "profile-get/";
   static const String avatarUpdate = "avatar-update/";

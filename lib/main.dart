@@ -13,11 +13,17 @@ import 'package:final_year_project_frontend/helpers/language.dart';
 import 'package:final_year_project_frontend/helpers/register_provider.dart';
 import 'package:final_year_project_frontend/loading.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 import 'helpers/helper_methods.dart';
 import 'helpers/navigation_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Firebase
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
   //await _requestPermissions();
   await GetStorage.init();
   diSetup();
@@ -25,8 +31,7 @@ void main() async {
 
   DioSingleton.instance.create();
 
-  runApp(
-    const MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -43,7 +48,7 @@ class MyApp extends StatelessWidget {
         child: PopScope(
           canPop: false,
           onPopInvoked: (bool didPop) async {
-           // showMaterialDialog(context);
+            // showMaterialDialog(context);
           },
           child: LayoutBuilder(
             builder: (context, constraints) {
@@ -57,46 +62,47 @@ class MyApp extends StatelessWidget {
 }
 
 class UtillScreenMobile extends StatelessWidget {
-  const UtillScreenMobile({
-    super.key,
-  });
+  const UtillScreenMobile({super.key});
 
   @override
   Widget build(BuildContext context) {
-      //String language = 'ru_RU';
-      //String language = 'en_US';
+    //String language = 'ru_RU';
+    //String language = 'en_US';
 
-     String language = appData.read(kKeyLanguage)??'bn_BD';
-   var screenSize = MediaQuery.sizeOf(context);
+    String language = appData.read(kKeyLanguage) ?? 'bn_BD';
+    var screenSize = MediaQuery.sizeOf(context);
     return ScreenUtilInit(
-      designSize:  Size(screenSize.width, screenSize.height),
+      designSize: Size(screenSize.width, screenSize.height),
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (_, child) {
         return PopScope(
-            canPop: false,
-            onPopInvoked: (bool didPop) async {
+          canPop: false,
+          onPopInvoked: (bool didPop) async {
             //  showMaterialDialog(context);
+          },
+          child: GetMaterialApp(
+            useInheritedMediaQuery: true,
+            locale: Locale(language),
+            translations: LocalString(),
+            theme: ThemeData(
+              unselectedWidgetColor: Colors.white,
+              useMaterial3: false,
+              scaffoldBackgroundColor: AppColors.cFFFFFF,
+              appBarTheme: const AppBarTheme(
+                color: AppColors.cFFFFFF,
+                elevation: 0,
+              ),
+            ),
+            debugShowCheckedModeBanner: false,
+            builder: (context, widget) {
+              return MediaQuery(data: MediaQuery.of(context), child: widget!);
             },
-            child: GetMaterialApp(
-
-                useInheritedMediaQuery: true,
-                locale: Locale(language),
-                translations: LocalString(),
-                theme: ThemeData(
-                    unselectedWidgetColor: Colors.white,
-                    useMaterial3: false,
-                    scaffoldBackgroundColor: AppColors.cFFFFFF,
-                    appBarTheme: const AppBarTheme(
-                        color: AppColors.cFFFFFF, elevation: 0)),
-                debugShowCheckedModeBanner: false,
-                builder: (context, widget) {
-                  return MediaQuery(
-                      data: MediaQuery.of(context), child: widget!);
-                },
-                navigatorKey: NavigationService.navigatorKey,
-                onGenerateRoute: RouteGenerator.generateRoute,
-                home: const Loading()));
+            navigatorKey: NavigationService.navigatorKey,
+            onGenerateRoute: RouteGenerator.generateRoute,
+            home: const Loading(),
+          ),
+        );
       },
     );
   }
