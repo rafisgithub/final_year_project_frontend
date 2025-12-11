@@ -13,16 +13,12 @@ import 'package:final_year_project_frontend/helpers/language.dart';
 import 'package:final_year_project_frontend/helpers/register_provider.dart';
 import 'package:final_year_project_frontend/loading.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
+
 import 'helpers/helper_methods.dart';
 import 'helpers/navigation_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Initialize Firebase
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   //await _requestPermissions();
   await GetStorage.init();

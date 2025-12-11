@@ -11,13 +11,13 @@ class CustomCardWidget extends StatelessWidget {
   final VoidCallback onButtonPressed;
 
   const CustomCardWidget({
-    Key? key,
+    super.key,
     required this.backgroundImagePath,
     required this.title,
     required this.subtitle,
     required this.buttonText,
     required this.onButtonPressed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

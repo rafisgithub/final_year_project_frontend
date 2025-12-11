@@ -7,7 +7,7 @@ import 'package:final_year_project_frontend/gen/colors.gen.dart';
 
 class MainNavigationBar extends StatefulWidget {
   final int pageNum;
-  const MainNavigationBar({Key? key, required this.pageNum}) : super(key: key);
+  const MainNavigationBar({super.key, required this.pageNum});
 
   @override
   _MainNavigationBarState createState() => _MainNavigationBarState();

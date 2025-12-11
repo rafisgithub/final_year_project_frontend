@@ -264,7 +264,7 @@ class _StoreDetailsScreenState extends State<StoreDetailsScreen> {
                     top: Radius.circular(12.r),
                   ),
                   child: Image.network(
-                    '${imageUrl}${product['thumbnail']}',
+                    '$imageUrl${product['thumbnail']}',
                     height: 120.h,
                     width: double.infinity,
                     fit: BoxFit.cover,
@@ -436,7 +436,7 @@ class _StoreDetailsScreenState extends State<StoreDetailsScreen> {
                   // Cover Photo
                   if (_storeData!['store_cover_photo'] != null)
                     Image.network(
-                      '${imageUrl}${_storeData!['store_cover_photo']}',
+                      '$imageUrl${_storeData!['store_cover_photo']}',
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
                         return Container(
@@ -1113,7 +1113,7 @@ class _StoreDetailsScreenState extends State<StoreDetailsScreen> {
                                         ),
                                         child: product['thumbnail'] != null
                                             ? Image.network(
-                                                '${imageUrl}${product['thumbnail']}',
+                                                '$imageUrl${product['thumbnail']}',
                                                 height: 120.h,
                                                 width: double.infinity,
                                                 fit: BoxFit.cover,

@@ -170,7 +170,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                             width: MediaQuery.of(context).size.width,
                             decoration: BoxDecoration(color: Colors.grey[100]),
                             child: Image.network(
-                              '${imageUrl}${imageData['image']}',
+                              '$imageUrl${imageData['image']}',
                               fit: BoxFit.contain,
                               errorBuilder: (context, error, stackTrace) {
                                 return Center(
@@ -435,7 +435,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                             backgroundColor: AppColors.button.withOpacity(0.1),
                             backgroundImage: product['seller']['avatar'] != null
                                 ? NetworkImage(
-                                    '${imageUrl}${product['seller']['avatar']}',
+                                    '$imageUrl${product['seller']['avatar']}',
                                   )
                                 : null,
                             child: product['seller']['avatar'] == null

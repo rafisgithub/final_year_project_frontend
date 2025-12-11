@@ -26,7 +26,7 @@ class _LoadingState extends State<Loading> {
     super.initState();
   }
 
-  loadInitialData() async {
+  Future<void> loadInitialData() async {
     await setInitValue();
     
     // Restore access token if user is logged in

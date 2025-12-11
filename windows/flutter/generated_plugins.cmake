@@ -5,8 +5,6 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   animated_item
   file_selector_windows
-  firebase_auth
-  firebase_core
   flutter_localization
   geolocator_windows
   permission_handler_windows

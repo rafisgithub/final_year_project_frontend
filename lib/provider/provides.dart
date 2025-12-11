@@ -27,20 +27,20 @@ final class ItemOptionIndex extends ChangeNotifier {
   double? get optionRate => _optionRate;
   double? get calVal => _calVal;
 
-  changeOption(int i, double rate) {
+  void changeOption(int i, double rate) {
     _optionId = i;
     _optionRate = rate;
     itemCalculation();
     notifyListeners();
   }
 
-  changeOptionQtyInc() {
+  void changeOptionQtyInc() {
     _optionQty++;
     itemCalculation();
     notifyListeners();
   }
 
-  changeOptionQtyDec() {
+  void changeOptionQtyDec() {
     if (_optionQty > 1) {
       _optionQty--;
     }
@@ -48,14 +48,14 @@ final class ItemOptionIndex extends ChangeNotifier {
     notifyListeners();
   }
 
-  itemCalculation() {
+  void itemCalculation() {
     _calVal = _optionRate! * _optionQty;
     for (var extras in extraList) {
       _calVal += extras.qty * double.parse(extras.rate);
     }
   }
 
-  addExtras(Extra ex) {
+  void addExtras(Extra ex) {
     if (extraList.length < 5 ||
         extraList.any(
           (element) => element.id == ex.id,
@@ -69,13 +69,13 @@ final class ItemOptionIndex extends ChangeNotifier {
     }
   }
 
-  removeExtras(Extra ex) {
+  void removeExtras(Extra ex) {
     extraList.removeWhere((element) => element.id == ex.id);
     itemCalculation();
     notifyListeners();
   }
 
-  clearOption() {
+  void clearOption() {
     _optionQty = 1;
     _calVal = 0.0;
     _optionId = null;
@@ -142,7 +142,7 @@ class PlcaeMarkAddress extends ChangeNotifier {
   String? get phone => _phone;
   String? get addressName => _addressName;
 
-  changePlcaeMarkAddress(
+  void changePlcaeMarkAddress(
       {String? addres,
       String? cty,
       String? st,
@@ -175,7 +175,7 @@ class PlcaeMarkAddress extends ChangeNotifier {
     notifyListeners();
   }
 
-  clearPlcaeMarkAddress() {
+  void clearPlcaeMarkAddress() {
     _address = null;
     _city = null;
     _state = null;
@@ -201,7 +201,7 @@ class GenericBool extends ChangeNotifier {
     notifyListeners();
   }
 
-  isDefaultAddressClear() {
+  void isDefaultAddressClear() {
     _isDefault = null;
   }
 }
@@ -217,7 +217,7 @@ class SelectedSubCat extends ChangeNotifier {
     notifyListeners();
   }
 
-  selectedSubCatIDClear() {
+  void selectedSubCatIDClear() {
     _id = null;
   }
 }
@@ -241,11 +241,11 @@ class GenericProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  selectedProductCatIDClear() {
+  void selectedProductCatIDClear() {
     _productCatID = null;
   }
 
-  paymentMethodIdClear() {
+  void paymentMethodIdClear() {
     _paymentMethodID = null;
   }
 }

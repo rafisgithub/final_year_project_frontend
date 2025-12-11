@@ -185,7 +185,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ClipRRect(
                 borderRadius: BorderRadius.vertical(top: Radius.circular(12.r)),
                 child: Image.network(
-                  '${imageUrl}${product['thumbnail']}',
+                  '$imageUrl${product['thumbnail']}',
                   height: 120.h,
                   width: double.infinity,
                   fit: BoxFit.cover,
@@ -298,7 +298,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   radius: 30.r,
                   backgroundColor: AppColors.button.withOpacity(0.1),
                   backgroundImage: store['user']?['avatar'] != null
-                      ? NetworkImage('${imageUrl}${store['user']['avatar']}')
+                      ? NetworkImage('$imageUrl${store['user']['avatar']}')
                       : null,
                   child: store['user']?['avatar'] == null
                       ? Icon(Icons.store, size: 30.sp, color: AppColors.button)
@@ -574,7 +574,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   backgroundImage:
                                       _profileData?['avatar'] != null
                                       ? NetworkImage(
-                                          '${imageUrl}${_profileData!['avatar']}',
+                                          '$imageUrl${_profileData!['avatar']}',
                                         )
                                       : null,
                                   child: _profileData?['avatar'] == null
@@ -1379,7 +1379,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     radius: 20.r,
                     backgroundColor: AppColors.button.withOpacity(0.1),
                     backgroundImage: _profileData?['avatar'] != null
-                        ? NetworkImage('${imageUrl}${_profileData!['avatar']}')
+                        ? NetworkImage('$imageUrl${_profileData!['avatar']}')
                         : null,
                     child: _profileData?['avatar'] == null
                         ? Icon(
@@ -1988,7 +1988,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(16.r),
                             child: Image.network(
-                              '${imageUrl}${banner['banner_image']}',
+                              '$imageUrl${banner['banner_image']}',
                               fit: BoxFit.cover,
                               width: double.infinity,
                               loadingBuilder:
@@ -2180,7 +2180,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       store['avatar'] != null &&
                                           store['avatar'].toString().isNotEmpty
                                       ? NetworkImage(
-                                          '${imageUrl}${store['avatar']}',
+                                          '$imageUrl${store['avatar']}',
                                         )
                                       : null,
                                   child:
@@ -2476,7 +2476,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   child: Stack(
                                     children: [
                                       Image.network(
-                                        '${imageUrl}${product['thumbnail']}',
+                                        '$imageUrl${product['thumbnail']}',
                                         height: 120.h,
                                         width: double.infinity,
                                         fit: BoxFit.cover,

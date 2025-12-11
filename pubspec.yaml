@@ -93,9 +93,8 @@ dependencies:
   otp_pin_field: ^1.4.1
   smooth_page_indicator: ^1.2.1
   carousel_slider: ^5.0.0
-  firebase_core: ^4.2.1
-  firebase_auth: ^6.1.2
   google_sign_in: ^6.2.2
+
 
 dev_dependencies:
   flutter_test:

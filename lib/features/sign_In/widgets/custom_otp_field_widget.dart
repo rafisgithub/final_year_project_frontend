@@ -12,13 +12,13 @@ class CustomOtpPinField extends StatefulWidget {
   final Function(String) onChange;
 
   const CustomOtpPinField({
-    Key? key,
+    super.key,
     this.maxLength = 4,
     this.autoFillEnable = false,
     this.showCustomKeyboard = false,
     required this.onSubmit,
     required this.onChange,
-  }) : super(key: key);
+  });
 
   @override
   _CustomOtpPinFieldState createState() => _CustomOtpPinFieldState();
