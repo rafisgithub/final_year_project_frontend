@@ -297,4 +297,74 @@ class ProfileService {
       return {'success': false, 'message': 'An unexpected error occurred'};
     }
   }
+
+  // Update Profile
+  static Future<Map<String, dynamic>> updateProfile({
+    required Map<String, dynamic> data,
+    required String role,
+  }) async {
+    try {
+      if (kDebugMode) {
+        print('Update Profile Request: role=$role');
+        print('Data: $data');
+      }
+
+      final response = await dio_helper.putHttp(
+        '${Endpoints.profileUpdate}?role=$role',
+        data,
+      );
+
+      if (kDebugMode) {
+        print('Update Profile Response: ${response.data}');
+      }
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final responseData = response.data;
+
+        if (responseData['success'] == true) {
+          return {
+            'success': true,
+            'message':
+                responseData['message'] ?? 'Profile updated successfully',
+            'data': responseData['data'],
+          };
+        } else {
+          return {
+            'success': false,
+            'message': responseData['message'] ?? 'Failed to update profile',
+          };
+        }
+      } else {
+        return {
+          'success': false,
+          'message': 'Server error: ${response.statusCode}',
+        };
+      }
+    } on DioException catch (e) {
+      if (kDebugMode) {
+        print('Update Profile Error: ${e.message}');
+        print('Error Response: ${e.response?.data}');
+      }
+
+      String errorMessage = 'Failed to update profile';
+
+      if (e.response?.data != null) {
+        if (e.response?.data is Map) {
+          errorMessage = e.response?.data['message'] ?? errorMessage;
+        }
+      } else if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout) {
+        errorMessage = 'Connection timeout. Please try again.';
+      } else if (e.type == DioExceptionType.connectionError) {
+        errorMessage = 'No internet connection';
+      }
+
+      return {'success': false, 'message': errorMessage};
+    } catch (e) {
+      if (kDebugMode) {
+        print('Unexpected Error: $e');
+      }
+      return {'success': false, 'message': 'An unexpected error occurred'};
+    }
+  }
 }

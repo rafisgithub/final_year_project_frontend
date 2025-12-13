@@ -8,6 +8,7 @@ import 'package:final_year_project_frontend/networks/endpoints.dart';
 import 'package:final_year_project_frontend/features/store/presentation/store_details_screen.dart';
 import 'package:final_year_project_frontend/features/product/presentation/product_details_screen.dart';
 import 'package:final_year_project_frontend/features/sign_up/seller_registration_screen.dart';
+import 'package:final_year_project_frontend/features/profile/presentation/profile_screen.dart';
 import 'package:final_year_project_frontend/helpers/all_routes.dart';
 import 'package:final_year_project_frontend/constants/app_constants.dart';
 import 'package:flutter/material.dart';
@@ -684,15 +685,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 padding: EdgeInsets.symmetric(vertical: 8.h),
                 children: [
                   _buildDrawerItem(
-                    icon: Icons.person_outline,
-                    title: 'Profile',
-                    onTap: () {
-                      // Navigation to Profile
-                      Navigator.pop(context);
-                      // Add profile page navigation here later if needed
-                    },
-                  ),
-                  _buildDrawerItem(
                     icon: Icons.swap_horiz,
                     title: 'Switch Role',
                     subtitle:
@@ -1352,6 +1344,24 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           );
                         }
+                      }
+                    },
+                  ),
+                  _buildDrawerItem(
+                    icon: Icons.person_outline,
+                    title: 'Profile',
+                    onTap: () {
+                      Navigator.pop(context);
+                      if (_profileData != null) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ProfileScreen(
+                              userData: _profileData!,
+                              role: GetStorage().read(kKeyRole) ?? 'customer',
+                            ),
+                          ),
+                        ).then((_) => _loadProfile());
                       }
                     },
                   ),
