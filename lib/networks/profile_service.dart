@@ -6,13 +6,16 @@ import 'package:final_year_project_frontend/networks/endpoints.dart';
 
 class ProfileService {
   // Get Profile
-  static Future<Map<String, dynamic>> getProfile() async {
+  static Future<Map<String, dynamic>> getProfile({required String role}) async {
     try {
       if (kDebugMode) {
-        print('Get Profile Request');
+        print('Get Profile Request: role=$role');
       }
 
-      final response = await dio_helper.getHttp(Endpoints.profileGet, null);
+      final response = await dio_helper.getHttp(
+        '${Endpoints.profileGet}?role=$role',
+        null,
+      );
 
       if (kDebugMode) {
         print('Get Profile Response: ${response.data}');

@@ -5,10 +5,10 @@ Future<void> totalDataClean() async {
   await appData.write(kKeyIsLoggedIn, false);
   await appData.write(kKeyIsExploring, false);
   await appData.write(kKeySelectedLocation, false);
-//lisbon
+  //lisbon
   // appData.writeIfNull(kKeySelectedLat, 38.74631383626653);
   // appData.writeIfNull(kKeySelectedLng, -9.130169921874991);
-//codemen
+  //codemen
   await appData.write(kKeySelectedLat, 22.818285677915657);
   await appData.write(kKeySelectedLng, 89.5535583794117);
 }
@@ -18,5 +18,3 @@ Future<void> totalDataClean() async {
 //   getProfileRXobj.clean();
 //   viewOrderRXobj.clean();
 // }
-
-
