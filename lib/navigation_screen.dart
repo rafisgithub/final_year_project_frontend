@@ -4,6 +4,7 @@ import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:final_year_project_frontend/features/home/presentation/home.dart';
 import 'package:final_year_project_frontend/features/scanner/presentation/scanner_screen.dart';
 import 'package:final_year_project_frontend/gen/colors.gen.dart';
+import 'package:final_year_project_frontend/features/chat/presentation/chat_list_screen.dart';
 
 class MainNavigationBar extends StatefulWidget {
   final int pageNum;
@@ -18,8 +19,7 @@ class _MainNavigationBarState extends State<MainNavigationBar> {
   final List<Widget> screens = [
     HomeScreen(),
     ScannerScreen(),
-    HomeScreen(), // Replace with ChatScreen when created
-
+    ChatListScreen(),
   ];
 
   @override
@@ -46,12 +46,7 @@ class _MainNavigationBarState extends State<MainNavigationBar> {
             topRight: Radius.circular(25.r),
           ),
           color: Colors.white,
-          border: Border(
-            top: BorderSide(
-              color: Colors.grey[200]!,
-              width: 1,
-            ),
-          ),
+          border: Border(top: BorderSide(color: Colors.grey[200]!, width: 1)),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.05),
@@ -64,16 +59,17 @@ class _MainNavigationBarState extends State<MainNavigationBar> {
           padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
           child: Container(
             decoration: BoxDecoration(
-             
-              borderRadius: BorderRadius.only(topLeft: Radius.circular(16.r), topRight: Radius.circular(16.r)),
-              
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(16.r),
+                topRight: Radius.circular(16.r),
+              ),
             ),
             child: GNav(
               rippleColor: AppColors.button.withOpacity(0.2),
               hoverColor: AppColors.button.withOpacity(0.1),
               haptic: true,
               tabBorderRadius: 16.r,
-              
+
               curve: Curves.easeOutCubic,
               duration: const Duration(milliseconds: 400),
               gap: 10.w,
@@ -87,10 +83,7 @@ class _MainNavigationBarState extends State<MainNavigationBar> {
               ),
               tabBackgroundColor: AppColors.button,
               tabBackgroundGradient: LinearGradient(
-                colors: [
-                  AppColors.button,
-                  AppColors.c28B446,
-                ],
+                colors: [AppColors.button, AppColors.c28B446],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),

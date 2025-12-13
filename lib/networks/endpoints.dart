@@ -5,6 +5,7 @@ const String url = "http://172.16.200.94:8000/api/";
 
 // const String imageUrl = "https://test.drinkwithme.click/";
 const String imageUrl = "http://172.16.200.94:8000";
+const String websocketUrl = "ws://172.16.200.94:8000/ws/chat/";
 // String imageUrl = String.fromEnvironment("IMAGE_URL");
 
 final class NetworkConstants {
@@ -52,4 +53,10 @@ final class Endpoints {
 
   // products
   static const String productDetails = "product-details/";
+
+  // chat
+  static const String chatList = "my-chat-list-users/";
+  static const String chatSearch = "search-users/";
+  static const String chatMessages = "messages/";
+  static const String chatMarkRead = "messages/mark-read/";
 }

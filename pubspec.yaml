@@ -94,6 +94,8 @@ dependencies:
   smooth_page_indicator: ^1.2.1
   carousel_slider: ^5.0.0
   google_sign_in: ^6.2.2
+  timeago: ^3.7.0
+  web_socket_channel: ^3.0.1
 
 
 dev_dependencies:
