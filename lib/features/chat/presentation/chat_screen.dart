@@ -86,6 +86,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
       '🔌 [ChatScreen] Current User: $_currentUserId, Other User: ${widget.otherUser.id}',
     );
 
+    // Connect with current user as sender and other user as receiver
     _webSocketService.connect(_currentUserId, widget.otherUser.id);
 
     print('👂 [ChatScreen] Setting up message listener...');
