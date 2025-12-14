@@ -4,6 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+
+import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:video_player/video_player.dart';
 import '../../../../gen/colors.gen.dart';
 import '../../../../networks/endpoints.dart';
 import '../../../../networks/websocket_service.dart';
@@ -411,6 +416,112 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     );
   }
 
+  Widget _buildMediaContent(ChatMessage message, bool isSent) {
+    final url = message.fileUrl!;
+    final type = message.type ?? 'document';
+    final fileName = url.split('/').last;
+
+    // Image
+    if (type == 'image' ||
+        url.endsWith('.jpg') ||
+        url.endsWith('.png') ||
+        url.endsWith('.jpeg')) {
+      return GestureDetector(
+        onTap: () {
+          // Open image viewer (optional, for now just show in list)
+        },
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(8.r),
+          child: CachedNetworkImage(
+            imageUrl: url,
+            placeholder: (context, url) => CircularProgressIndicator(),
+            errorWidget: (context, url, error) => Icon(Icons.error),
+            fit: BoxFit.cover,
+            width: 200.w,
+          ),
+        ),
+      );
+    }
+
+    // Video
+    if (type == 'video' || url.endsWith('.mp4')) {
+      return GestureDetector(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => VideoPlayerScreen(url: url),
+            ),
+          );
+        },
+        child: Container(
+          width: 200.w,
+          height: 120.h,
+          decoration: BoxDecoration(
+            color: Colors.black,
+            borderRadius: BorderRadius.circular(8.r),
+          ),
+          child: Center(
+            child: Icon(
+              Icons.play_circle_fill,
+              color: Colors.white,
+              size: 40.sp,
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Document / PDF
+    return GestureDetector(
+      onTap: () async {
+        if (url.endsWith('.pdf')) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) =>
+                  PdfViewerScreen(url: url, fileName: fileName),
+            ),
+          );
+        } else {
+          // Open in browser/external usage
+          if (await canLaunchUrl(Uri.parse(url))) {
+            await launchUrl(
+              Uri.parse(url),
+              mode: LaunchMode.externalApplication,
+            );
+          }
+        }
+      },
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            type == 'audio'
+                ? Icons.audiotrack
+                : url.endsWith('.pdf')
+                ? Icons.picture_as_pdf
+                : Icons.insert_drive_file,
+            color: isSent ? Colors.white : Colors.grey[700],
+          ),
+          SizedBox(width: 8.w),
+          Flexible(
+            child: Text(
+              fileName,
+              style: TextStyle(
+                color: isSent ? Colors.white : Colors.black87,
+                fontSize: 14.sp,
+                decoration: TextDecoration.underline,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _handleReaction(ChatMessage message, String emoji) async {
     // Optimistically update UI
     setState(() {
@@ -558,28 +669,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                           ],
                         ),
                         child: message.fileUrl != null
-                            ? Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Icons.description,
-                                    color: isSent ? Colors.white : Colors.grey,
-                                  ),
-                                  SizedBox(width: 8.w),
-                                  Flexible(
-                                    child: Text(
-                                      'File Attached', // Could parse filename from URL
-                                      style: TextStyle(
-                                        color: isSent
-                                            ? Colors.white
-                                            : Colors.black87,
-                                        fontSize: 15.sp,
-                                        decoration: TextDecoration.underline,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              )
+                            ? _buildMediaContent(message, isSent)
                             : Text(
                                 message.message ?? '',
                                 style: TextStyle(
@@ -721,6 +811,101 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class PdfViewerScreen extends StatelessWidget {
+  final String url;
+  final String fileName;
+
+  const PdfViewerScreen({super.key, required this.url, required this.fileName});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(fileName),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 1,
+      ),
+      body: SfPdfViewer.network(url),
+    );
+  }
+}
+
+class VideoPlayerScreen extends StatefulWidget {
+  final String url;
+
+  const VideoPlayerScreen({super.key, required this.url});
+
+  @override
+  State<VideoPlayerScreen> createState() => _VideoPlayerScreenState();
+}
+
+class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
+  late VideoPlayerController _controller;
+  bool _initialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = VideoPlayerController.networkUrl(Uri.parse(widget.url))
+      ..initialize().then((_) {
+        setState(() {
+          _initialized = true;
+          _controller.play(); // Auto-play when opened
+        });
+      });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        iconTheme: IconThemeData(color: Colors.white),
+      ),
+      body: Center(
+        child: _initialized
+            ? AspectRatio(
+                aspectRatio: _controller.value.aspectRatio,
+                child: Stack(
+                  alignment: Alignment.bottomCenter,
+                  children: [
+                    VideoPlayer(_controller),
+                    VideoProgressIndicator(_controller, allowScrubbing: true),
+                    Center(
+                      child: IconButton(
+                        icon: Icon(
+                          _controller.value.isPlaying
+                              ? Icons.pause
+                              : Icons.play_arrow,
+                          color: Colors.white,
+                          size: 50.sp,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _controller.value.isPlaying
+                                ? _controller.pause()
+                                : _controller.play();
+                          });
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            : CircularProgressIndicator(color: Colors.white),
       ),
     );
   }
