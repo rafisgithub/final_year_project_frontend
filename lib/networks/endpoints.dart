@@ -58,5 +58,7 @@ final class Endpoints {
   static const String chatList = "my-chat-list-users/";
   static const String chatSearch = "search-users/";
   static const String chatMessages = "messages/";
+  static const String chatReaction = "messages/reaction/";
+  static const String chatSendFile = "messages/send-file/";
   static const String chatMarkRead = "messages/mark-read/";
 }

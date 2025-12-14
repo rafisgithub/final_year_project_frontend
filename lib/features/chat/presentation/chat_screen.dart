@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get_storage/get_storage.dart';
@@ -163,7 +164,48 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     _messageController.dispose();
     _scrollController.dispose();
     _typingTimer?.cancel();
+
     super.dispose();
+  }
+
+  Future<void> _pickAndSendFile() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles();
+
+    if (result != null) {
+      String filePath = result.files.single.path!;
+
+      // Optimistic update (optional, but good for UX)
+      // For files, it's safer to show a loader or just wait for the sending to complete
+      // showing a "Sending file..." snackbar for now
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(_translate('Sending file...', 'ফাইল পাঠানো হচ্ছে...')),
+        ),
+      );
+
+      final response = await ChatService.sendFileMessage(
+        widget.otherUser.id,
+        filePath,
+      );
+
+      if (response['success'] == true) {
+        // The WebSocket should ideally broadcast this back,
+        // but if not, we can manually add it.
+        // Assuming WS broadcasts it, we just wait.
+        // If API returns the message object, we could add it:
+        if (response['data'] != null) {
+          final newMessage = ChatMessage.fromJson(response['data']);
+          setState(() {
+            _messages.add(newMessage);
+          });
+          _scrollToBottom();
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(response['message'] ?? 'Failed to send file')),
+        );
+      }
+    }
   }
 
   @override
@@ -369,96 +411,223 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     );
   }
 
+  Future<void> _handleReaction(ChatMessage message, String emoji) async {
+    // Optimistically update UI
+    setState(() {
+      final index = _messages.indexWhere((m) => m.id == message.id);
+      if (index != -1) {
+        final updatedMessage = ChatMessage(
+          id: message.id,
+          message: message.message,
+          senderId: message.senderId,
+          receiverId: message.receiverId,
+          timestamp: message.timestamp,
+          isRead: message.isRead,
+          type: message.type,
+          reaction: emoji, // Set the reaction
+        );
+        _messages[index] = updatedMessage;
+      }
+    });
+    Navigator.pop(context); // Close picker
+
+    // Call API
+    final result = await ChatService.reactToMessage(message.id, emoji);
+    if (result['success'] != true) {
+      // Revert if failed (optional, keeping simple for now)
+      print('❌ [ChatScreen] Failed to save reaction');
+    }
+  }
+
+  void _showReactionPicker(ChatMessage message) {
+    showDialog(
+      context: context,
+      builder: (context) => Stack(
+        children: [
+          Positioned(
+            top: 200.h, // Approximate position, could be improved
+            left: 20.w,
+            right: 20.w,
+            child: Material(
+              color: Colors.transparent,
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(30.r),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 10,
+                      offset: Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: ['👍', '❤️', '😂', '😮', '😢', '😡'].map((emoji) {
+                    return GestureDetector(
+                      onTap: () => _handleReaction(message, emoji),
+                      child: Text(emoji, style: TextStyle(fontSize: 28.sp)),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildMessageBubble(
     ChatMessage message,
     bool isSent,
     bool showAvatar,
   ) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: 8.h),
-      child: Row(
-        mainAxisAlignment: isSent
-            ? MainAxisAlignment.end
-            : MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          if (!isSent && showAvatar)
-            CircleAvatar(
-              radius: 16.r,
-              backgroundColor: AppColors.button.withValues(alpha: 0.2),
-              backgroundImage: widget.otherUser.avatar != null
-                  ? NetworkImage('$imageUrl${widget.otherUser.avatar}')
-                  : null,
-              child: widget.otherUser.avatar == null
-                  ? Text(
-                      widget.otherUser.name[0].toUpperCase(),
-                      style: TextStyle(
-                        color: AppColors.button,
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.bold,
+    return GestureDetector(
+      onLongPress: () => _showReactionPicker(message),
+      child: Padding(
+        padding: EdgeInsets.only(bottom: 8.h),
+        child: Row(
+          mainAxisAlignment: isSent
+              ? MainAxisAlignment.end
+              : MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            if (!isSent && showAvatar)
+              CircleAvatar(
+                radius: 16.r,
+                backgroundColor: AppColors.button.withValues(alpha: 0.2),
+                backgroundImage: widget.otherUser.avatar != null
+                    ? NetworkImage('$imageUrl${widget.otherUser.avatar}')
+                    : null,
+                child: widget.otherUser.avatar == null
+                    ? Text(
+                        widget.otherUser.name[0].toUpperCase(),
+                        style: TextStyle(
+                          color: AppColors.button,
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      )
+                    : null,
+              )
+            else if (!isSent)
+              SizedBox(width: 32.w),
+            SizedBox(width: 8.w),
+            Flexible(
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Column(
+                    crossAxisAlignment: isSent
+                        ? CrossAxisAlignment.end
+                        : CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 16.w,
+                          vertical: 10.h,
+                        ),
+                        decoration: BoxDecoration(
+                          gradient: isSent
+                              ? LinearGradient(
+                                  colors: [AppColors.button, AppColors.c28B446],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                )
+                              : null,
+                          color: isSent ? null : Colors.white,
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(18.r),
+                            topRight: Radius.circular(18.r),
+                            bottomLeft: isSent
+                                ? Radius.circular(18.r)
+                                : Radius.circular(4.r),
+                            bottomRight: isSent
+                                ? Radius.circular(4.r)
+                                : Radius.circular(18.r),
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.05),
+                              blurRadius: 4,
+                              offset: Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: message.fileUrl != null
+                            ? Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.description,
+                                    color: isSent ? Colors.white : Colors.grey,
+                                  ),
+                                  SizedBox(width: 8.w),
+                                  Flexible(
+                                    child: Text(
+                                      'File Attached', // Could parse filename from URL
+                                      style: TextStyle(
+                                        color: isSent
+                                            ? Colors.white
+                                            : Colors.black87,
+                                        fontSize: 15.sp,
+                                        decoration: TextDecoration.underline,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              )
+                            : Text(
+                                message.message ?? '',
+                                style: TextStyle(
+                                  color: isSent ? Colors.white : Colors.black87,
+                                  fontSize: 15.sp,
+                                  height: 1.3,
+                                ),
+                              ),
                       ),
-                    )
-                  : null,
-            )
-          else if (!isSent)
-            SizedBox(width: 32.w),
-          SizedBox(width: 8.w),
-          Flexible(
-            child: Column(
-              crossAxisAlignment: isSent
-                  ? CrossAxisAlignment.end
-                  : CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 16.w,
-                    vertical: 10.h,
-                  ),
-                  decoration: BoxDecoration(
-                    gradient: isSent
-                        ? LinearGradient(
-                            colors: [AppColors.button, AppColors.c28B446],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          )
-                        : null,
-                    color: isSent ? null : Colors.white,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(18.r),
-                      topRight: Radius.circular(18.r),
-                      bottomLeft: isSent
-                          ? Radius.circular(18.r)
-                          : Radius.circular(4.r),
-                      bottomRight: isSent
-                          ? Radius.circular(4.r)
-                          : Radius.circular(18.r),
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.05),
-                        blurRadius: 4,
-                        offset: Offset(0, 2),
+                      SizedBox(height: 4.h),
+                      Text(
+                        DateFormat('hh:mm a').format(message.timestamp),
+                        style: TextStyle(
+                          fontSize: 11.sp,
+                          color: Colors.grey[500],
+                        ),
                       ),
                     ],
                   ),
-                  child: Text(
-                    message.message ?? '',
-                    style: TextStyle(
-                      color: isSent ? Colors.white : Colors.black87,
-                      fontSize: 15.sp,
-                      height: 1.3,
+                  if (message.reaction != null)
+                    Positioned(
+                      bottom: 16.h,
+                      right: isSent ? null : -8.w,
+                      left: isSent ? -8.w : null,
+                      child: Container(
+                        padding: EdgeInsets.all(4.w),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black12,
+                              blurRadius: 2,
+                              offset: Offset(0, 1),
+                            ),
+                          ],
+                        ),
+                        child: Text(
+                          message.reaction!,
+                          style: TextStyle(fontSize: 12.sp),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-                SizedBox(height: 4.h),
-                Text(
-                  DateFormat('hh:mm a').format(message.timestamp),
-                  style: TextStyle(fontSize: 11.sp, color: Colors.grey[500]),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -501,6 +670,24 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                   onChanged: (text) {
                     // Optional: Send typing indicator
                   },
+                ),
+              ),
+            ),
+
+            SizedBox(width: 8.w),
+            GestureDetector(
+              onTap: _pickAndSendFile,
+              child: Container(
+                padding: EdgeInsets.all(10.w),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.grey[300]!),
+                ),
+                child: Icon(
+                  Icons.attach_file,
+                  color: AppColors.button,
+                  size: 20.sp,
                 ),
               ),
             ),

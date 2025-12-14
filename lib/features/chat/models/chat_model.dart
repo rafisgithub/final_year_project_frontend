@@ -54,6 +54,8 @@ class ChatMessage {
   final DateTime timestamp;
   final bool isRead;
   final String? type;
+  final String? reaction;
+  final String? fileUrl;
 
   ChatMessage({
     required this.id,
@@ -63,6 +65,8 @@ class ChatMessage {
     required this.timestamp,
     this.isRead = false,
     this.type,
+    this.reaction,
+    this.fileUrl,
   });
 
   factory ChatMessage.fromJson(Map<String, dynamic> json) {
@@ -78,7 +82,14 @@ class ChatMessage {
             ? DateTime.parse(json['timestamp'])
             : DateTime.now(),
         isRead: json['is_read'] ?? false,
-        type: json['type'],
+        type: json['message_type'] ?? json['type'],
+
+        reaction:
+            json['reaction'] ??
+            (json['reactions'] != null && (json['reactions'] as List).isNotEmpty
+                ? (json['reactions'] as List).last['emoji']
+                : null),
+        fileUrl: json['file'] ?? json['file_url'],
       );
 
       print(
