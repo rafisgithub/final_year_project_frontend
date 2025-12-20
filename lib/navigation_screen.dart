@@ -5,6 +5,7 @@ import 'package:final_year_project_frontend/features/home/presentation/home.dart
 import 'package:final_year_project_frontend/features/scanner/presentation/scanner_screen.dart';
 import 'package:final_year_project_frontend/gen/colors.gen.dart';
 import 'package:final_year_project_frontend/features/chat/presentation/chat_list_screen.dart';
+import 'package:final_year_project_frontend/features/chat/data/chat_service.dart';
 
 class MainNavigationBar extends StatefulWidget {
   final int pageNum;
@@ -16,6 +17,8 @@ class MainNavigationBar extends StatefulWidget {
 
 class _MainNavigationBarState extends State<MainNavigationBar> {
   late int currentTab;
+  int _unreadMessageCount = 0;
+
   final List<Widget> screens = [
     HomeScreen(),
     ScannerScreen(),
@@ -26,11 +29,20 @@ class _MainNavigationBarState extends State<MainNavigationBar> {
   void initState() {
     super.initState();
     currentTab = widget.pageNum;
+    _loadUnreadMessages();
   }
 
-  @override
-  void dispose() {
-    super.dispose();
+  Future<void> _loadUnreadMessages() async {
+    try {
+      final result = await ChatService.getUnreadMessageCount();
+      if (mounted && result['success'] == true) {
+        setState(() {
+          _unreadMessageCount = result['data']['unread_count'] ?? 0;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading unread messages: $e');
+    }
   }
 
   @override
@@ -94,6 +106,10 @@ class _MainNavigationBarState extends State<MainNavigationBar> {
                 setState(() {
                   currentTab = index;
                 });
+                // Refresh count if switching to tabs other than Chat,
+                // or maybe just refresh periodically.
+                // For now, let's refresh when tab changes.
+                _loadUnreadMessages();
               },
               tabs: [
                 GButton(
@@ -110,6 +126,48 @@ class _MainNavigationBarState extends State<MainNavigationBar> {
                 ),
                 GButton(
                   icon: Icons.chat,
+                  leading: _unreadMessageCount > 0
+                      ? Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            Icon(
+                              Icons.chat,
+                              color: currentTab == 2
+                                  ? Colors.white
+                                  : Colors.grey[500],
+                              size: 26.sp,
+                            ),
+                            Positioned(
+                              top: -8,
+                              right: -8,
+                              child: Container(
+                                padding: EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  color: Colors.red,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: Colors.white,
+                                    width: 1.5,
+                                  ),
+                                ),
+                                constraints: BoxConstraints(
+                                  minWidth: 18,
+                                  minHeight: 18,
+                                ),
+                                child: Text(
+                                  '$_unreadMessageCount',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10.sp,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ),
+                          ],
+                        )
+                      : null,
                   text: 'Chat',
                   iconActiveColor: Colors.white,
                   iconColor: Colors.grey[500],

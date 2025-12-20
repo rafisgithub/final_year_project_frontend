@@ -5,6 +5,7 @@ import 'package:final_year_project_frontend/networks/advertisement_service.dart'
 import 'package:final_year_project_frontend/networks/store_service.dart';
 import 'package:final_year_project_frontend/networks/search_service.dart';
 import 'package:final_year_project_frontend/networks/cart_service.dart';
+import 'package:final_year_project_frontend/features/chat/data/chat_service.dart';
 import 'package:final_year_project_frontend/networks/endpoints.dart';
 import 'package:final_year_project_frontend/features/store/presentation/store_details_screen.dart';
 import 'package:final_year_project_frontend/features/product/presentation/product_details_screen.dart';

@@ -62,6 +62,7 @@ final class Endpoints {
   static const String chatReaction = "messages/reaction/";
   static const String chatSendFile = "messages/send-file/";
   static const String chatMarkRead = "messages/mark-read/";
+  static const String allUnreadMessagesCount = "all-unread-new-messages-count/";
 
   // cart
   static const String addToCart = "add-to-cart/";

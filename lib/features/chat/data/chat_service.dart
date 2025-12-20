@@ -97,4 +97,17 @@ class ChatService {
       return {'success': false, 'message': e.toString()};
     }
   }
+
+  // Get total unread message count
+  static Future<Map<String, dynamic>> getUnreadMessageCount() async {
+    try {
+      final response = await getHttp(Endpoints.allUnreadMessagesCount, null);
+      if (response.statusCode == 200) {
+        return {'success': true, 'data': response.data['data']};
+      }
+      return {'success': false, 'message': 'Failed to get unread count'};
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
 }
