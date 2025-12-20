@@ -156,9 +156,10 @@ class _CartScreenState extends State<CartScreen> {
       );
     }
 
-    final items = (_cartData?['items'] as List<dynamic>?) ?? [];
+    final sellerSections =
+        (_cartData?['seller_wise_items'] as List<dynamic>?) ?? [];
 
-    if (items.isEmpty) {
+    if (sellerSections.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -176,158 +177,269 @@ class _CartScreenState extends State<CartScreen> {
 
     return ListView.builder(
       padding: EdgeInsets.all(16.w),
-      itemCount: items.length,
+      itemCount: sellerSections.length,
       itemBuilder: (context, index) {
-        final item = items[index];
-        return Container(
-          margin: EdgeInsets.only(bottom: 16.h),
-          padding: EdgeInsets.all(12.w),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12.r),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 8,
-                offset: Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              // Product Image
-              Container(
-                width: 80.w,
-                height: 80.w,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8.r),
-                  color: Colors.grey[100],
+        return _buildSellerSection(sellerSections[index]);
+      },
+    );
+  }
+
+  Widget _buildSellerSection(Map<String, dynamic> section) {
+    final seller = section['seller'] ?? {};
+    final items = (section['items'] as List<dynamic>?) ?? [];
+
+    return Container(
+      margin: EdgeInsets.only(bottom: 24.h),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Seller Header
+          Padding(
+            padding: EdgeInsets.only(bottom: 12.h, left: 4.w),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  radius: 16.r,
+                  backgroundImage: seller['avatar'] != null
+                      ? NetworkImage('$imageUrl${seller['avatar']}')
+                      : null,
+                  child: seller['avatar'] == null
+                      ? Icon(Icons.store, size: 16.r)
+                      : null,
                 ),
-                child: item['product_thumbnail'] != null
-                    ? ClipRRect(
-                        borderRadius: BorderRadius.circular(8.r),
-                        child: Image.network(
-                          '$imageUrl${item['product_thumbnail']}',
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Icon(
-                              Icons.image_not_supported,
-                              color: Colors.grey,
-                            );
-                          },
+                SizedBox(width: 12.w),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        seller['store_name'] ?? 'Unknown Store',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16.sp,
                         ),
-                      )
-                    : Icon(Icons.image_not_supported, color: Colors.grey),
-              ),
-              SizedBox(width: 12.w),
-              // Product Details
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                      ),
+                      Text(
+                        seller['name'] ?? '',
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 12.sp,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Items
+          ...items.map((item) => _buildCartItem(item)),
+          // Seller Total & Checkout
+          Container(
+            padding: EdgeInsets.all(16.w),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12.r),
+              border: Border.all(color: Colors.grey[200]!),
+            ),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      item['product_name'] ?? '',
-                      style: TextStyle(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+                      _translate('Subtotal', 'উপমোট'),
+                      style: TextStyle(color: Colors.grey[600]),
                     ),
-                    SizedBox(height: 4.h),
                     Text(
-                      'Price: ৳${item['product_price']}',
+                      '৳${section['total_price']}',
                       style: TextStyle(
-                        fontSize: 14.sp,
-                        color: Colors.grey[600],
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16.sp,
                       ),
                     ),
-                    SizedBox(height: 8.h),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            InkWell(
-                              onTap: () {
-                                if ((item['quantity'] ?? 1) > 1) {
-                                  _updateQuantity(
-                                    item['id'],
-                                    (item['quantity'] ?? 1) - 1,
-                                  );
-                                }
-                              },
-                              child: Container(
-                                padding: EdgeInsets.all(4.w),
-                                decoration: BoxDecoration(
-                                  border: Border.all(color: Colors.grey[300]!),
-                                  borderRadius: BorderRadius.circular(4.r),
-                                ),
-                                child: Icon(
-                                  Icons.remove,
-                                  size: 16.sp,
-                                  color: Colors.grey[600],
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 12.w),
-                              child: Text(
-                                '${item['quantity'] ?? 1}',
-                                style: TextStyle(
-                                  fontSize: 14.sp,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                            InkWell(
-                              onTap: () {
-                                // Add check for max stock if available in item data
-                                _updateQuantity(
-                                  item['id'],
-                                  (item['quantity'] ?? 1) + 1,
-                                );
-                              },
-                              child: Container(
-                                padding: EdgeInsets.all(4.w),
-                                decoration: BoxDecoration(
-                                  border: Border.all(color: AppColors.button),
-                                  borderRadius: BorderRadius.circular(4.r),
-                                  color: AppColors.button,
-                                ),
-                                child: Icon(
-                                  Icons.add,
-                                  size: 16.sp,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ],
+                  ],
+                ),
+                SizedBox(height: 12.h),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton(
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'Checkout from ${seller['store_name']} coming soon',
+                          ),
                         ),
-                        Text(
-                          '৳${item['subtotal']}',
-                          style: TextStyle(
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.button,
+                      );
+                    },
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.button,
+                      side: BorderSide(color: AppColors.button),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.r),
+                      ),
+                    ),
+                    child: Text(
+                      _translate(
+                        'Checkout from this Store',
+                        'এই দোকান থেকে চেকআউট করুন',
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCartItem(Map<String, dynamic> item) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 16.h),
+      padding: EdgeInsets.all(12.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          // Product Image
+          Container(
+            width: 80.w,
+            height: 80.w,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8.r),
+              color: Colors.grey[100],
+            ),
+            child: item['product_thumbnail'] != null
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(8.r),
+                    child: Image.network(
+                      '$imageUrl${item['product_thumbnail']}',
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Icon(
+                          Icons.image_not_supported,
+                          color: Colors.grey,
+                        );
+                      },
+                    ),
+                  )
+                : Icon(Icons.image_not_supported, color: Colors.grey),
+          ),
+          SizedBox(width: 12.w),
+          // Product Details
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item['product_name'] ?? '',
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                SizedBox(height: 4.h),
+                Text(
+                  'Price: ৳${item['product_price']}',
+                  style: TextStyle(fontSize: 14.sp, color: Colors.grey[600]),
+                ),
+                SizedBox(height: 8.h),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        InkWell(
+                          onTap: () {
+                            if ((item['quantity'] ?? 1) > 1) {
+                              _updateQuantity(
+                                item['id'],
+                                (item['quantity'] ?? 1) - 1,
+                              );
+                            }
+                          },
+                          child: Container(
+                            padding: EdgeInsets.all(4.w),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey[300]!),
+                              borderRadius: BorderRadius.circular(4.r),
+                            ),
+                            child: Icon(
+                              Icons.remove,
+                              size: 16.sp,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 12.w),
+                          child: Text(
+                            '${item['quantity'] ?? 1}',
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                        InkWell(
+                          onTap: () {
+                            _updateQuantity(
+                              item['id'],
+                              (item['quantity'] ?? 1) + 1,
+                            );
+                          },
+                          child: Container(
+                            padding: EdgeInsets.all(4.w),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: AppColors.button),
+                              borderRadius: BorderRadius.circular(4.r),
+                              color: AppColors.button,
+                            ),
+                            child: Icon(
+                              Icons.add,
+                              size: 16.sp,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ],
                     ),
+                    Text(
+                      '৳${item['subtotal']}',
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.button,
+                      ),
+                    ),
                   ],
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 
   Widget? _buildBottomBar() {
     if (_isLoading ||
         _error != null ||
-        (_cartData?['items'] as List?)?.isEmpty == true) {
+        (_cartData?['seller_wise_items'] as List?)?.isEmpty == true) {
       return null;
     }
 
@@ -373,8 +485,8 @@ class _CartScreenState extends State<CartScreen> {
                   SnackBar(
                     content: Text(
                       _translate(
-                        'Checkout coming soon!',
-                        'চেকআউট শীঘ্রই আসছে!',
+                        'Checkout All coming soon!',
+                        'সব চেকআউট শীঘ্রই আসছে!',
                       ),
                     ),
                   ),
@@ -388,7 +500,7 @@ class _CartScreenState extends State<CartScreen> {
                 ),
               ),
               child: Text(
-                _translate('Checkout', 'চেকআউট'),
+                _translate('Checkout All', 'সব চেকআউট করুন'),
                 style: TextStyle(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.bold,
