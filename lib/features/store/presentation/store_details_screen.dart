@@ -1,12 +1,14 @@
 import 'package:final_year_project_frontend/gen/colors.gen.dart';
 import 'package:final_year_project_frontend/networks/endpoints.dart';
-import 'package:final_year_project_frontend/networks/search_service.dart';
+
 import 'package:final_year_project_frontend/networks/store_service.dart';
 import 'package:final_year_project_frontend/features/product/presentation/product_details_screen.dart';
 import 'package:final_year_project_frontend/constants/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get_storage/get_storage.dart';
+import '../../chat/models/chat_model.dart';
+import '../../chat/presentation/chat_screen.dart';
 
 class StoreDetailsScreen extends StatefulWidget {
   final int storeId;
@@ -151,7 +153,8 @@ class _StoreDetailsScreenState extends State<StoreDetailsScreen> {
           ? _searchController.text
           : null;
 
-      final result = await StoreService.getStoreProducts(
+      // Use the new API for both initial load and category filtering
+      final result = await StoreService.getStoreProductSearch(
         storeId: widget.storeId,
         categoryName: categoryName,
         productName: productName,
@@ -183,6 +186,8 @@ class _StoreDetailsScreenState extends State<StoreDetailsScreen> {
         _showSearchResults = false;
         _searchResults = [];
       });
+      // Reload products to show all items when search is cleared
+      _loadProducts();
       return;
     }
 
@@ -192,10 +197,21 @@ class _StoreDetailsScreenState extends State<StoreDetailsScreen> {
     });
 
     try {
-      // Search only for products in this store
-      final result = await SearchService.searchProductAndSeller(
-        searchFor: 'product',
-        name: query,
+      // Get category name from selected category
+      String? categoryName;
+      if (_selectedCategoryId != 0) {
+        final selectedCategory = _categories.firstWhere(
+          (cat) => cat['id'] == _selectedCategoryId,
+          orElse: () => {},
+        );
+        categoryName = selectedCategory['nameEn']?.toString().toLowerCase();
+      }
+
+      // Use the new API for searching
+      final result = await StoreService.getStoreProductSearch(
+        storeId: widget.storeId,
+        categoryName: categoryName,
+        productName: query,
       );
 
       if (mounted) {
@@ -681,17 +697,43 @@ class _StoreDetailsScreenState extends State<StoreDetailsScreen> {
                       // Message Seller Button
                       InkWell(
                         onTap: () {
-                          // TODO: Navigate to messaging screen
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                _translate(
-                                  'Messaging feature coming soon!',
-                                  'মেসেজিং সুবিধা শীঘ্রই আসছে!',
+                          if (_storeData == null) return;
+
+                          // Create ChatUser from store data
+                          final chatUser = ChatUser(
+                            id:
+                                _storeData!['user_id'] ??
+                                _storeData!['owner_id'] ??
+                                _storeData!['id'] ?? // Use the ID from the root based on user feedback
+                                0,
+                            name: _storeData!['name'] ?? 'Store Owner',
+                            storeName: _storeData!['store_name'],
+                            avatar:
+                                _storeData!['image'] ??
+                                _storeData!['store_cover_photo'],
+                            role: 'seller',
+                          );
+
+                          if (chatUser.id == 0) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  _translate(
+                                    'Cannot message this seller',
+                                    'এই বিক্রেতাকে মেসেজ করা যাবে না',
+                                  ),
                                 ),
+                                backgroundColor: Colors.red,
                               ),
-                              backgroundColor: AppColors.button,
-                              duration: Duration(seconds: 2),
+                            );
+                            return;
+                          }
+
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  ChatScreen(otherUser: chatUser),
                             ),
                           );
                         },

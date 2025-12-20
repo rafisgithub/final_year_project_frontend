@@ -47,6 +47,7 @@ final class Endpoints {
   static const String storeList = "store-list/";
   static const String storeDetails = "store-details/";
   static const String storeProducts = "store-products/";
+  static const String storeProductSearch = "store-product-search/";
 
   // search
   static const String searchProductAndSeller = "search-product-and-seller/";
@@ -61,4 +62,9 @@ final class Endpoints {
   static const String chatReaction = "messages/reaction/";
   static const String chatSendFile = "messages/send-file/";
   static const String chatMarkRead = "messages/mark-read/";
+
+  // cart
+  static const String addToCart = "add-to-cart/";
+  static const String cart = "cart/";
+  static const String updateCartItem = "update-cart-item/";
 }

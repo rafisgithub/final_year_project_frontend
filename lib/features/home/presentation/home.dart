@@ -4,13 +4,16 @@ import 'package:final_year_project_frontend/networks/profile_service.dart';
 import 'package:final_year_project_frontend/networks/advertisement_service.dart';
 import 'package:final_year_project_frontend/networks/store_service.dart';
 import 'package:final_year_project_frontend/networks/search_service.dart';
+import 'package:final_year_project_frontend/networks/cart_service.dart';
 import 'package:final_year_project_frontend/networks/endpoints.dart';
 import 'package:final_year_project_frontend/features/store/presentation/store_details_screen.dart';
 import 'package:final_year_project_frontend/features/product/presentation/product_details_screen.dart';
+import 'package:final_year_project_frontend/features/cart/presentation/cart_screen.dart';
 import 'package:final_year_project_frontend/features/sign_up/seller_registration_screen.dart';
 import 'package:final_year_project_frontend/features/profile/presentation/profile_screen.dart';
 import 'package:final_year_project_frontend/helpers/all_routes.dart';
 import 'package:final_year_project_frontend/constants/app_constants.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get_storage/get_storage.dart';
@@ -51,6 +54,7 @@ class _HomeScreenState extends State<HomeScreen> {
   // Products data from API
   List<Map<String, dynamic>> _products = [];
   bool _isLoadingProducts = true;
+  int _cartItemCount = 0;
 
   final List<Map<String, dynamic>> _categories = [
     {
@@ -97,6 +101,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadBanners();
     _loadStores();
     _loadProducts(); // Load products on init
+    _loadCartCount();
   }
 
   Future<void> _handleSearch(String query) async {
@@ -444,6 +449,23 @@ class _HomeScreenState extends State<HomeScreen> {
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadCartCount() async {
+    try {
+      final result = await CartService.getCart();
+      if (mounted) {
+        setState(() {
+          if (result['success'] == true && result['data'] != null) {
+            _cartItemCount = result['data']['total_items'] ?? 0;
+          }
+        });
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error loading cart count: $e');
+      }
+    }
   }
 
   Future<void> _loadProfile() async {
@@ -1546,76 +1568,37 @@ class _HomeScreenState extends State<HomeScreen> {
                   size: 24.sp,
                 ),
                 onPressed: () {
-                  // Handle cart navigation
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Shopping cart coming soon')),
-                  );
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => CartScreen()),
+                  ).then((_) => _loadCartCount());
                 },
               ),
-              Positioned(
-                right: 8,
-                top: 8,
-                child: Container(
-                  padding: EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: Colors.red,
-                    shape: BoxShape.circle,
-                  ),
-                  constraints: BoxConstraints(minWidth: 16, minHeight: 16),
-                  child: Text(
-                    '3',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 10.sp,
-                      fontWeight: FontWeight.bold,
+              if (_cartItemCount > 0)
+                Positioned(
+                  right: 8,
+                  top: 8,
+                  child: Container(
+                    padding: EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
                     ),
-                    textAlign: TextAlign.center,
+                    constraints: BoxConstraints(minWidth: 16, minHeight: 16),
+                    child: Text(
+                      '$_cartItemCount',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 10.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                 ),
-              ),
             ],
           ),
-          // Notifications with Badge
-          Stack(
-            clipBehavior: Clip.none,
-            children: [
-              IconButton(
-                icon: Icon(
-                  Icons.notifications_outlined,
-                  color: AppColors.button,
-                  size: 24.sp,
-                ),
-                onPressed: () {
-                  // Handle notifications navigation
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Notifications coming soon')),
-                  );
-                },
-              ),
-              Positioned(
-                right: 8,
-                top: 8,
-                child: Container(
-                  padding: EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: Colors.red,
-                    shape: BoxShape.circle,
-                  ),
-                  constraints: BoxConstraints(minWidth: 16, minHeight: 16),
-                  child: Text(
-                    '5',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 10.sp,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(width: 8.w),
+          SizedBox(width: 16.w),
         ],
       ),
       body: SingleChildScrollView(

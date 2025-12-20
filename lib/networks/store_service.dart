@@ -222,4 +222,100 @@ class StoreService {
       };
     }
   }
+
+  // Get store products with search and category filter using new API
+  static Future<Map<String, dynamic>> getStoreProductSearch({
+    required int storeId,
+    String? categoryName,
+    String? productName,
+  }) async {
+    try {
+      // Build query parameters
+      final queryParams = <String, dynamic>{};
+
+      // Ensure we pass the parameters exactly as requested
+      if (productName != null && productName.isNotEmpty) {
+        queryParams['name'] = productName;
+      }
+
+      if (categoryName != null && categoryName.isNotEmpty) {
+        queryParams['category_name'] = categoryName;
+      }
+
+      if (kDebugMode) {
+        print(
+          'Searching store products for store ID: $storeId with filters: $queryParams',
+        );
+      }
+
+      // Build URL with store ID and query parameters
+      String url = '${Endpoints.storeProductSearch}$storeId/';
+      if (queryParams.isNotEmpty) {
+        final queryString = queryParams.entries
+            .map((e) => '${e.key}=${Uri.encodeComponent(e.value.toString())}')
+            .join('&');
+        url = '$url?$queryString';
+      }
+
+      if (kDebugMode) {
+        print('Request URL: $url');
+      }
+
+      final response = await getHttp(url, null);
+
+      if (kDebugMode) {
+        print('Store Product Search Response: ${response.data}');
+      }
+
+      if (response.statusCode == 200) {
+        final responseData = response.data;
+
+        if (responseData['success'] == true) {
+          return {
+            'success': true,
+            'message':
+                responseData['message'] ??
+                'Store product search results retrieved successfully',
+            'data': responseData['data'] ?? [],
+          };
+        } else {
+          return {
+            'success': false,
+            'message': responseData['message'] ?? 'Failed to search products',
+            'data': [],
+          };
+        }
+      } else {
+        return {
+          'success': false,
+          'message': 'Server error: ${response.statusCode}',
+          'data': [],
+        };
+      }
+    } on DioException catch (e) {
+      if (kDebugMode) {
+        print('Store Product Search Error: ${e.message}');
+        print('Error Response: ${e.response?.data}');
+      }
+
+      String errorMessage = 'Failed to search products';
+
+      if (e.response?.data != null) {
+        if (e.response?.data is Map) {
+          errorMessage = e.response?.data['message'] ?? errorMessage;
+        }
+      }
+
+      return {'success': false, 'message': errorMessage, 'data': []};
+    } catch (e) {
+      if (kDebugMode) {
+        print('Unexpected Error: $e');
+      }
+      return {
+        'success': false,
+        'message': 'An unexpected error occurred',
+        'data': [],
+      };
+    }
+  }
 }

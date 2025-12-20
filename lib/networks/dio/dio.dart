@@ -35,18 +35,18 @@ final class DioSingleton {
     if (kDebugMode) {
       print("Dio update");
     }
-    
+
     Map<String, dynamic> headers = {
       NetworkConstants.ACCEPT: NetworkConstants.ACCEPT_TYPE,
       NetworkConstants.ACCEPT_LANGUAGE: appData.read(kKeyLanguage) ?? "pt",
       NetworkConstants.APP_KEY: NetworkConstants.APP_KEY_VALUE,
     };
-    
+
     // Only add Authorization header if token is not empty
     if (auth.isNotEmpty) {
       headers[NetworkConstants.AUTHORIZATION] = "Bearer $auth";
     }
-    
+
     BaseOptions options = BaseOptions(
       baseUrl: url,
       responseType: ResponseType.json,
@@ -78,12 +78,10 @@ final class DioSingleton {
   }
 }
 
-Future<Response> postHttp(String path, [dynamic data]) =>
-    DioSingleton.instance.dio.post(
-      path,
-      data: data,
-      cancelToken: DioSingleton.cancelToken,
-    );
+Future<Response> postHttp(String path, [dynamic data]) => DioSingleton
+    .instance
+    .dio
+    .post(path, data: data, cancelToken: DioSingleton.cancelToken);
 
 // Post without Authorization header for sign-up, sign-in, send-otp
 Future<Response> postHttpNoAuth(String path, [dynamic data]) =>
@@ -99,17 +97,25 @@ Future<Response> postHttpNoAuth(String path, [dynamic data]) =>
       ),
     );
 
-Future<Response> putHttp(String path, [dynamic data]) =>
-    DioSingleton.instance.dio
-        .put(path, data: data, cancelToken: DioSingleton.cancelToken);
+Future<Response> putHttp(String path, [dynamic data]) => DioSingleton
+    .instance
+    .dio
+    .put(path, data: data, cancelToken: DioSingleton.cancelToken);
 
-Future<Response> getHttp(String path, [dynamic data]) =>
-    DioSingleton.instance.dio
-        .get(path, cancelToken: DioSingleton.cancelToken, data: data);
+Future<Response> patchHttp(String path, [dynamic data]) => DioSingleton
+    .instance
+    .dio
+    .patch(path, data: data, cancelToken: DioSingleton.cancelToken);
 
-Future<Response> deleteHttp(String path, [dynamic data]) =>
-    DioSingleton.instance.dio
-        .delete(path, data: data, cancelToken: DioSingleton.cancelToken);
+Future<Response> getHttp(String path, [dynamic data]) => DioSingleton
+    .instance
+    .dio
+    .get(path, cancelToken: DioSingleton.cancelToken, data: data);
+
+Future<Response> deleteHttp(String path, [dynamic data]) => DioSingleton
+    .instance
+    .dio
+    .delete(path, data: data, cancelToken: DioSingleton.cancelToken);
 
 // Post with FormData (for file uploads)
 Future<Response> postHttpFormData(String path, FormData formData) =>
@@ -117,9 +123,7 @@ Future<Response> postHttpFormData(String path, FormData formData) =>
       path,
       data: formData,
       cancelToken: DioSingleton.cancelToken,
-      options: Options(
-        contentType: 'multipart/form-data',
-      ),
+      options: Options(contentType: 'multipart/form-data'),
     );
 
 // Put with FormData (for file uploads)
@@ -128,7 +132,5 @@ Future<Response> putHttpFormData(String path, FormData formData) =>
       path,
       data: formData,
       cancelToken: DioSingleton.cancelToken,
-      options: Options(
-        contentType: 'multipart/form-data',
-      ),
+      options: Options(contentType: 'multipart/form-data'),
     );

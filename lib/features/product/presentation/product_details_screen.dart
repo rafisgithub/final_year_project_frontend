@@ -1,6 +1,7 @@
 import 'package:final_year_project_frontend/gen/colors.gen.dart';
 import 'package:final_year_project_frontend/networks/endpoints.dart';
 import 'package:final_year_project_frontend/networks/product_service.dart';
+import 'package:final_year_project_frontend/networks/cart_service.dart';
 import 'package:final_year_project_frontend/constants/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -22,6 +23,23 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   String? _error;
   String _currentLanguage = 'en';
   int _currentImageIndex = 0;
+  int _quantity = 1;
+
+  void _incrementQuantity() {
+    setState(() {
+      if (_productData != null && _quantity < _productData!['stock']) {
+        _quantity++;
+      }
+    });
+  }
+
+  void _decrementQuantity() {
+    setState(() {
+      if (_quantity > 1) {
+        _quantity--;
+      }
+    });
+  }
 
   @override
   void initState() {
@@ -497,20 +515,97 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
         ),
         child: Row(
           children: [
+            // Quantity Selector
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey[300]!),
+                borderRadius: BorderRadius.circular(12.r),
+              ),
+              child: Row(
+                children: [
+                  IconButton(
+                    onPressed: _quantity > 1 ? _decrementQuantity : null,
+                    icon: Icon(
+                      Icons.remove,
+                      color: _quantity > 1 ? Colors.black87 : Colors.grey,
+                    ),
+                  ),
+                  Text(
+                    '$_quantity',
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed:
+                        (_productData != null &&
+                            _quantity < (_productData?['stock'] ?? 100))
+                        ? _incrementQuantity
+                        : null,
+                    icon: Icon(
+                      Icons.add,
+                      color:
+                          (_productData != null &&
+                              _quantity < (_productData?['stock'] ?? 100))
+                          ? Colors.black87
+                          : Colors.grey,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(width: 16.w),
             Expanded(
               child: ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
+                  // Show loading
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(
                         _translate(
-                          'Add to cart feature coming soon!',
-                          'কার্টে যুক্ত করার সুবিধা শীঘ্রই আসছে!',
+                          'Adding to cart...',
+                          'কার্টে যুক্ত করা হচ্ছে...',
                         ),
                       ),
-                      backgroundColor: AppColors.button,
+                      duration: Duration(seconds: 1),
                     ),
                   );
+
+                  final result = await CartService.addToCart(
+                    productId: widget.productId,
+                    quantity: _quantity,
+                  );
+
+                  if (context.mounted) {
+                    if (result['success']) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            result['message'] ??
+                                _translate(
+                                  'Added to cart successfully',
+                                  'সফলভাবে কার্টে যুক্ত হয়েছে',
+                                ),
+                          ),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            result['message'] ??
+                                _translate(
+                                  'Failed to add to cart',
+                                  'কার্টে যুক্ত করতে ব্যর্থ হয়েছে',
+                                ),
+                          ),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.button,
