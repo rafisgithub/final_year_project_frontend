@@ -11,6 +11,7 @@ import 'package:final_year_project_frontend/features/product/presentation/produc
 import 'package:final_year_project_frontend/features/cart/presentation/cart_screen.dart';
 import 'package:final_year_project_frontend/features/sign_up/seller_registration_screen.dart';
 import 'package:final_year_project_frontend/features/profile/presentation/profile_screen.dart';
+import 'package:final_year_project_frontend/features/seller/presentation/seller_navigation_screen.dart';
 import 'package:final_year_project_frontend/helpers/all_routes.dart';
 import 'package:final_year_project_frontend/constants/app_constants.dart';
 import 'package:flutter/foundation.dart';
@@ -1062,6 +1063,21 @@ class _HomeScreenState extends State<HomeScreen> {
                       }
                     },
                   ),
+                  if (GetStorage().read(kKeyRole) == 'seller')
+                    _buildDrawerItem(
+                      icon: Icons.dashboard_outlined,
+                      title: 'Seller Dashboard',
+                      subtitle: 'Manage your store',
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => SellerNavigationScreen(),
+                          ),
+                        );
+                      },
+                    ),
                   _buildDrawerItem(
                     icon: Icons.language,
                     title: 'Language',
