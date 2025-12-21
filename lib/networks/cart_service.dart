@@ -224,4 +224,222 @@ class CartService {
       };
     }
   }
+
+  // Clear cart
+  static Future<Map<String, dynamic>> clearCart() async {
+    try {
+      final response = await deleteHttp(Endpoints.clearCart);
+
+      if (kDebugMode) {
+        print('Clear Cart Response: ${response.data}');
+      }
+
+      if (response.statusCode == 200) {
+        final responseData = response.data;
+
+        if (responseData['success'] == true) {
+          return {
+            'success': true,
+            'message': responseData['message'] ?? 'Cart cleared successfully',
+            'data': responseData['data'],
+          };
+        } else {
+          return {
+            'success': false,
+            'message': responseData['message'] ?? 'Failed to clear cart',
+            'data': null,
+          };
+        }
+      } else {
+        return {
+          'success': false,
+          'message': 'Server error: ${response.statusCode}',
+          'data': null,
+        };
+      }
+    } on DioException catch (e) {
+      if (kDebugMode) {
+        print('Clear Cart Error: ${e.message}');
+        print('Error Response: ${e.response?.data}');
+      }
+
+      String errorMessage = 'Failed to clear cart';
+
+      if (e.response?.data != null) {
+        if (e.response?.data is Map) {
+          errorMessage = e.response?.data['message'] ?? errorMessage;
+        }
+      } else if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout) {
+        errorMessage = 'Connection timeout. Please try again.';
+      } else if (e.type == DioExceptionType.connectionError) {
+        errorMessage = 'No internet connection. Please check your network.';
+      }
+
+      return {'success': false, 'message': errorMessage, 'data': null};
+    } catch (e) {
+      if (kDebugMode) {
+        print('Unexpected Error: $e');
+      }
+      return {
+        'success': false,
+        'message': 'An unexpected error occurred',
+        'data': null,
+      };
+    }
+  }
+
+  // Remove item from cart
+  static Future<Map<String, dynamic>> removeFromCart(int cartItemId) async {
+    try {
+      final url = '${Endpoints.removeFromCart}$cartItemId/';
+      final response = await deleteHttp(url);
+
+      if (kDebugMode) {
+        print('Remove From Cart Response: ${response.data}');
+      }
+
+      if (response.statusCode == 200) {
+        final responseData = response.data;
+
+        // Assuming similar response structure
+        if (responseData['success'] == true) {
+          return {
+            'success': true,
+            'message':
+                responseData['message'] ??
+                'Item removed from cart successfully',
+            'data': responseData['data'],
+          };
+        } else {
+          return {
+            'success': false,
+            'message': responseData['message'] ?? 'Failed to remove item',
+            'data': null,
+          };
+        }
+      } else {
+        return {
+          'success': false,
+          'message': 'Server error: ${response.statusCode}',
+          'data': null,
+        };
+      }
+    } on DioException catch (e) {
+      if (kDebugMode) {
+        print('Remove From Cart Error: ${e.message}');
+        print('Error Response: ${e.response?.data}');
+      }
+
+      String errorMessage = 'Failed to remove item';
+
+      if (e.response?.data != null) {
+        if (e.response?.data is Map) {
+          errorMessage = e.response?.data['message'] ?? errorMessage;
+        }
+      } else if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout) {
+        errorMessage = 'Connection timeout. Please try again.';
+      } else if (e.type == DioExceptionType.connectionError) {
+        errorMessage = 'No internet connection. Please check your network.';
+      }
+
+      return {'success': false, 'message': errorMessage, 'data': null};
+    } catch (e) {
+      if (kDebugMode) {
+        print('Unexpected Error: $e');
+      }
+      return {
+        'success': false,
+        'message': 'An unexpected error occurred',
+        'data': null,
+      };
+    }
+  }
+
+  // Place Order
+  static Future<Map<String, dynamic>> placeOrder({int? sellerId}) async {
+    try {
+      final data = sellerId != null ? {'seller_id': sellerId} : {};
+
+      if (kDebugMode) {
+        print('Place Order Request: $data');
+      }
+
+      final response = await postHttp(Endpoints.placeOrder, data);
+
+      if (kDebugMode) {
+        print('Place Order Response: ${response.data}');
+      }
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final responseData = response.data;
+
+        if (responseData['success'] == true) {
+          return {
+            'success': true,
+            'message': responseData['message'] ?? 'Order placed successfully',
+            'data': responseData['data'],
+          };
+        } else {
+          return {
+            'success': false,
+            'message': responseData['message'] ?? 'Failed to place order',
+            'errors': responseData['errors'],
+            'data': null,
+          };
+        }
+      } else {
+        if (response.data is Map) {
+          return {
+            'success': false,
+            'message':
+                response.data['message'] ??
+                'Server error: ${response.statusCode}',
+            'errors': response.data['errors'],
+            'data': null,
+          };
+        }
+        return {
+          'success': false,
+          'message': 'Server error: ${response.statusCode}',
+          'data': null,
+        };
+      }
+    } on DioException catch (e) {
+      if (kDebugMode) {
+        print('Place Order Error: ${e.message}');
+        print('Error Response: ${e.response?.data}');
+      }
+
+      String errorMessage = 'Failed to place order';
+
+      if (e.response?.data != null && e.response?.data is Map) {
+        return {
+          'success': false,
+          'message': e.response?.data['message'] ?? errorMessage,
+          'errors': e.response?.data['errors'],
+          'data': null,
+        };
+      }
+
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout) {
+        errorMessage = 'Connection timeout. Please try again.';
+      } else if (e.type == DioExceptionType.connectionError) {
+        errorMessage = 'No internet connection. Please check your network.';
+      }
+
+      return {'success': false, 'message': errorMessage, 'data': null};
+    } catch (e) {
+      if (kDebugMode) {
+        print('Unexpected Error: $e');
+      }
+      return {
+        'success': false,
+        'message': 'An unexpected error occurred',
+        'data': null,
+      };
+    }
+  }
 }

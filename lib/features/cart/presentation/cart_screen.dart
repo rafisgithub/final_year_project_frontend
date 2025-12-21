@@ -4,6 +4,8 @@ import 'package:final_year_project_frontend/networks/cart_service.dart';
 import 'package:final_year_project_frontend/networks/endpoints.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:final_year_project_frontend/features/profile/presentation/profile_screen.dart';
+import 'package:final_year_project_frontend/networks/profile_service.dart';
 import 'package:get_storage/get_storage.dart';
 
 class CartScreen extends StatefulWidget {
@@ -106,6 +108,221 @@ class _CartScreenState extends State<CartScreen> {
     }
   }
 
+  Future<void> _clearCart() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(_translate('Clear Cart', 'কার্ট খালি করুন')),
+        content: Text(
+          _translate(
+            'Are you sure you want to remove all items?',
+            'আপনি কি নিশ্চিত যে আপনি সমস্ত আইটেম সরাতে চান?',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(_translate('Cancel', 'বাতিল')),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(
+              _translate('Clear', 'খালি করুন'),
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) =>
+          Center(child: CircularProgressIndicator(color: AppColors.button)),
+    );
+
+    try {
+      final result = await CartService.clearCart();
+      if (mounted) {
+        Navigator.pop(context); // Close loading
+        if (result['success']) {
+          _loadCart();
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(result['message'] ?? 'Failed to clear cart'),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error clearing cart')));
+      }
+    }
+  }
+
+  Future<void> _removeItem(int cartItemId) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(_translate('Remove Item', 'আইটেম সরান')),
+        content: Text(
+          _translate(
+            'Are you sure you want to remove this item?',
+            'আপনি কি নিশ্চিত যে আপনি এই আইটেমটি সরাতে চান?',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(_translate('Cancel', 'বাতিল')),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(
+              _translate('Remove', 'সরান'),
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) =>
+          Center(child: CircularProgressIndicator(color: AppColors.button)),
+    );
+
+    try {
+      final result = await CartService.removeFromCart(cartItemId);
+      if (mounted) {
+        Navigator.pop(context); // Close loading
+        if (result['success']) {
+          _loadCart();
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(result['message'] ?? 'Failed to remove item'),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error removing item')));
+      }
+    }
+  }
+
+  Future<void> _placeOrder({int? sellerId}) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) =>
+          Center(child: CircularProgressIndicator(color: AppColors.button)),
+    );
+
+    try {
+      final result = await CartService.placeOrder(sellerId: sellerId);
+
+      if (mounted) {
+        Navigator.pop(context); // Close loading
+
+        if (result['success']) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(result['message'] ?? 'Order placed successfully'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          _loadCart();
+        } else {
+          // Check for specific profile completion error
+          if (result['message'] ==
+              "Please complete your profile with name and phone number") {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(result['message']),
+                duration: Duration(seconds: 2),
+                action: SnackBarAction(
+                  label: 'Update Profile',
+                  textColor: Colors.yellow,
+                  onPressed: () async {
+                    // Trigger profile update navigation
+                    await _navigateToProfileUpdate();
+                  },
+                ),
+              ),
+            );
+
+            // Create a slight delay before auto-navigating if user doesn't click action
+            // Or just navigate immediately? User said "this redrect profile update pages"
+            await _navigateToProfileUpdate();
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(result['message'] ?? 'Failed to place order'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error placing order')));
+      }
+    }
+  }
+
+  Future<void> _navigateToProfileUpdate() async {
+    // Fetch profile first to get data
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) =>
+          Center(child: CircularProgressIndicator(color: AppColors.button)),
+    );
+
+    final role = GetStorage().read(kKeyRole) ?? 'customer'; // Default role
+    final profileResult = await ProfileService.getProfile(role: role);
+
+    if (mounted) {
+      Navigator.pop(context); // Close loading
+
+      if (profileResult['success']) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                ProfileScreen(userData: profileResult['data'], role: role),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load profile for update')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -121,6 +338,15 @@ class _CartScreenState extends State<CartScreen> {
           icon: Icon(Icons.arrow_back, color: AppColors.button),
           onPressed: () => Navigator.pop(context),
         ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.delete_outline, color: Colors.red),
+            onPressed:
+                (_cartData?['seller_wise_items'] as List?)?.isEmpty == true
+                ? null
+                : _clearCart,
+          ),
+        ],
       ),
       body: _buildBody(),
       bottomNavigationBar: _buildBottomBar(),
@@ -265,13 +491,7 @@ class _CartScreenState extends State<CartScreen> {
                   width: double.infinity,
                   child: OutlinedButton(
                     onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            'Checkout from ${seller['store_name']} coming soon',
-                          ),
-                        ),
-                      );
+                      _placeOrder(sellerId: seller['id']);
                     },
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.button,
@@ -282,8 +502,8 @@ class _CartScreenState extends State<CartScreen> {
                     ),
                     child: Text(
                       _translate(
-                        'Checkout from this Store',
-                        'এই দোকান থেকে চেকআউট করুন',
+                        'Place Order from this Store',
+                        'এই দোকান থেকে অর্ডার করুন',
                       ),
                     ),
                   ),
@@ -431,6 +651,10 @@ class _CartScreenState extends State<CartScreen> {
               ],
             ),
           ),
+          IconButton(
+            onPressed: () => _removeItem(item['id']),
+            icon: Icon(Icons.close, color: Colors.grey, size: 20.sp),
+          ),
         ],
       ),
     );
@@ -480,17 +704,7 @@ class _CartScreenState extends State<CartScreen> {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: () {
-                // Checkout implementation would go here
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      _translate(
-                        'Checkout All coming soon!',
-                        'সব চেকআউট শীঘ্রই আসছে!',
-                      ),
-                    ),
-                  ),
-                );
+                _placeOrder();
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.button,
@@ -500,7 +714,7 @@ class _CartScreenState extends State<CartScreen> {
                 ),
               ),
               child: Text(
-                _translate('Checkout All', 'সব চেকআউট করুন'),
+                _translate('Place Order All', 'সব অর্ডার করুন'),
                 style: TextStyle(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.bold,
