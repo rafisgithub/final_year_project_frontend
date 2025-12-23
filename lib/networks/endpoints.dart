@@ -54,6 +54,9 @@ final class Endpoints {
 
   // products
   static const String productDetails = "product-details/";
+  static const String productCategories = "product-categories/";
+  static const String diseasedCategories = "diseased-categories/";
+  static const String targetStages = "target-stages/";
 
   // chat
   static const String chatList = "my-chat-list-users/";

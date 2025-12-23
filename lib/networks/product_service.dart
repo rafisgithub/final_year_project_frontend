@@ -77,4 +77,79 @@ class ProductService {
       };
     }
   }
+
+  // Get product categories
+  static Future<Map<String, dynamic>> getProductCategories() async {
+    try {
+      final response = await getHttp(Endpoints.productCategories, null);
+
+      if (response.statusCode == 200) {
+        final responseData = response.data;
+        if (responseData['success'] == true) {
+          return {
+            'success': true,
+            'message':
+                responseData['message'] ??
+                'Product categories retrieved successfully',
+            'data': responseData['data'],
+          };
+        }
+      }
+      return {'success': false, 'message': 'Failed to load categories'};
+    } catch (e) {
+      return {'success': false, 'message': 'Error fetching categories'};
+    }
+  }
+
+  // Get diseased categories
+  static Future<Map<String, dynamic>> getDiseasedCategories() async {
+    try {
+      final response = await getHttp(Endpoints.diseasedCategories, null);
+
+      if (response.statusCode == 200) {
+        final responseData = response.data;
+        if (responseData['success'] == true) {
+          return {
+            'success': true,
+            'message':
+                responseData['message'] ??
+                'Diseased categories retrieved successfully',
+            'data': responseData['data'],
+          };
+        }
+      }
+      return {
+        'success': false,
+        'message': 'Failed to load diseased categories',
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Error fetching diseased categories',
+      };
+    }
+  }
+
+  // Get target stages
+  static Future<Map<String, dynamic>> getTargetStages() async {
+    try {
+      final response = await getHttp(Endpoints.targetStages, null);
+
+      if (response.statusCode == 200) {
+        final responseData = response.data;
+        if (responseData['success'] == true) {
+          return {
+            'success': true,
+            'message':
+                responseData['message'] ??
+                'Target stages retrieved successfully',
+            'data': responseData['data'],
+          };
+        }
+      }
+      return {'success': false, 'message': 'Failed to load target stages'};
+    } catch (e) {
+      return {'success': false, 'message': 'Error fetching target stages'};
+    }
+  }
 }
