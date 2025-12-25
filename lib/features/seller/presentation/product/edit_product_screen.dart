@@ -7,70 +7,39 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 
 import 'package:final_year_project_frontend/networks/product_service.dart';
+import 'package:final_year_project_frontend/networks/endpoints.dart';
+// ignore: unused_import
+import 'package:final_year_project_frontend/networks/dio/dio.dart'; // check if needed for other things or just ensure imageUrl is available.
+// imageUrl is top level in endpoints.dart, so importing endpoints.dart should suffice if it's exported.
+// Re-checking endpoints.dart content.
 
-class AddProductScreen extends StatefulWidget {
-  const AddProductScreen({super.key});
+class EditProductScreen extends StatefulWidget {
+  final Map<String, dynamic> product;
+
+  const EditProductScreen({super.key, required this.product});
 
   @override
-  State<AddProductScreen> createState() => _AddProductScreenState();
+  State<EditProductScreen> createState() => _EditProductScreenState();
 }
 
-class _AddProductScreenState extends State<AddProductScreen> {
+class _EditProductScreenState extends State<EditProductScreen> {
   final _formKey = GlobalKey<FormState>();
   final ImagePicker _picker = ImagePicker();
 
   bool _isLoading = false;
 
-  Future<void> _submitProduct() async {
-    if (_validateForm()) {
-      _formKey.currentState!.save();
-
-      setState(() {
-        _isLoading = true;
-      });
-
-      final result = await ProductService.addProduct(
-        name: _name,
-        price: _priceController.text,
-        discount: _discountController.text,
-        stock: _stock,
-        description: _description,
-        category: _selectedCategory!,
-        targetStage: _selectedStage!,
-        disease: _selectedDisease,
-        thumbnail: _thumbnail,
-        productImages: _productImages,
-      );
-
-      setState(() {
-        _isLoading = false;
-      });
-
-      if (mounted) {
-        if (result['success']) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Product Added Successfully!'),
-              backgroundColor: AppColors.button,
-            ),
-          );
-          Navigator.pop(context);
-        } else {
-          _showErrorSnackBar(result['message']);
-        }
-      }
-    }
-  }
-
   // Form Fields
   String _name = '';
-  // double _price = 0.0;
   String _stock = '';
   String _description = '';
 
   // Controllers for live updates
-  final TextEditingController _priceController = TextEditingController();
-  final TextEditingController _discountController = TextEditingController();
+  late TextEditingController _nameController;
+  late TextEditingController _priceController;
+  late TextEditingController _discountController;
+  late TextEditingController _stockController;
+  late TextEditingController _descriptionController;
+
   double _discountedPrice = 0.0;
 
   // Dropdown Selections
@@ -79,10 +48,19 @@ class _AddProductScreenState extends State<AddProductScreen> {
   String? _selectedStage;
 
   // Images
+  // Existing thumbnail URL
+  String? _existingThumbnail;
+  // New thumbnail file
   File? _thumbnail;
-  List<File> _productImages = [];
 
-  // Data Sources (from Django Model)
+  // New gallery images
+  List<File> _newProductImages = [];
+  // Existing gallery images
+  List<dynamic> _existingProductImages = [];
+  // Deleted existing image IDs
+  final List<int> _deletedImageIds = [];
+
+  // Data Sources (Same as AddProduct)
   final Map<String, String> _categories = {
     'all': 'All (সকল)',
     'fertilizer': 'Fertilizer (সার)',
@@ -139,14 +117,76 @@ class _AddProductScreenState extends State<AddProductScreen> {
   @override
   void initState() {
     super.initState();
+    _initializeFields();
+  }
+
+  void _initializeFields() {
+    final p = widget.product;
+
+    _name = p['name'] ?? '';
+    _stock = p['stock'].toString();
+    _description = p['description'] ?? '';
+
+    // Calculate initial discount percentage from price/discount_price or use discount field if available?
+    // API has 'discount_price' and 'price'.
+    // If we want to show 'Discount %' field, we need to reverse calc.
+    // Or if API sends 'discount' field (percentage), use that. User said 'discount_price' is there.
+    // Let's assume user wants to edit Price and Discount Percentage again.
+    // We can try to calc percentage.
+    double price = double.tryParse(p['price'].toString()) ?? 0.0;
+    double discountPrice =
+        double.tryParse(p['discount_price'].toString()) ?? 0.0;
+    double discount = 0.0;
+
+    // Check if 'discount' field exists in response (sometimes it's null or not there)
+    // If not, calculate.
+    if (p['discount'] != null) {
+      discount = double.tryParse(p['discount'].toString()) ?? 0.0;
+    } else {
+      if (price > 0 && discountPrice < price) {
+        discount = ((price - discountPrice) / price) * 100;
+      }
+    }
+
+    _nameController = TextEditingController(text: _name);
+    _priceController = TextEditingController(text: price.toString());
+    _discountController = TextEditingController(
+      text: discount.toInt().toString(),
+    ); // Show int for cleaner UI
+    _stockController = TextEditingController(text: _stock);
+    _descriptionController = TextEditingController(text: _description);
+
+    _selectedCategory = p['product_category'];
+    _selectedStage = p['target_stage'];
+    _selectedDisease = p['diseased_category'];
+
+    // Map keys might need validation against our lists to avoid dropdown errors if API sends unknown key
+    if (_selectedCategory != null &&
+        !_categories.containsKey(_selectedCategory))
+      _selectedCategory = null;
+    if (_selectedStage != null && !_growthStages.containsKey(_selectedStage))
+      _selectedStage = null;
+    if (_selectedDisease != null && !_diseases.containsKey(_selectedDisease))
+      _selectedDisease = null;
+
+    _existingThumbnail = p['thumbnail'];
+
+    if (p['product_images'] != null && p['product_images'] is List) {
+      _existingProductImages = p['product_images'];
+    }
+
+    _calculateDiscountedPrice();
     _priceController.addListener(_calculateDiscountedPrice);
     _discountController.addListener(_calculateDiscountedPrice);
   }
 
   @override
   void dispose() {
+    _nameController.dispose();
     _priceController.dispose();
     _discountController.dispose();
+    _stockController.dispose();
+    _descriptionController.dispose();
     super.dispose();
   }
 
@@ -159,11 +199,55 @@ class _AddProductScreenState extends State<AddProductScreen> {
     });
   }
 
+  Future<void> _submitProduct() async {
+    if (_validateForm()) {
+      _formKey.currentState!.save();
+
+      setState(() {
+        _isLoading = true;
+      });
+
+      final result = await ProductService.updateProduct(
+        id: widget.product['id'],
+        name: _nameController.text,
+        price: _priceController.text,
+        discount: _discountController.text,
+        stock: _stockController.text,
+        description: _descriptionController.text,
+        category: _selectedCategory!,
+        targetStage: _selectedStage!,
+        disease: _selectedDisease,
+        thumbnail: _thumbnail, // Only sends if not null
+        productImages: _newProductImages,
+        deleteImageIds: _deletedImageIds,
+      );
+
+      setState(() {
+        _isLoading = false;
+      });
+
+      if (mounted) {
+        if (result['success']) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Product Updated Successfully!'),
+              backgroundColor: AppColors.button,
+            ),
+          );
+          Navigator.pop(context); // Go back
+        } else {
+          _showErrorSnackBar(result['message']);
+        }
+      }
+    }
+  }
+
   Future<void> _pickThumbnail() async {
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
     if (image != null) {
       setState(() {
         _thumbnail = File(image.path);
+        // If we pick new one, we hide existing one visually or replace it
       });
     }
   }
@@ -172,21 +256,29 @@ class _AddProductScreenState extends State<AddProductScreen> {
     final List<XFile> images = await _picker.pickMultiImage();
     if (images.isNotEmpty) {
       setState(() {
-        _productImages.addAll(images.map((e) => File(e.path)));
+        _newProductImages.addAll(images.map((e) => File(e.path)));
       });
     }
   }
 
-  void _removeProductImage(int index) {
+  void _removeNewProductImage(int index) {
     setState(() {
-      _productImages.removeAt(index);
+      _newProductImages.removeAt(index);
     });
   }
 
-  // Validation function
-  bool _validateForm() {
-    bool isValid = _formKey.currentState!.validate();
+  void _removeExistingImage(int index) {
+    setState(() {
+      final img = _existingProductImages[index];
+      if (img['id'] != null) {
+        _deletedImageIds.add(img['id']);
+      }
+      _existingProductImages.removeAt(index);
+    });
+  }
 
+  bool _validateForm() {
+    if (!_formKey.currentState!.validate()) return false;
     if (_selectedCategory == null) {
       _showErrorSnackBar('Please select a category');
       return false;
@@ -195,10 +287,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
       _showErrorSnackBar('Please select a growth stage');
       return false;
     }
-
-    // Disease is optional, so no check needed
-
-    return isValid;
+    return true;
   }
 
   void _showErrorSnackBar(String message) {
@@ -213,7 +302,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text(
-          'Add New Product',
+          'Edit Product',
           style: TextFontStyle.textStyle20c3D4040EurostileW700Center.copyWith(
             color: Colors.black,
             fontSize: 20.sp,
@@ -250,33 +339,40 @@ class _AddProductScreenState extends State<AddProductScreen> {
                     color: AppColors.cF2F0F0,
                     borderRadius: BorderRadius.circular(16.r),
                     border: Border.all(color: AppColors.cD5D5D5),
-                    image: _thumbnail != null
-                        ? DecorationImage(
-                            image: FileImage(_thumbnail!),
-                            fit: BoxFit.cover,
-                          )
-                        : null,
                   ),
-                  child: _thumbnail == null
-                      ? Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.add_photo_alternate_rounded,
-                              size: 40.sp,
-                              color: AppColors.c8993A4,
-                            ),
-                            SizedBox(height: 8.h),
-                            Text(
-                              'Tap to upload thumbnail',
-                              style: TextFontStyle.textStyle12c7E7E7Epoppins400,
-                            ),
-                          ],
-                        )
-                      : null,
+                  clipBehavior: Clip.hardEdge,
+                  child: _thumbnail != null
+                      ? Image.file(_thumbnail!, fit: BoxFit.cover)
+                      : (_existingThumbnail != null
+                            ? Image.network(
+                                _existingThumbnail!.startsWith('http')
+                                    ? _existingThumbnail!
+                                    : '$imageUrl$_existingThumbnail',
+                                fit: BoxFit.cover,
+                                errorBuilder: (c, o, s) => Icon(
+                                  Icons.broken_image,
+                                  color: Colors.grey,
+                                ),
+                              )
+                            : Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.add_photo_alternate_rounded,
+                                    size: 40.sp,
+                                    color: AppColors.c8993A4,
+                                  ),
+                                  SizedBox(height: 8.h),
+                                  Text(
+                                    'Tap to upload new thumbnail',
+                                    style: TextFontStyle
+                                        .textStyle12c7E7E7Epoppins400,
+                                  ),
+                                ],
+                              )),
                 ),
               ),
-              if (_thumbnail != null)
+              if (_thumbnail != null || _existingThumbnail != null)
                 Padding(
                   padding: EdgeInsets.only(top: 8.h),
                   child: Align(
@@ -302,8 +398,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
               SizedBox(height: 16.h),
               _buildLabel('Product Name'),
               _buildTextField(
-                hint: 'Enter product name (e.g. ACI Fertilizer)',
-                onSaved: (value) => _name = value!,
+                controller: _nameController,
+                hint: 'Enter product name',
                 validator: (value) =>
                     value!.isEmpty ? 'Name is required' : null,
               ),
@@ -311,9 +407,9 @@ class _AddProductScreenState extends State<AddProductScreen> {
 
               _buildLabel('Description'),
               _buildTextField(
+                controller: _descriptionController,
                 hint: 'Enter detailed description...',
                 maxLines: 4,
-                onSaved: (value) => _description = value!,
                 validator: (value) =>
                     value!.isEmpty ? 'Description is required' : null,
               ),
@@ -326,14 +422,17 @@ class _AddProductScreenState extends State<AddProductScreen> {
               _buildDropdown(
                 hint: 'Select Category',
                 items: _categories,
+                selectedKey: _selectedCategory,
                 onSelected: (val) => setState(() => _selectedCategory = val),
               ),
+
               SizedBox(height: 16.h),
 
               _buildLabel('Growth Stage'),
               _buildDropdown(
                 hint: 'Select Target Stage',
                 items: _growthStages,
+                selectedKey: _selectedStage,
                 onSelected: (val) => setState(() => _selectedStage = val),
               ),
               SizedBox(height: 16.h),
@@ -344,7 +443,6 @@ class _AddProductScreenState extends State<AddProductScreen> {
                     "Is this for a specific disease?",
                     style: TextFontStyle.textStyle16c3D4040EurostileW500,
                   ),
-                  Spacer(),
                 ],
               ),
               SizedBox(height: 8.h),
@@ -352,6 +450,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
               _buildDropdown(
                 hint: 'Select Disease (if applicable)',
                 items: _diseases,
+                selectedKey: _selectedDisease,
                 onSelected: (val) => setState(() => _selectedDisease = val),
               ),
               SizedBox(height: 24.h),
@@ -418,15 +517,15 @@ class _AddProductScreenState extends State<AddProductScreen> {
               SizedBox(height: 16.h),
               _buildLabel('Stock Quantity'),
               _buildTextField(
+                controller: _stockController,
                 hint: 'Available stock',
                 inputType: TextInputType.number,
-                onSaved: (value) => _stock = value!,
                 validator: (value) => value!.isEmpty ? 'Required' : null,
               ),
               SizedBox(height: 24.h),
 
-              // Gallery
-              _buildSectionTitle('Product Gallery'),
+              // Gallery (Adding new images only for now)
+              _buildSectionTitle('Add New Images (Gallery)'),
               SizedBox(height: 10.h),
               GridView.builder(
                 shrinkWrap: true,
@@ -436,9 +535,14 @@ class _AddProductScreenState extends State<AddProductScreen> {
                   crossAxisSpacing: 10,
                   mainAxisSpacing: 10,
                 ),
-                itemCount: _productImages.length + 1,
+                itemCount:
+                    _existingProductImages.length +
+                    _newProductImages.length +
+                    1,
                 itemBuilder: (context, index) {
-                  if (index == _productImages.length) {
+                  if (index ==
+                      _existingProductImages.length +
+                          _newProductImages.length) {
                     return GestureDetector(
                       onTap: _pickProductImages,
                       child: Container(
@@ -451,6 +555,49 @@ class _AddProductScreenState extends State<AddProductScreen> {
                       ),
                     );
                   }
+
+                  // Existing Images
+                  if (index < _existingProductImages.length) {
+                    final imgData = _existingProductImages[index];
+                    final imgUrl = imgData['image']; // based on API sample
+                    final fullUrl = imgUrl.startsWith('http')
+                        ? imgUrl
+                        : '$imageUrl$imgUrl';
+
+                    return Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8.r),
+                            image: DecorationImage(
+                              image: NetworkImage(fullUrl),
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          top: -5,
+                          right: -5,
+                          child: GestureDetector(
+                            onTap: () => _removeExistingImage(index),
+                            child: CircleAvatar(
+                              backgroundColor: Colors.red,
+                              radius: 10.r,
+                              child: Icon(
+                                Icons.close,
+                                size: 12.sp,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  }
+
+                  // New Images
+                  final newIndex = index - _existingProductImages.length;
                   return Stack(
                     clipBehavior: Clip.none,
                     children: [
@@ -458,7 +605,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(8.r),
                           image: DecorationImage(
-                            image: FileImage(_productImages[index]),
+                            image: FileImage(_newProductImages[newIndex]),
                             fit: BoxFit.cover,
                           ),
                         ),
@@ -467,7 +614,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                         top: -5,
                         right: -5,
                         child: GestureDetector(
-                          onTap: () => _removeProductImage(index),
+                          onTap: () => _removeNewProductImage(newIndex),
                           child: CircleAvatar(
                             backgroundColor: Colors.red,
                             radius: 10.r,
@@ -501,7 +648,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                   child: _isLoading
                       ? CircularProgressIndicator(color: Colors.white)
                       : Text(
-                          'Create Product',
+                          'Update Product',
                           style: TextFontStyle.textStyle14cFFFFFFpoppinw400
                               .copyWith(
                                 fontWeight: FontWeight.bold,
@@ -545,7 +692,6 @@ class _AddProductScreenState extends State<AddProductScreen> {
     int maxLines = 1,
     TextInputType inputType = TextInputType.text,
     TextEditingController? controller,
-    FormFieldSetter<String>? onSaved,
     FormFieldValidator<String>? validator,
   }) {
     return TextFormField(
@@ -562,17 +708,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
           borderRadius: BorderRadius.circular(12.r),
           borderSide: BorderSide.none,
         ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12.r),
-          borderSide: BorderSide(color: Colors.transparent),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12.r),
-          borderSide: BorderSide(color: AppColors.button, width: 1.5),
-        ),
         contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
       ),
-      onSaved: onSaved,
       validator: validator,
     );
   }
@@ -581,11 +718,16 @@ class _AddProductScreenState extends State<AddProductScreen> {
     required Map<String, String> items,
     required ValueChanged<String?> onSelected,
     String? hint,
+    String? selectedKey,
   }) {
+    // If selectedKey is not in the items, we can't show it as initialSelection.
+    // However, we pre-washed keys in initState.
+
     return DropdownMenu<String>(
-      width: double.infinity, // Uses full width available
+      width: double.infinity,
+      initialSelection: selectedKey,
       hintText: hint,
-      enableFilter: true, // Enables searchable functionality
+      enableFilter: true,
       requestFocusOnTap: true,
       menuHeight: 300.h,
       textStyle: TextFontStyle.textStyle16c3D4040EurostileW500,
@@ -597,7 +739,6 @@ class _AddProductScreenState extends State<AddProductScreen> {
           borderSide: BorderSide.none,
         ),
         contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
-        hintStyle: TextFontStyle.textStyle16c8993A4EurostileField,
       ),
       dropdownMenuEntries: items.entries.map((entry) {
         return DropdownMenuEntry<String>(

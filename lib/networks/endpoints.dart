@@ -57,6 +57,14 @@ final class Endpoints {
   static const String productCategories = "product-categories/";
   static const String diseasedCategories = "diseased-categories/";
   static const String targetStages = "target-stages/";
+  static const String addProduct = "add-product/";
+  static const String sellerProducts = "seller-products/";
+  static const String updateStock = "update-product-stock/";
+  static const String updateProduct = "update-product/";
+  static const String editProduct = "edit-product/";
+  static const String productDelete = "product-delete/";
+  static const String sellerOrders = "seller-orders/";
+  static const String orderDetails = "order-details/";
 
   // chat
   static const String chatList = "my-chat-list-users/";

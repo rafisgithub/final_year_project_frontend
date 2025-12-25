@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:final_year_project_frontend/networks/dio/dio.dart';
@@ -150,6 +151,320 @@ class ProductService {
       return {'success': false, 'message': 'Failed to load target stages'};
     } catch (e) {
       return {'success': false, 'message': 'Error fetching target stages'};
+    }
+  }
+
+  // Get product details for editing
+  static Future<Map<String, dynamic>> getProductForEdit(int productId) async {
+    try {
+      final response = await getHttp(
+        '${Endpoints.editProduct}$productId/',
+        null,
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = response.data;
+        if (responseData['success'] == true) {
+          return {
+            'success': true,
+            'message':
+                responseData['message'] ?? 'Product retrieved successfully',
+            'data': responseData['data'],
+          };
+        }
+      }
+      return {'success': false, 'message': 'Failed to load product details'};
+    } catch (e) {
+      if (kDebugMode) {
+        print('Get Product For Edit Error: $e');
+      }
+      return {'success': false, 'message': 'Error fetching product details'};
+    }
+  }
+
+  // Add Product
+  static Future<Map<String, dynamic>> addProduct({
+    required String name,
+    required String price,
+    required String discount,
+    required String stock,
+    required String description,
+    required String category,
+    required String targetStage,
+    String? disease,
+    File? thumbnail,
+    List<File>? productImages,
+  }) async {
+    try {
+      FormData formData = FormData.fromMap({
+        'name': name,
+        'price': price,
+        'discount': discount,
+        'stock': stock,
+        'description': description,
+        'product_category': category,
+        'target_stage': targetStage,
+        if (disease != null && disease.isNotEmpty) 'diseased_category': disease,
+      });
+
+      if (thumbnail != null) {
+        formData.files.add(
+          MapEntry(
+            'thumbnail',
+            await MultipartFile.fromFile(
+              thumbnail.path,
+              filename: thumbnail.path.split('/').last,
+            ),
+          ),
+        );
+      }
+
+      if (productImages != null && productImages.isNotEmpty) {
+        for (var file in productImages) {
+          formData.files.add(
+            MapEntry(
+              'product_images[]',
+              await MultipartFile.fromFile(
+                file.path,
+                filename: file.path.split('/').last,
+              ),
+            ),
+          );
+        }
+      }
+
+      final response = await postHttpFormData(Endpoints.addProduct, formData);
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        final responseData = response.data;
+        if (responseData['success'] == true) {
+          return {
+            'success': true,
+            'message': responseData['message'] ?? 'Product added successfully',
+            'data': responseData['data'],
+          };
+        }
+      }
+
+      return {
+        'success': false,
+        'message': response.data['message'] ?? 'Failed to add product',
+      };
+    } on DioException catch (e) {
+      String errorMessage = 'Failed to add product';
+      if (e.response?.data != null && e.response?.data is Map) {
+        errorMessage = e.response?.data['message'] ?? errorMessage;
+      }
+      return {'success': false, 'message': errorMessage};
+    } catch (e) {
+      if (kDebugMode) {
+        print('Add Product Error: $e');
+      }
+      return {'success': false, 'message': 'An unexpected error occurred'};
+    }
+  }
+
+  // Get Seller Products
+  static Future<Map<String, dynamic>> getSellerProducts({
+    String? name,
+    String? category,
+    String? disease,
+    String? stage,
+  }) async {
+    try {
+      final Map<String, dynamic> queryParams = {};
+      if (name != null && name.isNotEmpty) queryParams['name'] = name;
+      if (category != null && category != 'all') {
+        queryParams['product_category'] = category;
+      }
+      if (disease != null && disease != 'all') {
+        queryParams['diseased_category'] = disease;
+      }
+      if (stage != null && stage != 'all_stages' && stage != 'all') {
+        queryParams['target_stage'] = stage;
+      }
+
+      final response = await getHttp(Endpoints.sellerProducts, queryParams);
+
+      if (response.statusCode == 200) {
+        final responseData = response.data;
+        if (responseData['success'] == true) {
+          return {
+            'success': true,
+            'message':
+                responseData['message'] ?? 'Products retrieved successfully',
+            'data': responseData['data'],
+          };
+        }
+      }
+      return {
+        'success': false,
+        'message': 'Failed to load products',
+        'data': [],
+      };
+    } catch (e) {
+      if (kDebugMode) {
+        print('Get Seller Products Error: $e');
+      }
+      return {
+        'success': false,
+        'message': 'Error loading products',
+        'data': [],
+      };
+    }
+  }
+
+  // Update Product Stock
+  static Future<Map<String, dynamic>> updateStock({
+    required int productId,
+    required int stock,
+  }) async {
+    try {
+      final data = {'stock': stock};
+
+      final response = await patchHttp(
+        '${Endpoints.updateStock}$productId/',
+        data,
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = response.data;
+        if (responseData['success'] == true) {
+          return {
+            'success': true,
+            'message': responseData['message'] ?? 'Stock updated successfully',
+          };
+        }
+      }
+      return {'success': false, 'message': 'Failed to update stock'};
+    } catch (e) {
+      if (kDebugMode) {
+        print('Update Stock Error: $e');
+      }
+      return {'success': false, 'message': 'Error updating stock'};
+    }
+  }
+
+  // Update Product (PUT)
+  static Future<Map<String, dynamic>> updateProduct({
+    required int id,
+    required String name,
+    required String price,
+    required String discount,
+    required String stock,
+    required String description,
+    required String category,
+    required String targetStage,
+    String? disease,
+    File? thumbnail,
+    List<File>? productImages,
+    List<int>? deleteImageIds,
+  }) async {
+    try {
+      FormData formData = FormData.fromMap({
+        'name': name,
+        'price': price,
+        'discount': discount,
+        'stock': stock,
+        'description': description,
+        'product_category': category,
+        'target_stage': targetStage,
+        if (disease != null && disease.isNotEmpty) 'diseased_category': disease,
+      });
+
+      if (deleteImageIds != null && deleteImageIds.isNotEmpty) {
+        for (var id in deleteImageIds) {
+          formData.fields.add(
+            MapEntry('delete_product_images[]', id.toString()),
+          );
+        }
+      }
+
+      if (thumbnail != null) {
+        formData.files.add(
+          MapEntry(
+            'thumbnail',
+            await MultipartFile.fromFile(
+              thumbnail.path,
+              filename: thumbnail.path.split('/').last,
+            ),
+          ),
+        );
+      }
+
+      if (productImages != null && productImages.isNotEmpty) {
+        for (var file in productImages) {
+          formData.files.add(
+            MapEntry(
+              'product_images[]',
+              await MultipartFile.fromFile(
+                file.path,
+                filename: file.path.split('/').last,
+              ),
+            ),
+          );
+        }
+      }
+
+      final response = await putHttpFormData(
+        '${Endpoints.updateProduct}$id/',
+        formData,
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final responseData = response.data;
+        if (responseData['success'] == true) {
+          return {
+            'success': true,
+            'message':
+                responseData['message'] ?? 'Product updated successfully',
+            'data': responseData['data'],
+          };
+        }
+      }
+
+      return {
+        'success': false,
+        'message': response.data['message'] ?? 'Failed to update product',
+      };
+    } on DioException catch (e) {
+      String errorMessage = 'Failed to update product';
+      if (e.response?.data != null && e.response?.data is Map) {
+        errorMessage = e.response?.data['message'] ?? errorMessage;
+      }
+      return {'success': false, 'message': errorMessage};
+    } catch (e) {
+      if (kDebugMode) {
+        print('Update Product Error: $e');
+      }
+      return {'success': false, 'message': 'An unexpected error occurred'};
+    }
+  }
+
+  // Delete Product
+  static Future<Map<String, dynamic>> deleteProduct(int productId) async {
+    try {
+      final response = await deleteHttp(
+        '${Endpoints.productDelete}$productId/',
+        null,
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        final responseData = response.data;
+        if (responseData['success'] == true) {
+          return {
+            'success': true,
+            'message':
+                responseData['message'] ?? 'Product deleted successfully',
+          };
+        }
+      }
+      return {'success': false, 'message': 'Failed to delete product'};
+    } catch (e) {
+      if (kDebugMode) {
+        print('Delete Product Error: $e');
+      }
+      return {'success': false, 'message': 'Error deleting product'};
     }
   }
 }

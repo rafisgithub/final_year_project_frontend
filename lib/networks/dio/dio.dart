@@ -110,7 +110,7 @@ Future<Response> patchHttp(String path, [dynamic data]) => DioSingleton
 Future<Response> getHttp(String path, [dynamic data]) => DioSingleton
     .instance
     .dio
-    .get(path, cancelToken: DioSingleton.cancelToken, data: data);
+    .get(path, cancelToken: DioSingleton.cancelToken, queryParameters: data);
 
 Future<Response> deleteHttp(String path, [dynamic data]) => DioSingleton
     .instance

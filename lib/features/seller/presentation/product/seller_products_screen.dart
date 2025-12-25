@@ -1,10 +1,13 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get_storage/get_storage.dart';
-import 'package:final_year_project_frontend/constants/app_constants.dart';
+
 import 'package:final_year_project_frontend/gen/colors.gen.dart';
 import 'package:final_year_project_frontend/features/seller/presentation/product/add_product_screen.dart';
 import 'package:final_year_project_frontend/networks/product_service.dart';
+import 'package:final_year_project_frontend/features/seller/presentation/product/edit_product_screen.dart';
+import 'package:final_year_project_frontend/networks/endpoints.dart';
+import 'package:final_year_project_frontend/constants/text_font_style.dart';
 
 class SellerProductsScreen extends StatefulWidget {
   const SellerProductsScreen({super.key});
@@ -14,74 +17,30 @@ class SellerProductsScreen extends StatefulWidget {
 }
 
 class _SellerProductsScreenState extends State<SellerProductsScreen> {
-  // Dummy products list with new fields for testing
-  final List<Map<String, dynamic>> _products = [
-    {
-      'name': 'Fresh Apple',
-      'price': '180',
-      'stock': '50',
-      'image': 'assets/images/apple.png',
-      'category': 'fertilizer',
-      'diseased_category': 'chili_leaf_curl',
-      'target_stage': 'seeding',
-    },
-    {
-      'name': 'Banana',
-      'price': '60',
-      'stock': '120',
-      'image': 'assets/images/banana.png',
-      'category': 'fertilizer',
-      'diseased_category': 'chili_healthy',
-      'target_stage': 'harvest',
-    },
-    {
-      'name': 'Fertilizer A',
-      'price': '500',
-      'stock': '20',
-      'image': 'assets/images/apple.png',
-      'category': 'fertilizer',
-      'diseased_category': 'corn_common_rust',
-      'target_stage': 'seeding',
-    },
-    {
-      'name': 'Potato',
-      'price': '40',
-      'stock': '100',
-      'image': 'assets/images/potato.png',
-      'category': 'seed',
-      'diseased_category': 'potato_early_blight',
-      'target_stage': 'germination',
-    },
-    {
-      'name': 'Tomato',
-      'price': '80',
-      'stock': '80',
-      'image': 'assets/images/tomato.png',
-      'category': 'pesticide',
-      'diseased_category': 'chili_leaf_curl',
-      'target_stage': 'flowering',
-    },
-  ];
-
-  final TextEditingController _searchController = TextEditingController();
-
-  // Filter States
-  String _selectedCategoryKey = 'all';
-  String _selectedDiseaseKey =
-      'all'; // Assuming 'all' meant "All Diseases" or similar
-  String _selectedStageKey = 'all';
-
   // Data Lists
+  List<Map<String, dynamic>> _products = [];
   List<Map<String, dynamic>> _categories = [];
   List<Map<String, dynamic>> _diseasedCategories = [];
   List<Map<String, dynamic>> _targetStages = [];
 
+  final TextEditingController _searchController = TextEditingController();
+
+  // Debounce for search
+  Timer? _debounce;
+
+  // Filter States
+  String _selectedCategoryKey = 'all';
+  String _selectedDiseaseKey = 'all';
+  String _selectedStageKey = 'all_stages';
+
   bool _isLoading = true;
+  bool _isProductsLoading = false;
 
   @override
   void initState() {
     super.initState();
     _fetchAllFilters();
+    _fetchProducts();
   }
 
   Future<void> _fetchAllFilters() async {
@@ -99,6 +58,9 @@ class _SellerProductsScreenState extends State<SellerProductsScreen> {
           // Process Categories
           if (results[0]['success']) {
             _categories = List<Map<String, dynamic>>.from(results[0]['data']);
+            if (!_categories.any((element) => element['key'] == 'all')) {
+              _categories.insert(0, {'key': 'all', 'value': 'All Categories'});
+            }
           }
 
           // Process Diseases
@@ -106,24 +68,23 @@ class _SellerProductsScreenState extends State<SellerProductsScreen> {
             _diseasedCategories = List<Map<String, dynamic>>.from(
               results[1]['data'],
             );
-            _diseasedCategories.insert(0, {'key': 'all', 'value': 'সব রোগ'});
+            _diseasedCategories.insert(0, {
+              'key': 'all',
+              'value': 'All Diseases (সব রোগ)',
+            });
           }
 
           // Process Stages
           if (results[2]['success']) {
             _targetStages = List<Map<String, dynamic>>.from(results[2]['data']);
-            // Check if 'all_stages' is already there or we need 'all' key
-            // The API example showed "all_stages". We might need to handle 'all' logic manually if the key is 'all_stages' for "All"
-            // But my internal logic uses 'all'. Let's see.
-            // If API returns a specific "All Key", I should use that.
-            // API returned "all_stages". I'll default my selection to that if it exists, otherwise 'all'
-
-            // Check if API already has an 'All' option.
-            // Categories had 'all'.
-            // Stages had 'all_stages'.
-            // Diseases example didn't explicitly show 'all' but it's safe to add one locally for "No Filter"
-
-            _selectedStageKey = 'all_stages'; // As per API response
+            if (!_targetStages.any(
+              (element) => element['key'] == 'all_stages',
+            )) {
+              _targetStages.insert(0, {
+                'key': 'all_stages',
+                'value': 'All Stages',
+              });
+            }
           }
           _isLoading = false;
         });
@@ -138,33 +99,41 @@ class _SellerProductsScreenState extends State<SellerProductsScreen> {
     }
   }
 
-  List<Map<String, dynamic>> get _filteredProducts {
-    return _products.where((product) {
-      final matchesSearch = product['name'].toString().toLowerCase().contains(
-        _searchController.text.toLowerCase(),
+  Future<void> _fetchProducts() async {
+    if (!mounted) return;
+    setState(() => _isProductsLoading = true);
+
+    try {
+      final response = await ProductService.getSellerProducts(
+        name: _searchController.text,
+        category: _selectedCategoryKey,
+        disease: _selectedDiseaseKey,
+        stage: _selectedStageKey,
       );
 
-      final matchesCategory =
-          _selectedCategoryKey == 'all' ||
-          product['category'] == _selectedCategoryKey;
-
-      final matchesDisease =
-          _selectedDiseaseKey == 'all' ||
-          product['diseased_category'] == _selectedDiseaseKey;
-
-      final matchesStage =
-          _selectedStageKey == 'all_stages' || // Matches API's "All" key
-          _selectedStageKey == 'all' || // Fallback
-          product['target_stage'] == _selectedStageKey;
-
-      return matchesSearch && matchesCategory && matchesDisease && matchesStage;
-    }).toList();
+      if (mounted) {
+        if (response['success']) {
+          setState(() {
+            _products = List<Map<String, dynamic>>.from(response['data']);
+          });
+        } else {
+          // Optionally show error for products fetch, or just empty list
+        }
+      }
+    } catch (e) {
+      // Handle error
+    } finally {
+      if (mounted) {
+        setState(() => _isProductsLoading = false);
+      }
+    }
   }
 
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
+  void _onSearchChanged(String query) {
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      _fetchProducts();
+    });
   }
 
   String _capitalize(String s) {
@@ -179,312 +148,682 @@ class _SellerProductsScreenState extends State<SellerProductsScreen> {
         .join(' ');
   }
 
-  Widget _buildFilterSection(
-    String title,
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  Widget _buildDropdownFilter(
+    String hint,
     List<Map<String, dynamic>> items,
-    String selectedKey,
-    Function(String) onSelected,
-    bool isEnglish,
+    String? selectedKey,
+    Function(String?) onSelected,
   ) {
-    if (items.isEmpty) return SizedBox.shrink();
+    final menuEntries = items.map((item) {
+      return DropdownMenuEntry<String>(
+        value: item['key'],
+        label: item['value'],
+      );
+    }).toList();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp),
+    return DropdownMenu<String>(
+      initialSelection: selectedKey,
+      label: Text(hint),
+      dropdownMenuEntries: menuEntries,
+      onSelected: onSelected,
+      width: 320.w,
+      enableFilter: true, // Enable search
+      menuHeight: 300.h,
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: Colors.grey[50],
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.r),
+          borderSide: BorderSide.none,
         ),
-        SizedBox(height: 8.h),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: items.map((item) {
-              final key = item['key'];
-              final value = item['value'];
-              final isSelected = selectedKey == key;
-
-              final label = isEnglish
-                  ? _capitalize(key.toString())
-                  : value.toString();
-
-              return Padding(
-                padding: EdgeInsets.only(right: 8.w),
-                child: FilterChip(
-                  label: Text(label),
-                  selected: isSelected,
-                  onSelected: (selected) => onSelected(key),
-                  backgroundColor: Colors.grey[100],
-                  selectedColor: AppColors.button.withOpacity(0.1),
-                  labelStyle: TextStyle(
-                    color: isSelected ? AppColors.button : Colors.grey[800],
-                    fontWeight: isSelected
-                        ? FontWeight.bold
-                        : FontWeight.normal,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20.r),
-                    side: BorderSide(
-                      color: isSelected ? AppColors.button : Colors.transparent,
-                    ),
-                  ),
-                  showCheckmark: false,
-                ),
-              );
-            }).toList(),
-          ),
-        ),
-        SizedBox(height: 16.h),
-      ],
+        contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+      ),
+      textStyle: TextStyle(
+        fontSize: 14.sp,
+        fontWeight: FontWeight.w400,
+        color: AppColors.c3D4040,
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    // Check language
-    final isEnglish = GetStorage().read(kKeyLanguage) == kKeyEnglish;
-
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: AppColors.cF2F0F0,
       appBar: AppBar(
         title: Text(
           'My Products',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          style: TextFontStyle.textStyle20c3D4040EurostileW700Center,
         ),
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(
+            Icons.arrow_back_ios_new,
+            color: Colors.black,
+            size: 20.sp,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
       ),
       body: Column(
         children: [
           Container(
-            padding: EdgeInsets.all(16.w),
-            color: Colors.white,
+            padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 8.h),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(20.r),
+                bottomRight: Radius.circular(20.r),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: Offset(0, 5),
+                ),
+              ],
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Search Bar
                 TextField(
                   controller: _searchController,
+                  style: TextStyle(
+                    fontFamily: 'Eurostile',
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w400,
+                    color: AppColors.c3D4040,
+                  ),
                   decoration: InputDecoration(
-                    hintText: 'Search products...',
-                    prefixIcon: Icon(Icons.search, color: Colors.grey),
+                    hintText: 'Search your products...',
+                    hintStyle: TextStyle(
+                      fontFamily: 'Eurostile',
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w400,
+                      color: AppColors.c8993A4,
+                    ),
+                    prefixIcon: Icon(Icons.search, color: AppColors.c8993A4),
                     filled: true,
-                    fillColor: Colors.grey[100],
+                    fillColor: AppColors.cF2F0F0,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.r),
                       borderSide: BorderSide.none,
                     ),
-                    contentPadding: EdgeInsets.symmetric(vertical: 12.h),
+                    contentPadding: EdgeInsets.symmetric(vertical: 0.h),
                   ),
-                  onChanged: (value) => setState(() {}),
+                  onChanged: _onSearchChanged,
                 ),
                 SizedBox(height: 16.h),
 
                 // Filters
                 _isLoading
                     ? Center(
-                        child: Padding(
-                          padding: EdgeInsets.all(20.0),
-                          child: CircularProgressIndicator(
-                            color: AppColors.button,
-                          ),
-                        ),
+                        child: LinearProgressIndicator(color: AppColors.button),
                       )
                     : Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildFilterSection(
-                            'Category',
-                            _categories,
-                            _selectedCategoryKey,
-                            (key) => setState(() => _selectedCategoryKey = key),
-                            isEnglish,
+                          Center(
+                            child: _buildDropdownFilter(
+                              'Category',
+                              _categories,
+                              _selectedCategoryKey,
+                              (value) {
+                                setState(
+                                  () => _selectedCategoryKey = value ?? 'all',
+                                );
+                                _fetchProducts();
+                              },
+                            ),
                           ),
-                          _buildFilterSection(
-                            'Disease',
-                            _diseasedCategories,
-                            _selectedDiseaseKey,
-                            (key) => setState(() => _selectedDiseaseKey = key),
-                            isEnglish,
-                          ),
-                          _buildFilterSection(
-                            'Stage',
-                            _targetStages,
-                            _selectedStageKey,
-                            (key) => setState(() => _selectedStageKey = key),
-                            isEnglish,
-                          ),
+                          SizedBox(height: 12.h),
+
+                          if (_selectedCategoryKey != 'all') ...[
+                            Center(
+                              child: _buildDropdownFilter(
+                                'Target Stage',
+                                _targetStages,
+                                _selectedStageKey,
+                                (value) {
+                                  setState(
+                                    () => _selectedStageKey =
+                                        value ?? 'all_stages',
+                                  );
+                                  _fetchProducts();
+                                },
+                              ),
+                            ),
+                            SizedBox(height: 12.h),
+                            Center(
+                              child: _buildDropdownFilter(
+                                'Target Disease',
+                                _diseasedCategories,
+                                _selectedDiseaseKey,
+                                (value) {
+                                  setState(
+                                    () => _selectedDiseaseKey = value ?? 'all',
+                                  );
+                                  _fetchProducts();
+                                },
+                              ),
+                            ),
+                          ],
                         ],
                       ),
               ],
             ),
           ),
+
+          if (_isProductsLoading)
+            Padding(
+              padding: EdgeInsets.all(20.0),
+              child: Center(
+                child: CircularProgressIndicator(color: AppColors.button),
+              ),
+            ),
+
           Expanded(
-            child: _filteredProducts.isEmpty
+            child: !_isProductsLoading && _products.isEmpty
                 ? Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(
-                          Icons.search_off,
+                          Icons.inventory_2_outlined,
                           size: 64.sp,
-                          color: Colors.grey[300],
+                          color: AppColors.c8993A4,
                         ),
                         SizedBox(height: 16.h),
                         Text(
                           'No products found',
-                          style: TextStyle(
-                            fontSize: 16.sp,
-                            color: Colors.grey[500],
-                          ),
+                          style: TextFontStyle.textStyle16c8993A4EurostileField,
                         ),
                       ],
                     ),
                   )
                 : ListView.separated(
                     padding: EdgeInsets.all(16.w),
-                    itemCount: _filteredProducts.length,
+                    itemCount: _products.length,
                     separatorBuilder: (context, index) =>
                         SizedBox(height: 12.h),
                     itemBuilder: (context, index) {
-                      final product = _filteredProducts[index];
-                      return Container(
-                        padding: EdgeInsets.all(12.w),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12.r),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
-                              blurRadius: 4,
-                              offset: Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            // Product Image Placeholder
-                            Container(
-                              width: 60.w,
-                              height: 60.w,
-                              decoration: BoxDecoration(
-                                color: Colors.grey[200],
-                                borderRadius: BorderRadius.circular(8.r),
-                              ),
-                              child: Icon(Icons.image, color: Colors.grey),
-                            ),
-                            SizedBox(width: 12.w),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    product['name'],
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16.sp,
-                                    ),
-                                  ),
-                                  SizedBox(height: 4.h),
-                                  Text(
-                                    'Stock: ${product['stock']}',
-                                    style: TextStyle(
-                                      fontSize: 12.sp,
-                                      color: Colors.grey[600],
-                                    ),
-                                  ),
-                                  Wrap(
-                                    spacing: 4,
-                                    children: [
-                                      Text(
-                                        product['category'],
-                                        style: TextStyle(
-                                          fontSize: 10.sp,
-                                          color: AppColors.button,
-                                        ),
-                                      ),
-                                      Text(
-                                        '|',
-                                        style: TextStyle(
-                                          fontSize: 10.sp,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                      Text(
-                                        product['diseased_category']
-                                            .toString()
-                                            .replaceAll('_', ' '),
-                                        style: TextStyle(
-                                          fontSize: 10.sp,
-                                          color: Colors.orange,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Column(
-                              children: [
-                                Text(
-                                  '৳ ${product['price']}',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.button,
-                                    fontSize: 16.sp,
-                                  ),
-                                ),
-                                SizedBox(height: 4.h),
-                                Row(
-                                  children: [
-                                    IconButton(
-                                      icon: Icon(
-                                        Icons.remove_circle_outline,
-                                        size: 20.sp,
-                                        color: Colors.grey,
-                                      ),
-                                      onPressed: () {},
-                                      padding: EdgeInsets.zero,
-                                      constraints: BoxConstraints(),
-                                    ),
-                                    SizedBox(width: 8.w),
-                                    IconButton(
-                                      icon: Icon(
-                                        Icons.add_circle_outline,
-                                        size: 20.sp,
-                                        color: AppColors.button,
-                                      ),
-                                      onPressed: () {},
-                                      padding: EdgeInsets.zero,
-                                      constraints: BoxConstraints(),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      );
+                      final product = _products[index];
+                      return _buildProductCard(product);
                     },
                   ),
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Navigate to Add Product Screen
-          Navigator.push(
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () async {
+          await Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => AddProductScreen()),
           );
+          // Refresh list when coming back
+          _fetchProducts();
         },
         backgroundColor: AppColors.button,
-        child: Icon(Icons.add, color: Colors.white),
+        icon: Icon(Icons.add, color: Colors.white),
+        label: Text(
+          "Add Product",
+          style: TextFontStyle.textStyle14cFFFFFFpoppinw400.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProductCard(Map<String, dynamic> product) {
+    final double price = double.tryParse(product['price'].toString()) ?? 0.0;
+    final double discountPrice =
+        double.tryParse(product['discount_price'].toString()) ?? 0.0;
+
+    // Calculate percentage for badge
+    double discountPercentage = 0.0;
+    if (price > 0 && discountPrice < price) {
+      discountPercentage = ((price - discountPrice) / price) * 100;
+    }
+
+    final bool hasDiscount = discountPercentage > 0;
+
+    // Construct thumbnail ImageProvider
+    ImageProvider? thumbnailProvider;
+    if (product['thumbnail'] != null) {
+      String thumbPath = product['thumbnail'];
+      if (thumbPath.startsWith('http')) {
+        thumbnailProvider = NetworkImage(thumbPath);
+      } else {
+        if (thumbPath.startsWith('assets/')) {
+          thumbnailProvider = AssetImage(thumbPath);
+        } else {
+          thumbnailProvider = NetworkImage('$imageUrl$thumbPath');
+        }
+      }
+    }
+
+    return GestureDetector(
+      onTap: () {
+        // Swallow taps on the card to prevent unwanted navigation
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16.r),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 8,
+              offset: Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: EdgeInsets.all(12.w),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Thumbnail
+              Container(
+                width: 80.w,
+                height: 80.w,
+                decoration: BoxDecoration(
+                  color: AppColors.cF2F0F0,
+                  borderRadius: BorderRadius.circular(12.r),
+                  image: thumbnailProvider != null
+                      ? DecorationImage(
+                          image: thumbnailProvider,
+                          fit: BoxFit.cover,
+                        )
+                      : null,
+                ),
+                child: thumbnailProvider == null
+                    ? Icon(
+                        Icons.image_not_supported_outlined,
+                        color: AppColors.c8993A4,
+                      )
+                    : null,
+              ),
+              SizedBox(width: 12.w),
+
+              // Details
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            product['name'],
+                            style: TextStyle(
+                              fontFamily: 'Eurostile',
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.c3D4040,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        SizedBox(
+                          width: 30.w,
+                          height: 30.w,
+                          child: PopupMenuButton<String>(
+                            padding: EdgeInsets.zero,
+                            icon: Icon(
+                              Icons.more_vert,
+                              size: 20.sp,
+                              color: AppColors.c8993A4,
+                            ),
+                            onSelected: (value) async {
+                              if (value == 'edit') {
+                                showDialog(
+                                  context: context,
+                                  barrierDismissible: false,
+                                  builder: (c) => Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                );
+
+                                final result =
+                                    await ProductService.getProductForEdit(
+                                      product['id'],
+                                    );
+                                Navigator.pop(context); // Close loading
+
+                                if (result['success']) {
+                                  await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => EditProductScreen(
+                                        product: result['data'],
+                                      ),
+                                    ),
+                                  );
+                                  _fetchProducts(); // Refresh after edit
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text(result['message'])),
+                                  );
+                                }
+                              } else if (value == 'delete') {
+                                _showDeleteConfirmationDialog(
+                                  context,
+                                  product['id'],
+                                );
+                              } else if (value == 'update_stock') {
+                                _showUpdateStockDialog(context, product);
+                              }
+                            },
+                            color: Colors.white,
+                            itemBuilder: (BuildContext context) {
+                              return [
+                                PopupMenuItem(
+                                  value: 'edit',
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.edit,
+                                        size: 18.sp,
+                                        color: Colors.blue,
+                                      ),
+                                      SizedBox(width: 8.w),
+                                      Text(
+                                        'Edit',
+                                        style: TextStyle(
+                                          fontSize: 14.sp,
+                                          color: AppColors.c3D4040,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                PopupMenuItem(
+                                  value: 'update_stock',
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.inventory,
+                                        size: 18.sp,
+                                        color: Colors.orange,
+                                      ),
+                                      SizedBox(width: 8.w),
+                                      Text(
+                                        'Update Stock',
+                                        style: TextStyle(
+                                          fontSize: 14.sp,
+                                          color: AppColors.c3D4040,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                PopupMenuItem(
+                                  value: 'delete',
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.delete_outline,
+                                        size: 18.sp,
+                                        color: Colors.red,
+                                      ),
+                                      SizedBox(width: 8.w),
+                                      Text(
+                                        'Delete',
+                                        style: TextStyle(
+                                          fontSize: 14.sp,
+                                          color: AppColors.c3D4040,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ];
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 4.h),
+
+                    // Category & Stock
+                    Row(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 6.w,
+                            vertical: 2.h,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.button.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(4.r),
+                          ),
+                          child: Text(
+                            _capitalize(product['product_category'] ?? ''),
+                            style: TextStyle(
+                              fontSize: 10.sp,
+                              color: AppColors.button,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 8.w),
+                        Text(
+                          'Stock: ${product['stock']}',
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            color: AppColors.c8993A4,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 8.h),
+
+                    // Pricing
+                    Row(
+                      children: [
+                        Text(
+                          '৳${discountPrice.toStringAsFixed(0)}',
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.button,
+                            fontFamily: 'Eurostile',
+                          ),
+                        ),
+                        if (hasDiscount) ...[
+                          SizedBox(width: 6.w),
+                          Text(
+                            '৳${price.toStringAsFixed(0)}',
+                            style: TextStyle(
+                              fontSize: 12.sp,
+                              color: AppColors.c8993A4,
+                              decoration: TextDecoration.lineThrough,
+                            ),
+                          ),
+                          SizedBox(width: 6.w),
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 4.w,
+                              vertical: 1.h,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.red.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(4.r),
+                            ),
+                            child: Text(
+                              '-${discountPercentage.toStringAsFixed(0)}%',
+                              style: TextStyle(
+                                fontSize: 10.sp,
+                                color: Colors.red,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showUpdateStockDialog(
+    BuildContext context,
+    Map<String, dynamic> product,
+  ) {
+    final TextEditingController _stockController = TextEditingController(
+      text: product['stock'].toString(),
+    );
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(
+          "Update Stock",
+          style: TextStyle(
+            fontFamily: 'Eurostile',
+            fontSize: 18.sp,
+            fontWeight: FontWeight.w700,
+            color: AppColors.c3D4040,
+          ),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Current Stock: ${product['stock']}",
+              style: TextStyle(fontSize: 14.sp, color: AppColors.c8993A4),
+            ),
+            SizedBox(height: 12.h),
+            TextField(
+              controller: _stockController,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: "New Stock Quantity",
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text("Cancel", style: TextStyle(color: Colors.red)),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final newStock = int.tryParse(_stockController.text);
+              if (newStock != null) {
+                Navigator.pop(context);
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (c) => Center(child: CircularProgressIndicator()),
+                );
+
+                final result = await ProductService.updateStock(
+                  productId: product['id'],
+                  stock: newStock,
+                );
+
+                Navigator.pop(context);
+
+                if (result['success']) {
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text(result['message'])));
+                  _fetchProducts();
+                } else {
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text(result['message'])));
+                }
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text("Invalid stock quantity")),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.button),
+            child: Text("Update", style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeleteConfirmationDialog(BuildContext context, int productId) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(
+          "Delete Product",
+          style: TextStyle(
+            fontFamily: 'Eurostile',
+            fontSize: 18.sp,
+            fontWeight: FontWeight.w700,
+            color: AppColors.c3D4040,
+          ),
+        ),
+        content: Text(
+          "Are you sure you want to delete this product? This action cannot be undone.",
+          style: TextStyle(fontSize: 14.sp, color: AppColors.c3D4040),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text("Cancel", style: TextStyle(color: AppColors.c8993A4)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () async {
+              Navigator.pop(context); // Close confirm dialog
+
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (c) => Center(child: CircularProgressIndicator()),
+              );
+
+              final result = await ProductService.deleteProduct(productId);
+
+              if (result['success']) {
+                // Close loading and maybe wait a bit/refresh
+                Navigator.pop(context);
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text(result['message'])));
+                _fetchProducts();
+              } else {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text(result['message'])));
+              }
+            },
+            child: Text("Delete", style: TextStyle(color: Colors.white)),
+          ),
+        ],
       ),
     );
   }
