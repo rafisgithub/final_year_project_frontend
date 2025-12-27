@@ -65,6 +65,7 @@ final class Endpoints {
   static const String productDelete = "product-delete/";
   static const String sellerOrders = "seller-orders/";
   static const String orderDetails = "order-details/";
+  static const String customerOrders = "customer-orders/";
 
   // chat
   static const String chatList = "my-chat-list-users/";

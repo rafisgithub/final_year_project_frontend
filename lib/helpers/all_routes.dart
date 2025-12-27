@@ -9,8 +9,7 @@ import 'package:final_year_project_frontend/features/sign_In/presentation/reset_
 import 'package:final_year_project_frontend/features/sign_In/presentation/sign_in_screen.dart';
 
 import 'package:final_year_project_frontend/features/sign_up/presentation/sign_up_screen.dart';
-
-
+import 'package:final_year_project_frontend/features/order/presentation/customer_order_screen.dart';
 
 import 'package:final_year_project_frontend/navigation_screen.dart';
 import '../loading.dart';
@@ -28,13 +27,15 @@ final class Routes {
   static const String otpSuccessfullScreen = '/otpSuccessfullScreen';
   static const String forgotPasswordscreen = '/forgotPasswordscreen';
   static const String resetPasswordScreen = '/resetPasswordScreen';
-  static const String passwordUpdateSuccessScreen = '/passwordUpdateSuccessScreen';
+  static const String passwordUpdateSuccessScreen =
+      '/passwordUpdateSuccessScreen';
   static const String selectLanguage = '/selectLanguage';
   static const String signUpScreen = '/signUpScreen';
   static const String signUpWithWorkingArea = '/SignUpWithWorkingArea';
   static const String vehicleInfo = '/vehicleInfo';
   static const String driversLicense = '/DriversLicense';
-  static const String vehicleRegistrationInspection = '/vehicleRegistrationInspection';
+  static const String vehicleRegistrationInspection =
+      '/vehicleRegistrationInspection';
   static const String vehicleInsurance = '/vehicleInsurance';
   static const String diamondSticker = '/diamondSticker';
   static const String tLCLicense = '/tLCLicense';
@@ -44,8 +45,7 @@ final class Routes {
   static const String allDone = '/allDone';
   static const String rejectRequest = '/rejectRequest';
   static const String mainNavigationBar = '/mainNavigationBar';
-  
- 
+  static const String customerOrdersScreen = '/customerOrdersScreen';
 }
 
 final class RouteGenerator {
@@ -61,46 +61,94 @@ final class RouteGenerator {
             : CupertinoPageRoute(builder: (context) => const Loading());
       case Routes.onBoardingScreen:
         return Platform.isAndroid
-            ? _FadedTransitionRoute(widget: const OnBoardingScreen(), settings: settings)
-            : CupertinoPageRoute(builder: (context) => const OnBoardingScreen());
+            ? _FadedTransitionRoute(
+                widget: const OnBoardingScreen(),
+                settings: settings,
+              )
+            : CupertinoPageRoute(
+                builder: (context) => const OnBoardingScreen(),
+              );
       case Routes.languageScreen:
         return Platform.isAndroid
-            ? _FadedTransitionRoute(widget: const LanguageScreen(), settings: settings)
+            ? _FadedTransitionRoute(
+                widget: const LanguageScreen(),
+                settings: settings,
+              )
             : CupertinoPageRoute(builder: (context) => const LanguageScreen());
       case Routes.signinScreen:
         return Platform.isAndroid
-            ? _FadedTransitionRoute(widget: const SignInScreen(), settings: settings)
+            ? _FadedTransitionRoute(
+                widget: const SignInScreen(),
+                settings: settings,
+              )
             : CupertinoPageRoute(builder: (context) => const SignInScreen());
       case Routes.otpVerificationScreen:
         return Platform.isAndroid
-            ? _FadedTransitionRoute(widget: const OtpVerificationScreen(), settings: settings)
-            : CupertinoPageRoute(builder: (context) => const OtpVerificationScreen());
+            ? _FadedTransitionRoute(
+                widget: const OtpVerificationScreen(),
+                settings: settings,
+              )
+            : CupertinoPageRoute(
+                builder: (context) => const OtpVerificationScreen(),
+              );
       case Routes.forgotPasswordscreen:
         return Platform.isAndroid
-            ? _FadedTransitionRoute(widget: const ForgotPasswordscreen(), settings: settings)
-            : CupertinoPageRoute(builder: (context) => const ForgotPasswordscreen());
+            ? _FadedTransitionRoute(
+                widget: const ForgotPasswordscreen(),
+                settings: settings,
+              )
+            : CupertinoPageRoute(
+                builder: (context) => const ForgotPasswordscreen(),
+              );
       case Routes.resetPasswordScreen:
         return Platform.isAndroid
-            ? _FadedTransitionRoute(widget: const ResetPasswordScreen(), settings: settings)
-            : CupertinoPageRoute(builder: (context) => const ResetPasswordScreen());
+            ? _FadedTransitionRoute(
+                widget: const ResetPasswordScreen(),
+                settings: settings,
+              )
+            : CupertinoPageRoute(
+                builder: (context) => const ResetPasswordScreen(),
+              );
       case Routes.passwordUpdateSuccessScreen:
         return Platform.isAndroid
-            ? _FadedTransitionRoute(widget: const PasswordUpdateSuccessScreen(), settings: settings)
-            : CupertinoPageRoute(builder: (context) => const PasswordUpdateSuccessScreen());
+            ? _FadedTransitionRoute(
+                widget: const PasswordUpdateSuccessScreen(),
+                settings: settings,
+              )
+            : CupertinoPageRoute(
+                builder: (context) => const PasswordUpdateSuccessScreen(),
+              );
 
       case Routes.signUpScreen:
         return Platform.isAndroid
-            ? _FadedTransitionRoute(widget: const SignUpScreen(), settings: settings)
+            ? _FadedTransitionRoute(
+                widget: const SignUpScreen(),
+                settings: settings,
+              )
             : CupertinoPageRoute(builder: (context) => const SignUpScreen());
 
-    
       case Routes.documentsVerified:
-
       case Routes.mainNavigationBar:
-      final args = settings.arguments as Map? ?? {};
+        final args = settings.arguments as Map? ?? {};
         return Platform.isAndroid
-            ? _FadedTransitionRoute(widget:  MainNavigationBar(pageNum: args['pageNum'],), settings: settings)
-            : CupertinoPageRoute(builder: (context) =>  MainNavigationBar(pageNum: args['pageNum'],));
+            ? _FadedTransitionRoute(
+                widget: MainNavigationBar(pageNum: args['pageNum']),
+                settings: settings,
+              )
+            : CupertinoPageRoute(
+                builder: (context) =>
+                    MainNavigationBar(pageNum: args['pageNum']),
+              );
+
+      case Routes.customerOrdersScreen:
+        return Platform.isAndroid
+            ? _FadedTransitionRoute(
+                widget: const CustomerOrderScreen(),
+                settings: settings,
+              )
+            : CupertinoPageRoute(
+                builder: (context) => const CustomerOrderScreen(),
+              );
 
       // case Routes.uploadedStaffInfoScreen:
       //   final args = settings.arguments as Map? ?? {};
@@ -126,43 +174,44 @@ final class RouteGenerator {
       //   return Platform.isAndroid
       //       ? _FadedTransitionRoute(
 
-
       default:
         return null;
     }
   }
 }
+
 class _FadedTransitionRoute extends PageRouteBuilder {
   final Widget widget;
   @override
   final RouteSettings settings;
 
   _FadedTransitionRoute({required this.widget, required this.settings})
-      : super(
-          settings: settings,
-          reverseTransitionDuration: const Duration(milliseconds: 500),
-          pageBuilder: (
-            BuildContext context,
-            Animation<double> animation,
-            Animation<double> secondaryAnimation,
-          ) {
-            return widget;
-          },
-          transitionDuration: const Duration(milliseconds: 500),
-          transitionsBuilder: (
-            BuildContext context,
-            Animation<double> animation,
-            Animation<double> secondaryAnimation,
-            Widget child,
-          ) {
-            return FadeTransition(
-              opacity: CurvedAnimation(parent: animation, curve: Curves.ease),
-              child: child,
-            );
-          },
-        );
+    : super(
+        settings: settings,
+        reverseTransitionDuration: const Duration(milliseconds: 500),
+        pageBuilder:
+            (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+            ) {
+              return widget;
+            },
+        transitionDuration: const Duration(milliseconds: 500),
+        transitionsBuilder:
+            (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+              Widget child,
+            ) {
+              return FadeTransition(
+                opacity: CurvedAnimation(parent: animation, curve: Curves.ease),
+                child: child,
+              );
+            },
+      );
 }
-
 
 class ScreenTitle extends StatelessWidget {
   final Widget widget;

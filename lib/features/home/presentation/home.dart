@@ -1,3 +1,4 @@
+import 'package:final_year_project_frontend/features/order/presentation/customer_order_screen.dart';
 import 'package:final_year_project_frontend/gen/colors.gen.dart';
 import 'package:final_year_project_frontend/networks/auth_service.dart';
 import 'package:final_year_project_frontend/networks/profile_service.dart';
@@ -1548,6 +1549,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
           ),
         ),
+        leadingWidth: 72.w,
+        centerTitle: false,
+        titleSpacing: 0,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
@@ -1573,48 +1577,73 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         actions: [
-          // Shopping Cart with Badge
-          Stack(
-            clipBehavior: Clip.none,
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              // Shopping Cart with Badge
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  IconButton(
+                    icon: Icon(
+                      Icons.shopping_cart_outlined,
+                      color: AppColors.button,
+                      size: 24.sp,
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => CartScreen()),
+                      ).then((_) => _loadCartCount());
+                    },
+                  ),
+                  if (_cartItemCount > 0)
+                    Positioned(
+                      right: 8,
+                      top: 8,
+                      child: Container(
+                        padding: EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                        constraints: BoxConstraints(
+                          minWidth: 16,
+                          minHeight: 16,
+                        ),
+                        child: Text(
+                          '$_cartItemCount',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 10.sp,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              // My Orders
               IconButton(
                 icon: Icon(
-                  Icons.shopping_cart_outlined,
+                  Icons.shopping_bag_outlined,
                   color: AppColors.button,
                   size: 24.sp,
                 ),
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => CartScreen()),
-                  ).then((_) => _loadCartCount());
+                    MaterialPageRoute(
+                      builder: (context) => const CustomerOrderScreen(),
+                    ),
+                  );
                 },
               ),
-              if (_cartItemCount > 0)
-                Positioned(
-                  right: 8,
-                  top: 8,
-                  child: Container(
-                    padding: EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: Colors.red,
-                      shape: BoxShape.circle,
-                    ),
-                    constraints: BoxConstraints(minWidth: 16, minHeight: 16),
-                    child: Text(
-                      '$_cartItemCount',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 10.sp,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
+              SizedBox(width: 4.w),
             ],
           ),
-          SizedBox(width: 16.w),
         ],
       ),
       body: SingleChildScrollView(

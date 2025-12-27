@@ -1,6 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:final_year_project_frontend/networks/dio/dio.dart';
 import 'package:final_year_project_frontend/networks/endpoints.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:final_year_project_frontend/constants/app_constants.dart';
+import 'package:dio/dio.dart';
 
 class OrderService {
   // Get Seller Orders
@@ -71,6 +74,35 @@ class OrderService {
         print('Get Order Details Error: $e');
       }
       return {'success': false, 'message': 'Error loading order details'};
+    }
+  }
+
+  static Future<Map<String, dynamic>> getCustomerOrders() async {
+    try {
+      final token = GetStorage().read(kKeyAccessToken);
+      final response = await DioSingleton.instance.dio.get(
+        Endpoints.customerOrders,
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = response.data;
+        if (responseData['success'] == true) {
+          return {
+            'success': true,
+            'message':
+                responseData['message'] ??
+                'Customer orders retrieved successfully',
+            'data': responseData['data'],
+          };
+        }
+      }
+      return {'success': false, 'message': 'Failed to load orders', 'data': []};
+    } catch (e) {
+      if (kDebugMode) {
+        print('Get Customer Orders Error: $e');
+      }
+      return {'success': false, 'message': 'Error loading orders', 'data': []};
     }
   }
 }
