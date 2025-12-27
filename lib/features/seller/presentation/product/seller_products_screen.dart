@@ -7,7 +7,6 @@ import 'package:final_year_project_frontend/features/seller/presentation/product
 import 'package:final_year_project_frontend/networks/product_service.dart';
 import 'package:final_year_project_frontend/features/seller/presentation/product/edit_product_screen.dart';
 import 'package:final_year_project_frontend/networks/endpoints.dart';
-import 'package:final_year_project_frontend/constants/text_font_style.dart';
 
 class SellerProductsScreen extends StatefulWidget {
   const SellerProductsScreen({super.key});
@@ -168,28 +167,46 @@ class _SellerProductsScreenState extends State<SellerProductsScreen> {
       );
     }).toList();
 
-    return DropdownMenu<String>(
-      initialSelection: selectedKey,
-      label: Text(hint),
-      dropdownMenuEntries: menuEntries,
-      onSelected: onSelected,
-      width: 320.w,
-      enableFilter: true, // Enable search
-      menuHeight: 300.h,
-      inputDecorationTheme: InputDecorationTheme(
-        filled: true,
-        fillColor: Colors.grey[50],
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12.r),
-          borderSide: BorderSide.none,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: EdgeInsets.only(left: 4.w, bottom: 6.h),
+          child: Text(
+            hint,
+            style: TextStyle(
+              fontSize: 12.sp,
+              fontWeight: FontWeight.w600,
+              color: Colors.white.withOpacity(0.9),
+            ),
+          ),
         ),
-        contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
-      ),
-      textStyle: TextStyle(
-        fontSize: 14.sp,
-        fontWeight: FontWeight.w400,
-        color: AppColors.c3D4040,
-      ),
+        DropdownMenu<String>(
+          initialSelection: selectedKey,
+          dropdownMenuEntries: menuEntries,
+          onSelected: onSelected,
+          width: 320.w,
+          enableFilter: true, // Enable search
+          menuHeight: 300.h,
+          inputDecorationTheme: InputDecorationTheme(
+            filled: true,
+            fillColor: Colors.white,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12.r),
+              borderSide: BorderSide.none,
+            ),
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: 16.w,
+              vertical: 14.h,
+            ),
+          ),
+          textStyle: TextStyle(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w400,
+            color: AppColors.c3D4040,
+          ),
+        ),
+      ],
     );
   }
 

@@ -67,6 +67,13 @@ final class Endpoints {
   static const String orderDetails = "order-details/";
   static const String customerOrders = "customer-orders/";
   static const String orderStatusUpdate = "order-status-update/";
+  static const String allCustomers = "all-customers/";
+  static const String addDues = "add-dues/";
+  static const String duesFilter = "dues-filter/";
+  static const String updateDuesStatus = "update-dues-status/";
+  static const String updateDues = "update-dues/";
+  static const String editDues = "edit-dues/";
+  static const String deleteDues = "delete-dues/";
 
   // chat
   static const String chatList = "my-chat-list-users/";

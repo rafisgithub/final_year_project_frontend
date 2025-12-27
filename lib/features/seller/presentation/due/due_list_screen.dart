@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:final_year_project_frontend/gen/colors.gen.dart';
 import 'package:final_year_project_frontend/features/seller/presentation/due/add_due_screen.dart';
+import 'package:final_year_project_frontend/networks/order_service.dart';
 
 class DueListScreen extends StatefulWidget {
   const DueListScreen({super.key});
@@ -11,82 +13,101 @@ class DueListScreen extends StatefulWidget {
 }
 
 class _DueListScreenState extends State<DueListScreen> {
-  // Enhanced Dummy Data with Status and ID
-  List<Map<String, dynamic>> _dues = [
-    {
-      'id': 1,
-      'name': 'Karim Uddin',
-      'amount': '500',
-      'note': 'Took rice and dal',
-      'date': '20 Dec, 2024',
-      'status': 'unpaid',
-    },
-    {
-      'id': 2,
-      'name': 'Rahim Mia',
-      'amount': '1200',
-      'note': 'Monthly groceries bill',
-      'date': '18 Dec, 2024',
-      'status': 'unpaid',
-    },
-    {
-      'id': 3,
-      'name': 'Salma Begum',
-      'amount': '150',
-      'note': 'Milk and eggs',
-      'date': '15 Dec, 2024',
-      'status': 'paid',
-    },
-    {
-      'id': 4,
-      'name': 'Bashir Ahmed',
-      'amount': '3400',
-      'note': 'Fertilizer credit',
-      'date': '10 Dec, 2024',
-      'status': 'unpaid',
-    },
-  ];
-
-  List<Map<String, dynamic>> _filteredDues = [];
+  List<Map<String, dynamic>> _dues = [];
+  bool _isLoading = false;
+  Timer? _debounce;
   final TextEditingController _searchController = TextEditingController();
   String _filterStatus = 'All'; // 'All', 'Unpaid', 'Paid'
 
   @override
   void initState() {
     super.initState();
-    _filteredDues = _dues;
-    _searchController.addListener(_filterList);
+    _fetchDues(); // Initial fetch
   }
 
   @override
   void dispose() {
+    _debounce?.cancel();
     _searchController.dispose();
     super.dispose();
   }
 
-  void _filterList() {
-    final query = _searchController.text.toLowerCase();
-    setState(() {
-      _filteredDues = _dues.where((due) {
-        final matchesQuery = due['name'].toLowerCase().contains(query);
-        final matchesStatus =
-            _filterStatus == 'All' ||
-            (_filterStatus == 'Unpaid' && due['status'] == 'unpaid') ||
-            (_filterStatus == 'Paid' && due['status'] == 'paid');
-        return matchesQuery && matchesStatus;
-      }).toList();
+  Future<void> _fetchDues() async {
+    setState(() => _isLoading = true);
+
+    final result = await OrderService.getDues(
+      customerName: _searchController.text.trim(),
+      statusFilter: _filterStatus.toLowerCase(),
+    );
+
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+        if (result['success']) {
+          _dues = List<Map<String, dynamic>>.from(result['data']);
+        } else {
+          _dues = []; // Clear list on error or empty
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(result['message'])));
+        }
+      });
+    }
+  }
+
+  void _onSearchChanged(String query) {
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      _fetchDues();
     });
   }
 
-  void _toggleStatus(int id) {
-    setState(() {
-      final index = _dues.indexWhere((element) => element['id'] == id);
-      if (index != -1) {
-        final currentStatus = _dues[index]['status'];
-        _dues[index]['status'] = currentStatus == 'unpaid' ? 'paid' : 'unpaid';
-        _filterList(); // Re-apply filter
+  Future<void> _deleteDue(int id) async {
+    final bool confirm =
+        await showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text(
+              "Delete Due?",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: AppColors.c3D4040,
+              ),
+            ),
+            content: Text("Are you sure you want to delete this entry?"),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: Text("Cancel", style: TextStyle(color: Colors.grey)),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context, true),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                child: Text("Delete", style: TextStyle(color: Colors.white)),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+
+    if (confirm) {
+      // Show loading
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Deleting...")));
+
+      final result = await OrderService.deleteDue(id);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(result['message'])));
+        if (result['success']) {
+          _fetchDues(); // Refresh list
+        }
       }
-    });
+    }
   }
 
   void _showStatusChangeDialog(Map<String, dynamic> due) {
@@ -113,18 +134,33 @@ class _DueListScreenState extends State<DueListScreen> {
             child: Text("Cancel", style: TextStyle(color: Colors.grey)),
           ),
           ElevatedButton(
-            onPressed: () {
-              _toggleStatus(due['id']);
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    "Status updated successfully",
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  backgroundColor: AppColors.button,
-                ),
+            onPressed: () async {
+              Navigator.pop(context); // Close dialog first
+
+              // Determine new status
+              final currentStatus = due['status'] ?? 'unpaid';
+              final newStatus = currentStatus == 'unpaid' ? 'paid' : 'unpaid';
+
+              // Show loading indicator or simple snackbar
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text("Updating status...")));
+
+              final result = await OrderService.updateDueStatus(
+                due['id'],
+                newStatus,
               );
+
+              if (mounted) {
+                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text(result['message'])));
+
+                if (result['success']) {
+                  _fetchDues(); // Refresh list to show updated status
+                }
+              }
             },
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.button),
             child: Text("Confirm", style: TextStyle(color: Colors.white)),
@@ -180,6 +216,8 @@ class _DueListScreenState extends State<DueListScreen> {
                 // Search Bar
                 TextField(
                   controller: _searchController,
+                  onChanged: _onSearchChanged,
+                  textInputAction: TextInputAction.search,
                   style: TextStyle(fontSize: 14.sp, color: Colors.black),
                   decoration: InputDecoration(
                     hintText: 'Search customer name...',
@@ -187,7 +225,10 @@ class _DueListScreenState extends State<DueListScreen> {
                       fontSize: 14.sp,
                       color: Colors.grey[400],
                     ),
-                    prefixIcon: Icon(Icons.search, color: AppColors.button),
+                    prefixIcon: GestureDetector(
+                      onTap: _fetchDues, // Allow taping icon to search
+                      child: Icon(Icons.search, color: AppColors.button),
+                    ),
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
@@ -199,7 +240,7 @@ class _DueListScreenState extends State<DueListScreen> {
                 ),
                 SizedBox(height: 16.h),
 
-                // Filter Tabs (Tabs style)
+                // Filter Tabs
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -216,7 +257,11 @@ class _DueListScreenState extends State<DueListScreen> {
 
           // List Content
           Expanded(
-            child: _filteredDues.isEmpty
+            child: _isLoading
+                ? Center(
+                    child: CircularProgressIndicator(color: AppColors.button),
+                  )
+                : _dues.isEmpty
                 ? Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -240,11 +285,11 @@ class _DueListScreenState extends State<DueListScreen> {
                   )
                 : ListView.separated(
                     padding: EdgeInsets.all(16.w),
-                    itemCount: _filteredDues.length,
+                    itemCount: _dues.length,
                     separatorBuilder: (context, index) =>
                         SizedBox(height: 12.h),
                     itemBuilder: (context, index) {
-                      final due = _filteredDues[index];
+                      final due = _dues[index];
                       return _buildDueCard(due);
                     },
                   ),
@@ -252,11 +297,12 @@ class _DueListScreenState extends State<DueListScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.push(
+        onPressed: () async {
+          await Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => AddDueScreen()),
           );
+          _fetchDues(); // Refresh list after returning
         },
         backgroundColor: AppColors.button,
         elevation: 4,
@@ -279,8 +325,8 @@ class _DueListScreenState extends State<DueListScreen> {
       onTap: () {
         setState(() {
           _filterStatus = title;
-          _filterList();
         });
+        _fetchDues();
       },
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
@@ -300,8 +346,98 @@ class _DueListScreenState extends State<DueListScreen> {
     );
   }
 
+  void _showDueActions(Map<String, dynamic> due) {
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+      ),
+      builder: (context) => Container(
+        padding: EdgeInsets.all(20.w),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              "Manage Due Entry",
+              style: TextStyle(
+                fontSize: 18.sp,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+            ),
+            SizedBox(height: 20.h),
+            _buildActionTile(
+              icon: Icons.edit,
+              color: Colors.blue,
+              label: "Edit Entry",
+              onTap: () async {
+                Navigator.pop(context);
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AddDueScreen(dueId: due['id']),
+                  ),
+                );
+                _fetchDues();
+              },
+            ),
+            _buildActionTile(
+              icon: Icons.sync,
+              color: Colors.orange,
+              label: due['status'] == 'paid'
+                  ? "Mark as Unpaid"
+                  : "Mark as Paid",
+              onTap: () {
+                Navigator.pop(context);
+                _showStatusChangeDialog(due);
+              },
+            ),
+            _buildActionTile(
+              icon: Icons.delete,
+              color: Colors.red,
+              label: "Delete Entry",
+              onTap: () {
+                Navigator.pop(context);
+                _deleteDue(due['id']);
+              },
+            ),
+            SizedBox(height: 10.h),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionTile({
+    required IconData icon,
+    required Color color,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return ListTile(
+      leading: Container(
+        padding: EdgeInsets.all(8.w),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(8.r),
+        ),
+        child: Icon(icon, color: color, size: 20.sp),
+      ),
+      title: Text(
+        label,
+        style: TextStyle(
+          fontSize: 16.sp,
+          fontWeight: FontWeight.w500,
+          color: Colors.black87,
+        ),
+      ),
+      onTap: onTap,
+    );
+  }
+
   Widget _buildDueCard(Map<String, dynamic> due) {
-    bool isPaid = due['status'] == 'paid';
+    bool isPaid =
+        (due['status'] ?? 'unpaid').toString().toLowerCase() == 'paid';
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -318,10 +454,7 @@ class _DueListScreenState extends State<DueListScreen> {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(16.r),
-          onTap: () {
-            // Show details or edit dialog
-            _showStatusChangeDialog(due);
-          },
+          onTap: () => _showDueActions(due),
           child: Padding(
             padding: EdgeInsets.all(16.w),
             child: Row(
@@ -334,7 +467,7 @@ class _DueListScreenState extends State<DueListScreen> {
                       Row(
                         children: [
                           Text(
-                            due['name'],
+                            due['customer_name'] ?? due['name'] ?? 'Unknown',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 16.sp,
@@ -352,7 +485,7 @@ class _DueListScreenState extends State<DueListScreen> {
                       ),
                       SizedBox(height: 6.h),
                       Text(
-                        due['note'],
+                        due['notes'] ?? due['note'] ?? 'No notes',
                         style: TextStyle(
                           fontSize: 14.sp,
                           color: Colors.grey[600],
@@ -370,7 +503,7 @@ class _DueListScreenState extends State<DueListScreen> {
                           ),
                           SizedBox(width: 4.w),
                           Text(
-                            due['date'],
+                            due['payment_date'] ?? due['date'] ?? '',
                             style: TextStyle(
                               fontSize: 12.sp,
                               color: Colors.grey[400],
@@ -385,7 +518,8 @@ class _DueListScreenState extends State<DueListScreen> {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      '৳ ${due['amount']}',
+                      // Handle amount as string or number safely
+                      '৳ ${due['due_amount'] ?? due['amount'] ?? 0}',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: isPaid ? Colors.green : Colors.red,
