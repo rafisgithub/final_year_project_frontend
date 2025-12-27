@@ -39,31 +39,57 @@ class _SellerOrdersScreenState extends State<SellerOrdersScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.cF2F0F0,
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
         title: Text(
           "Orders",
           style: TextStyle(
-            fontFamily: 'Eurostile',
             fontSize: 20.sp,
-            fontWeight: FontWeight.w700,
-            color: AppColors.c3D4040,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
           ),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.button,
         centerTitle: true,
         elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.c3D4040),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
-        bottom: TabBar(
-          controller: _tabController,
-          isScrollable: true,
-          labelColor: AppColors.button,
-          unselectedLabelColor: AppColors.c8993A4,
-          indicatorColor: AppColors.button,
-          tabs: _tabs.map((tab) => Tab(text: tab)).toList(),
+        bottom: PreferredSize(
+          preferredSize: Size.fromHeight(60.h),
+          child: Container(
+            color: AppColors.button,
+            child: TabBar(
+              controller: _tabController,
+              isScrollable: true,
+              labelColor: AppColors.button, // Selected Color (text)
+              unselectedLabelColor: Colors.white70,
+              indicatorSize: TabBarIndicatorSize.label,
+              indicator: BoxDecoration(
+                borderRadius: BorderRadius.circular(50),
+                color: Colors.white,
+              ), // Indicator
+              tabs: _tabs
+                  .map(
+                    (tab) => Tab(
+                      child: Container(
+                        padding: EdgeInsets.symmetric(horizontal: 20.w),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(50),
+                          border: Border.all(color: Colors.white, width: 1),
+                        ),
+                        child: Align(
+                          alignment: Alignment.center,
+                          child: Text(tab),
+                        ),
+                      ),
+                    ),
+                  )
+                  .toList(),
+            ),
+          ),
         ),
       ),
       body: TabBarView(
@@ -149,21 +175,28 @@ class _OrderListState extends State<_OrderList> {
     return Column(
       children: [
         // Search Bar
-        Padding(
-          padding: EdgeInsets.all(16.w),
+        Container(
+          padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 16.h),
+          decoration: BoxDecoration(
+            color: AppColors.button,
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(20.r),
+              bottomRight: Radius.circular(20.r),
+            ),
+          ),
           child: TextField(
             controller: _searchController,
             decoration: InputDecoration(
               hintText: 'Search by Customer Name...',
-              prefixIcon: const Icon(Icons.search, color: AppColors.c8993A4),
+              prefixIcon: const Icon(Icons.search, color: AppColors.button),
               filled: true,
               fillColor: Colors.white,
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.r),
+                borderRadius: BorderRadius.circular(12.r),
                 borderSide: BorderSide.none,
               ),
               contentPadding: EdgeInsets.symmetric(vertical: 0.h),
-              hintStyle: TextStyle(fontSize: 14.sp, color: AppColors.c8993A4),
+              hintStyle: TextStyle(fontSize: 14.sp, color: Colors.grey[400]),
             ),
           ),
         ),
@@ -174,7 +207,7 @@ class _OrderListState extends State<_OrderList> {
 
   Widget _buildContent() {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return Center(child: CircularProgressIndicator(color: AppColors.button));
     }
 
     if (_errorMessage.isNotEmpty) {
@@ -191,11 +224,15 @@ class _OrderListState extends State<_OrderList> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.shopping_bag_outlined, size: 48.sp, color: Colors.grey),
-            SizedBox(height: 10.h),
+            Icon(
+              Icons.shopping_bag_outlined,
+              size: 64.sp,
+              color: Colors.grey[300],
+            ),
+            SizedBox(height: 16.h),
             Text(
               "No orders found",
-              style: TextStyle(fontSize: 14.sp, color: Colors.grey),
+              style: TextStyle(fontSize: 16.sp, color: Colors.grey[500]),
             ),
           ],
         ),
@@ -204,10 +241,11 @@ class _OrderListState extends State<_OrderList> {
 
     return RefreshIndicator(
       onRefresh: _fetchOrders,
+      color: AppColors.button,
       child: ListView.separated(
-        padding: EdgeInsets.symmetric(horizontal: 16.w),
+        padding: EdgeInsets.all(16.w.sp),
         itemCount: _orders.length,
-        separatorBuilder: (context, index) => SizedBox(height: 12.h),
+        separatorBuilder: (context, index) => SizedBox(height: 16.h),
         itemBuilder: (context, index) {
           final order = _orders[index];
           return _buildOrderCard(order);
@@ -219,145 +257,157 @@ class _OrderListState extends State<_OrderList> {
   Widget _buildOrderCard(Map<String, dynamic> order) {
     final date = order['created_at'] != null
         ? DateFormat(
-            'dd MMM yyyy, hh:mm a',
+            'MMM dd, yyyy, hh:mm a',
           ).format(DateTime.parse(order['created_at']))
         : 'Unknown Date';
 
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) =>
-                SellerOrderDetailsScreen(orderId: order['id']),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
-        );
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12.r),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              offset: const Offset(0, 2),
-              blurRadius: 10,
+        ],
+        border: Border.all(color: Colors.grey.withOpacity(0.1)),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16.r),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) =>
+                    SellerOrderDetailsScreen(orderId: order['id']),
+              ),
+            );
+          },
+          child: Padding(
+            padding: EdgeInsets.all(16.w),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header: ID and Status
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Order #${order['id']}',
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.button,
+                      ),
+                    ),
+                    _buildStatusChip(order['status']),
+                  ],
+                ),
+                SizedBox(height: 12.h),
+
+                // Customer Info
+                Row(
+                  children: [
+                    CircleAvatar(
+                      backgroundColor: Colors.grey[100],
+                      radius: 20.r,
+                      child: Icon(
+                        Icons.person,
+                        color: Colors.grey[500],
+                        size: 20.sp,
+                      ),
+                    ),
+                    SizedBox(width: 12.w),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          order['customer_name'] ?? 'Unknown',
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        if (order['customer_phone'] != null)
+                          Text(
+                            order['customer_phone'] ?? '',
+                            style: TextStyle(
+                              fontSize: 12.sp,
+                              color: Colors.grey[500],
+                            ),
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+                SizedBox(height: 16.h),
+                Divider(color: Colors.grey[100], height: 1),
+                SizedBox(height: 16.h),
+
+                // Amount and Date
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Total Amount',
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                        SizedBox(height: 4.h),
+                        Text(
+                          '৳${order['total_amount']}',
+                          style: TextStyle(
+                            fontSize: 18.sp,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.button,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          date,
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            color: Colors.grey[500],
+                          ),
+                        ),
+                        SizedBox(height: 4.h),
+                        Row(
+                          children: [
+                            Text(
+                              'Details',
+                              style: TextStyle(
+                                fontSize: 13.sp,
+                                color: Colors.blue,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            Icon(
+                              Icons.arrow_forward_ios,
+                              size: 10.sp,
+                              color: Colors.blue,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
             ),
-          ],
-        ),
-        child: Padding(
-          padding: EdgeInsets.all(16.w),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header: ID and Status
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Order #${order['id']}',
-                    style: TextStyle(
-                      fontFamily: 'Eurostile',
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.c3D4040,
-                    ),
-                  ),
-                  _buildStatusChip(order['status']),
-                ],
-              ),
-              SizedBox(height: 12.h),
-
-              // Customer Info
-              Row(
-                children: [
-                  CircleAvatar(
-                    backgroundColor: AppColors.cF2F0F0,
-                    radius: 20.r,
-                    child: Icon(
-                      Icons.person,
-                      color: AppColors.c8993A4,
-                      size: 20.sp,
-                    ),
-                  ),
-                  SizedBox(width: 12.w),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        order['customer_name'] ?? 'Unknown',
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.c3D4040,
-                        ),
-                      ),
-                      Text(
-                        order['customer_phone'] ?? '',
-                        style: TextStyle(
-                          fontSize: 12.sp,
-                          color: AppColors.c8993A4,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              SizedBox(height: 12.h),
-              Divider(color: Colors.grey.withOpacity(0.2)),
-              SizedBox(height: 12.h),
-
-              // Amount and Date
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Total Amount',
-                        style: TextStyle(
-                          fontSize: 12.sp,
-                          color: AppColors.c8993A4,
-                        ),
-                      ),
-                      SizedBox(height: 4.h),
-                      Text(
-                        '৳${order['total_amount']}',
-                        style: TextStyle(
-                          fontFamily: 'Eurostile',
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.button,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        date,
-                        style: TextStyle(
-                          fontSize: 12.sp,
-                          color: AppColors.c8993A4,
-                        ),
-                      ),
-                      SizedBox(height: 4.h),
-                      // You could add items count if available, simplified here
-                      Text(
-                        'View Details',
-                        style: TextStyle(
-                          fontSize: 12.sp,
-                          color: Colors.blue,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ],
           ),
         ),
       ),
@@ -375,6 +425,14 @@ class _OrderListState extends State<_OrderList> {
       case 'confirmed':
         color = Colors.blue.withOpacity(0.1);
         textColor = Colors.blue;
+        break;
+      case 'processing':
+        color = Colors.blue.withOpacity(0.1);
+        textColor = Colors.blue;
+        break;
+      case 'shipped':
+        color = Colors.indigo.withOpacity(0.1);
+        textColor = Colors.indigo;
         break;
       case 'delivered':
         color = Colors.green.withOpacity(0.1);

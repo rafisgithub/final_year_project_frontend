@@ -105,4 +105,37 @@ class OrderService {
       return {'success': false, 'message': 'Error loading orders', 'data': []};
     }
   }
+
+  // Update Order Status
+  static Future<Map<String, dynamic>> updateOrderStatus(
+    int orderId,
+    String status,
+  ) async {
+    try {
+      final token = GetStorage().read(kKeyAccessToken);
+      final formData = FormData.fromMap({'status': status});
+
+      final response = await DioSingleton.instance.dio.patch(
+        '${Endpoints.orderStatusUpdate}$orderId/',
+        data: formData,
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = response.data;
+        if (responseData['success'] == true) {
+          return {
+            'success': true,
+            'message': responseData['message'] ?? 'Order status updated',
+          };
+        }
+      }
+      return {'success': false, 'message': 'Failed to update order status'};
+    } catch (e) {
+      if (kDebugMode) {
+        print('Update Order Status Error: $e');
+      }
+      return {'success': false, 'message': 'Error updating order status'};
+    }
+  }
 }

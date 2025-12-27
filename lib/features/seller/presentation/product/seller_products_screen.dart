@@ -196,37 +196,38 @@ class _SellerProductsScreenState extends State<SellerProductsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.cF2F0F0,
+      backgroundColor: Colors.grey[50], // Consistent background
       appBar: AppBar(
         title: Text(
           'My Products',
-          style: TextFontStyle.textStyle20c3D4040EurostileW700Center,
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 20.sp,
+          ),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.button,
         elevation: 0,
         centerTitle: true,
+        iconTheme: const IconThemeData(color: Colors.white),
         leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back_ios_new,
-            color: Colors.black,
-            size: 20.sp,
-          ),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
       ),
       body: Column(
         children: [
           Container(
-            padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 8.h),
+            padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 16.h),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.button, // Extend header color
               borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(20.r),
-                bottomRight: Radius.circular(20.r),
+                bottomLeft: Radius.circular(24.r),
+                bottomRight: Radius.circular(24.r),
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: AppColors.button.withOpacity(0.3),
                   blurRadius: 10,
                   offset: Offset(0, 5),
                 ),
@@ -239,7 +240,6 @@ class _SellerProductsScreenState extends State<SellerProductsScreen> {
                 TextField(
                   controller: _searchController,
                   style: TextStyle(
-                    fontFamily: 'Eurostile',
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w400,
                     color: AppColors.c3D4040,
@@ -247,14 +247,12 @@ class _SellerProductsScreenState extends State<SellerProductsScreen> {
                   decoration: InputDecoration(
                     hintText: 'Search your products...',
                     hintStyle: TextStyle(
-                      fontFamily: 'Eurostile',
                       fontSize: 14.sp,
-                      fontWeight: FontWeight.w400,
-                      color: AppColors.c8993A4,
+                      color: Colors.grey[400],
                     ),
-                    prefixIcon: Icon(Icons.search, color: AppColors.c8993A4),
+                    prefixIcon: Icon(Icons.search, color: AppColors.button),
                     filled: true,
-                    fillColor: AppColors.cF2F0F0,
+                    fillColor: Colors.white,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.r),
                       borderSide: BorderSide.none,
@@ -268,7 +266,7 @@ class _SellerProductsScreenState extends State<SellerProductsScreen> {
                 // Filters
                 _isLoading
                     ? Center(
-                        child: LinearProgressIndicator(color: AppColors.button),
+                        child: CircularProgressIndicator(color: Colors.white),
                       )
                     : Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -341,12 +339,16 @@ class _SellerProductsScreenState extends State<SellerProductsScreen> {
                         Icon(
                           Icons.inventory_2_outlined,
                           size: 64.sp,
-                          color: AppColors.c8993A4,
+                          color: Colors.grey[300],
                         ),
                         SizedBox(height: 16.h),
                         Text(
                           'No products found',
-                          style: TextFontStyle.textStyle16c8993A4EurostileField,
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            color: Colors.grey[500],
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ],
                     ),
@@ -374,11 +376,14 @@ class _SellerProductsScreenState extends State<SellerProductsScreen> {
           _fetchProducts();
         },
         backgroundColor: AppColors.button,
+        elevation: 4,
         icon: Icon(Icons.add, color: Colors.white),
         label: Text(
           "Add Product",
-          style: TextFontStyle.textStyle14cFFFFFFpoppinw400.copyWith(
+          style: TextStyle(
+            fontSize: 14.sp,
             fontWeight: FontWeight.bold,
+            color: Colors.white,
           ),
         ),
       ),
@@ -413,273 +418,283 @@ class _SellerProductsScreenState extends State<SellerProductsScreen> {
       }
     }
 
-    return GestureDetector(
-      onTap: () {
-        // Swallow taps on the card to prevent unwanted navigation
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 10,
+            offset: Offset(0, 4),
+          ),
+        ],
+        border: Border.all(color: Colors.grey.withOpacity(0.1)),
+      ),
+      child: Material(
+        // Material for ripple
+        color: Colors.transparent,
+        child: InkWell(
           borderRadius: BorderRadius.circular(16.r),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 8,
-              offset: Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Padding(
-          padding: EdgeInsets.all(12.w),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Thumbnail
-              Container(
-                width: 80.w,
-                height: 80.w,
-                decoration: BoxDecoration(
-                  color: AppColors.cF2F0F0,
-                  borderRadius: BorderRadius.circular(12.r),
-                  image: thumbnailProvider != null
-                      ? DecorationImage(
-                          image: thumbnailProvider,
-                          fit: BoxFit.cover,
+          onTap: () {}, // Make ripple visible
+          child: Padding(
+            padding: EdgeInsets.all(12.w),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Thumbnail
+                Container(
+                  width: 80.w,
+                  height: 80.w,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[100],
+                    borderRadius: BorderRadius.circular(12.r),
+                    image: thumbnailProvider != null
+                        ? DecorationImage(
+                            image: thumbnailProvider,
+                            fit: BoxFit.cover,
+                          )
+                        : null,
+                  ),
+                  child: thumbnailProvider == null
+                      ? Icon(
+                          Icons.image_not_supported_outlined,
+                          color: Colors.grey[400],
                         )
                       : null,
                 ),
-                child: thumbnailProvider == null
-                    ? Icon(
-                        Icons.image_not_supported_outlined,
-                        color: AppColors.c8993A4,
-                      )
-                    : null,
-              ),
-              SizedBox(width: 12.w),
+                SizedBox(width: 12.w),
 
-              // Details
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            product['name'],
-                            style: TextStyle(
-                              fontFamily: 'Eurostile',
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.c3D4040,
+                // Details
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              product['name'],
+                              style: TextStyle(
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.black87,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
                           ),
-                        ),
-                        SizedBox(
-                          width: 30.w,
-                          height: 30.w,
-                          child: PopupMenuButton<String>(
-                            padding: EdgeInsets.zero,
-                            icon: Icon(
-                              Icons.more_vert,
-                              size: 20.sp,
-                              color: AppColors.c8993A4,
-                            ),
-                            onSelected: (value) async {
-                              if (value == 'edit') {
-                                showDialog(
-                                  context: context,
-                                  barrierDismissible: false,
-                                  builder: (c) => Center(
-                                    child: CircularProgressIndicator(),
-                                  ),
-                                );
-
-                                final result =
-                                    await ProductService.getProductForEdit(
-                                      product['id'],
-                                    );
-                                Navigator.pop(context); // Close loading
-
-                                if (result['success']) {
-                                  await Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => EditProductScreen(
-                                        product: result['data'],
+                          SizedBox(
+                            width: 30.w,
+                            height: 30.w,
+                            child: PopupMenuButton<String>(
+                              padding: EdgeInsets.zero,
+                              icon: Icon(
+                                Icons.more_vert,
+                                size: 20.sp,
+                                color: Colors.grey[600],
+                              ),
+                              onSelected: (value) async {
+                                if (value == 'edit') {
+                                  showDialog(
+                                    context: context,
+                                    barrierDismissible: false,
+                                    builder: (c) => Center(
+                                      child: CircularProgressIndicator(
+                                        color: AppColors.button,
                                       ),
                                     ),
                                   );
-                                  _fetchProducts(); // Refresh after edit
-                                } else {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text(result['message'])),
+
+                                  final result =
+                                      await ProductService.getProductForEdit(
+                                        product['id'],
+                                      );
+                                  Navigator.pop(context); // Close loading
+
+                                  if (result['success']) {
+                                    await Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => EditProductScreen(
+                                          product: result['data'],
+                                        ),
+                                      ),
+                                    );
+                                    _fetchProducts(); // Refresh after edit
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(result['message']),
+                                      ),
+                                    );
+                                  }
+                                } else if (value == 'delete') {
+                                  _showDeleteConfirmationDialog(
+                                    context,
+                                    product['id'],
                                   );
+                                } else if (value == 'update_stock') {
+                                  _showUpdateStockDialog(context, product);
                                 }
-                              } else if (value == 'delete') {
-                                _showDeleteConfirmationDialog(
-                                  context,
-                                  product['id'],
-                                );
-                              } else if (value == 'update_stock') {
-                                _showUpdateStockDialog(context, product);
-                              }
-                            },
-                            color: Colors.white,
-                            itemBuilder: (BuildContext context) {
-                              return [
-                                PopupMenuItem(
-                                  value: 'edit',
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        Icons.edit,
-                                        size: 18.sp,
-                                        color: Colors.blue,
-                                      ),
-                                      SizedBox(width: 8.w),
-                                      Text(
-                                        'Edit',
-                                        style: TextStyle(
-                                          fontSize: 14.sp,
-                                          color: AppColors.c3D4040,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                PopupMenuItem(
-                                  value: 'update_stock',
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        Icons.inventory,
-                                        size: 18.sp,
-                                        color: Colors.orange,
-                                      ),
-                                      SizedBox(width: 8.w),
-                                      Text(
-                                        'Update Stock',
-                                        style: TextStyle(
-                                          fontSize: 14.sp,
-                                          color: AppColors.c3D4040,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                PopupMenuItem(
-                                  value: 'delete',
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        Icons.delete_outline,
-                                        size: 18.sp,
-                                        color: Colors.red,
-                                      ),
-                                      SizedBox(width: 8.w),
-                                      Text(
-                                        'Delete',
-                                        style: TextStyle(
-                                          fontSize: 14.sp,
-                                          color: AppColors.c3D4040,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ];
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 4.h),
-
-                    // Category & Stock
-                    Row(
-                      children: [
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 6.w,
-                            vertical: 2.h,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.button.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(4.r),
-                          ),
-                          child: Text(
-                            _capitalize(product['product_category'] ?? ''),
-                            style: TextStyle(
-                              fontSize: 10.sp,
-                              color: AppColors.button,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 8.w),
-                        Text(
-                          'Stock: ${product['stock']}',
-                          style: TextStyle(
-                            fontSize: 12.sp,
-                            color: AppColors.c8993A4,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 8.h),
-
-                    // Pricing
-                    Row(
-                      children: [
-                        Text(
-                          '৳${discountPrice.toStringAsFixed(0)}',
-                          style: TextStyle(
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.button,
-                            fontFamily: 'Eurostile',
-                          ),
-                        ),
-                        if (hasDiscount) ...[
-                          SizedBox(width: 6.w),
-                          Text(
-                            '৳${price.toStringAsFixed(0)}',
-                            style: TextStyle(
-                              fontSize: 12.sp,
-                              color: AppColors.c8993A4,
-                              decoration: TextDecoration.lineThrough,
-                            ),
-                          ),
-                          SizedBox(width: 6.w),
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 4.w,
-                              vertical: 1.h,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.red.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(4.r),
-                            ),
-                            child: Text(
-                              '-${discountPercentage.toStringAsFixed(0)}%',
-                              style: TextStyle(
-                                fontSize: 10.sp,
-                                color: Colors.red,
-                                fontWeight: FontWeight.bold,
+                              },
+                              color: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12.r),
                               ),
+                              itemBuilder: (BuildContext context) {
+                                return [
+                                  PopupMenuItem(
+                                    value: 'edit',
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          Icons.edit,
+                                          size: 18.sp,
+                                          color: Colors.blue,
+                                        ),
+                                        SizedBox(width: 8.w),
+                                        Text(
+                                          'Edit',
+                                          style: TextStyle(
+                                            fontSize: 14.sp,
+                                            color: Colors.black87,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  PopupMenuItem(
+                                    value: 'update_stock',
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          Icons.inventory,
+                                          size: 18.sp,
+                                          color: Colors.orange,
+                                        ),
+                                        SizedBox(width: 8.w),
+                                        Text(
+                                          'Update Stock',
+                                          style: TextStyle(
+                                            fontSize: 14.sp,
+                                            color: Colors.black87,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  PopupMenuItem(
+                                    value: 'delete',
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          Icons.delete_outline,
+                                          size: 18.sp,
+                                          color: Colors.red,
+                                        ),
+                                        SizedBox(width: 8.w),
+                                        Text(
+                                          'Delete',
+                                          style: TextStyle(
+                                            fontSize: 14.sp,
+                                            color: Colors.black87,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ];
+                              },
                             ),
                           ),
                         ],
-                      ],
-                    ),
-                  ],
+                      ),
+                      SizedBox(height: 4.h),
+
+                      // Category & Stock
+                      Row(
+                        children: [
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 8.w,
+                              vertical: 4.h,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.button.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(6.r),
+                            ),
+                            child: Text(
+                              _capitalize(product['product_category'] ?? ''),
+                              style: TextStyle(
+                                fontSize: 10.sp,
+                                color: AppColors.button,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 8.w),
+                          Text(
+                            'Stock: ${product['stock']}',
+                            style: TextStyle(
+                              fontSize: 12.sp,
+                              color: Colors.grey[600],
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 8.h),
+
+                      // Pricing
+                      Row(
+                        children: [
+                          Text(
+                            '৳${discountPrice.toStringAsFixed(0)}',
+                            style: TextStyle(
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.button,
+                            ),
+                          ),
+                          if (hasDiscount) ...[
+                            SizedBox(width: 6.w),
+                            Text(
+                              '৳${price.toStringAsFixed(0)}',
+                              style: TextStyle(
+                                fontSize: 12.sp,
+                                color: Colors.grey,
+                                decoration: TextDecoration.lineThrough,
+                              ),
+                            ),
+                            SizedBox(width: 6.w),
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 6.w,
+                                vertical: 2.h,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.red.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(4.r),
+                              ),
+                              child: Text(
+                                '-${discountPercentage.toStringAsFixed(0)}%',
+                                style: TextStyle(
+                                  fontSize: 10.sp,
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

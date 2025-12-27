@@ -48,6 +48,36 @@ class _SellerOrderDetailsScreenState extends State<SellerOrderDetailsScreen> {
     }
   }
 
+  Future<void> _updateOrderStatus(String status) async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    final result = await OrderService.updateOrderStatus(widget.orderId, status);
+
+    if (mounted) {
+      if (result['success']) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(result['message']),
+            backgroundColor: Colors.green,
+          ),
+        );
+        _fetchOrderDetails(); // Refresh details
+      } else {
+        setState(() {
+          _isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(result['message']),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -69,6 +99,32 @@ class _SellerOrderDetailsScreenState extends State<SellerOrderDetailsScreen> {
           icon: const Icon(Icons.arrow_back, color: AppColors.c3D4040),
           onPressed: () => Navigator.pop(context),
         ),
+        actions: [
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert, color: AppColors.c3D4040),
+            onSelected: (String status) {
+              _updateOrderStatus(status);
+            },
+            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+              const PopupMenuItem<String>(
+                value: 'pending',
+                child: Text('Mark as Pending'),
+              ),
+              const PopupMenuItem<String>(
+                value: 'confirmed',
+                child: Text('Mark as Confirmed'),
+              ),
+              const PopupMenuItem<String>(
+                value: 'delivered',
+                child: Text('Mark as Delivered'),
+              ),
+              const PopupMenuItem<String>(
+                value: 'cancelled',
+                child: Text('Mark as Cancelled'),
+              ),
+            ],
+          ),
+        ],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -380,20 +436,87 @@ class _SellerOrderDetailsScreenState extends State<SellerOrderDetailsScreen> {
         textColor = Colors.grey;
     }
 
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(20.r),
-      ),
-      child: Text(
-        (status ?? 'Unknown').toUpperCase(),
-        style: TextStyle(
-          fontSize: 10.sp,
-          fontWeight: FontWeight.bold,
-          color: textColor,
+    return GestureDetector(
+      onTap: () => _showStatusBottomSheet(context),
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(20.r),
+          border: Border.all(color: textColor.withOpacity(0.3)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              (status ?? 'Unknown').toUpperCase(),
+              style: TextStyle(
+                fontSize: 10.sp,
+                fontWeight: FontWeight.bold,
+                color: textColor,
+              ),
+            ),
+            SizedBox(width: 4.w),
+            Icon(Icons.edit, size: 12.sp, color: textColor),
+          ],
         ),
       ),
+    );
+  }
+
+  void _showStatusBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+      ),
+      builder: (context) => Container(
+        padding: EdgeInsets.symmetric(vertical: 24.h, horizontal: 16.w),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Update Order Status',
+              style: TextStyle(
+                fontSize: 18.sp,
+                fontWeight: FontWeight.bold,
+                color: AppColors.c3D4040,
+              ),
+            ),
+            SizedBox(height: 16.h),
+            _buildStatusOption('pending', 'Mark as Pending', Colors.orange),
+            _buildStatusOption('confirmed', 'Mark as Confirmed', Colors.blue),
+            _buildStatusOption('delivered', 'Mark as Delivered', Colors.green),
+            _buildStatusOption('cancelled', 'Mark as Cancelled', Colors.red),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatusOption(String status, String label, Color color) {
+    return ListTile(
+      leading: Container(
+        padding: EdgeInsets.all(8.w),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(Icons.circle, size: 12.sp, color: color),
+      ),
+      title: Text(
+        label,
+        style: TextStyle(
+          fontSize: 16.sp,
+          fontWeight: FontWeight.w500,
+          color: AppColors.c3D4040,
+        ),
+      ),
+      onTap: () {
+        Navigator.pop(context); // Close bottom sheet
+        _updateOrderStatus(status);
+      },
     );
   }
 }

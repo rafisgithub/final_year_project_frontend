@@ -46,63 +46,80 @@ class _SellerNavigationScreenState extends State<SellerNavigationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: _screens[_selectedIndex],
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: Colors.white,
           boxShadow: [
-            BoxShadow(blurRadius: 20, color: Colors.black.withOpacity(.1)),
+            BoxShadow(
+              blurRadius: 20,
+              color: Colors.black.withOpacity(0.05), // Softer shadow
+              offset: const Offset(0, -5),
+            ),
           ],
         ),
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8),
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
             child: GNav(
-              rippleColor: Colors.grey[300]!,
-              hoverColor: Colors.grey[100]!,
+              rippleColor: AppColors.button.withOpacity(0.1),
+              hoverColor: AppColors.button.withOpacity(0.1),
               gap: 8,
               activeColor: AppColors.button,
-              iconSize: 24,
-              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              duration: Duration(milliseconds: 400),
-              tabBackgroundColor: Colors.grey[100]!,
-              color: Colors.black,
+              iconSize: 22.sp,
+              textStyle: TextStyle(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w600,
+                color: AppColors.button,
+              ),
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+              duration: const Duration(milliseconds: 300),
+              tabBackgroundColor: AppColors.button.withOpacity(0.1),
+              color: Colors.grey[500], // Inactive icon color
               tabs: [
-                GButton(icon: Icons.dashboard, text: 'Home'),
-                GButton(icon: Icons.inventory_2, text: 'Products'),
-                GButton(icon: Icons.shopping_bag, text: 'Orders'),
-                GButton(icon: Icons.book, text: 'Due'),
+                const GButton(icon: Icons.grid_view_rounded, text: 'Home'),
+                const GButton(
+                  icon: Icons.inventory_2_rounded,
+                  text: 'Products',
+                ),
+                const GButton(icon: Icons.shopping_bag_rounded, text: 'Orders'),
+                const GButton(icon: Icons.receipt_long_rounded, text: 'Due'),
                 GButton(
-                  icon: Icons.chat_bubble_outline,
+                  icon: Icons.chat_bubble_rounded,
                   text: 'Chat',
                   leading: _unreadMessageCount > 0
                       ? Stack(
                           children: [
                             Icon(
-                              Icons.chat_bubble_outline,
+                              Icons.chat_bubble_rounded,
                               color: _selectedIndex == 4
                                   ? AppColors.button
-                                  : Colors.black,
-                              size: 24,
+                                  : Colors.grey[500],
+                              size: 22.sp,
                             ),
                             Positioned(
                               right: 0,
                               top: 0,
                               child: Container(
-                                padding: EdgeInsets.all(2),
+                                padding: const EdgeInsets.all(2),
                                 decoration: BoxDecoration(
                                   color: Colors.red,
                                   shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: Colors.white,
+                                    width: 1.5,
+                                  ),
                                 ),
                                 constraints: BoxConstraints(
-                                  minWidth: 12,
-                                  minHeight: 12,
+                                  minWidth: 14.w,
+                                  minHeight: 14.w,
                                 ),
                                 child: Text(
                                   '$_unreadMessageCount',
                                   style: TextStyle(
                                     color: Colors.white,
-                                    fontSize: 8,
+                                    fontSize: 8.sp,
                                     fontWeight: FontWeight.bold,
                                   ),
                                   textAlign: TextAlign.center,
@@ -120,8 +137,6 @@ class _SellerNavigationScreenState extends State<SellerNavigationScreen> {
                   _selectedIndex = index;
                 });
                 if (index == 4) {
-                  // Refresh unread count or reset if logic dictates;
-                  // For now, re-fetching to keep sync or just simple navigation
                   _loadUnreadMessages();
                 }
               },
