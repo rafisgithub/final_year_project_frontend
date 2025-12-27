@@ -13,17 +13,22 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50], // Light background
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
         title: Text(
           'Seller Dashboard',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 20.sp,
+          ),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.button,
         elevation: 0,
         centerTitle: true,
+        iconTheme: const IconThemeData(color: Colors.white),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -32,10 +37,21 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Welcome Section
+            Text(
+              'Overview',
+              style: TextStyle(
+                fontSize: 20.sp,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+            ),
+            SizedBox(height: 16.h),
+
             // Stats Grid
             GridView.count(
               shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(),
+              physics: const NeverScrollableScrollPhysics(),
               crossAxisCount: 2,
               crossAxisSpacing: 16.w,
               mainAxisSpacing: 16.h,
@@ -44,66 +60,113 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
                 _buildStatCard(
                   'Total Products',
                   '12',
-                  Icons.inventory,
+                  Icons.inventory_2_outlined,
                   Colors.blue,
                 ),
                 _buildStatCard(
                   'Pending Orders',
                   '5',
-                  Icons.hourglass_top,
+                  Icons.pending_actions_outlined,
                   Colors.orange,
                 ),
                 _buildStatCard(
                   'Total Sales',
                   '৳ 15,400',
                   Icons.attach_money,
-                  Colors.green,
+                  AppColors.button,
                 ),
-                _buildStatCard('Total Dues', '৳ 2,500', Icons.book, Colors.red),
+                _buildStatCard(
+                  'Total Dues',
+                  '৳ 2,500',
+                  Icons.account_balance_wallet_outlined,
+                  Colors.red,
+                ),
               ],
             ),
             SizedBox(height: 24.h),
-            Text(
-              'Recent Orders',
-              style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Recent Orders',
+                  style: TextStyle(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {},
+                  child: Text(
+                    'View All',
+                    style: TextStyle(color: AppColors.button),
+                  ),
+                ),
+              ],
             ),
-            SizedBox(height: 12.h),
-            // Recent Orders List (Placeholder for now)
+            SizedBox(height: 8.h),
+
+            // Recent Orders List
             ListView.separated(
               shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(),
+              physics: const NeverScrollableScrollPhysics(),
               itemCount: 3,
               separatorBuilder: (context, index) => SizedBox(height: 12.h),
               itemBuilder: (context, index) {
                 return Container(
-                  padding: EdgeInsets.all(12.w),
+                  padding: EdgeInsets.all(16.w),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(12.r),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 4,
-                        offset: Offset(0, 2),
+                        color: Colors.grey.withOpacity(0.08),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
                       ),
                     ],
+                    border: Border.all(color: Colors.grey.withOpacity(0.1)),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      Row(
                         children: [
-                          Text(
-                            'Order #100${index + 1}',
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          Text(
-                            'Waiting for confirmation',
-                            style: TextStyle(
-                              fontSize: 12.sp,
-                              color: Colors.grey,
+                          Container(
+                            padding: EdgeInsets.all(10.w),
+                            decoration: BoxDecoration(
+                              color: AppColors.button.withOpacity(0.1),
+                              shape: BoxShape.circle,
                             ),
+                            child: Icon(
+                              Icons.shopping_bag_outlined,
+                              color: AppColors.button,
+                              size: 20.sp,
+                            ),
+                          ),
+                          SizedBox(width: 12.w),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Order #100${index + 1}',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14.sp,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                              SizedBox(height: 4.h),
+                              Text(
+                                'Checking Details',
+                                style: TextStyle(
+                                  fontSize: 12.sp,
+                                  color: Colors.orange,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -111,7 +174,8 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
                         '৳ 500',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          color: AppColors.button,
+                          fontSize: 14.sp,
+                          color: Colors.black87,
                         ),
                       ),
                     ],
@@ -132,26 +196,33 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
     Color color,
   ) {
     return Container(
-      padding: EdgeInsets.all(12.w),
+      padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12.r),
+        borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: Offset(0, 4),
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Container(
+            padding: EdgeInsets.all(8.w),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8.r),
+            ),
+            child: Icon(icon, color: color, size: 20.sp),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(icon, color: color, size: 24.sp),
               Text(
                 value,
                 style: TextStyle(
@@ -160,12 +231,16 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
                   color: Colors.black87,
                 ),
               ),
+              SizedBox(height: 4.h),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  color: Colors.grey[600],
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
             ],
-          ),
-          SizedBox(height: 8.h),
-          Text(
-            title,
-            style: TextStyle(fontSize: 14.sp, color: Colors.grey[600]),
           ),
         ],
       ),
