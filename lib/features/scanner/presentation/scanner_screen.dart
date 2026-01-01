@@ -3,6 +3,12 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:camera/camera.dart';
 import 'package:final_year_project_frontend/gen/colors.gen.dart';
 
+import 'dart:io';
+import 'package:final_year_project_frontend/features/scanner/data/ai_service.dart';
+import 'package:final_year_project_frontend/features/scanner/data/disease_response_model.dart';
+import 'package:final_year_project_frontend/constants/text_font_style.dart';
+import 'package:final_year_project_frontend/networks/endpoints.dart'; // For imageUrl
+
 class ScannerScreen extends StatefulWidget {
   const ScannerScreen({super.key});
 
@@ -10,13 +16,17 @@ class ScannerScreen extends StatefulWidget {
   State<ScannerScreen> createState() => _ScannerScreenState();
 }
 
-class _ScannerScreenState extends State<ScannerScreen> with WidgetsBindingObserver {
+class _ScannerScreenState extends State<ScannerScreen>
+    with WidgetsBindingObserver {
   CameraController? _cameraController;
   List<CameraDescription>? _cameras;
   bool _isCameraInitialized = false;
   bool _isLoading = true;
   String? _errorMessage;
   bool _isFlashOn = false;
+
+  // Add a loading state specifically for AI processing
+  bool _isProcessing = false;
 
   @override
   void initState() {
@@ -87,35 +97,280 @@ class _ScannerScreenState extends State<ScannerScreen> with WidgetsBindingObserv
   }
 
   Future<void> _takePicture() async {
-    if (_cameraController == null || !_cameraController!.value.isInitialized) {
+    if (_cameraController == null ||
+        !_cameraController!.value.isInitialized ||
+        _isProcessing) {
       return;
     }
 
     try {
       final XFile image = await _cameraController!.takePicture();
-      
+
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Picture captured! Path: ${image.path}'),
-            backgroundColor: AppColors.button,
-            duration: Duration(seconds: 2),
-          ),
-        );
-        
-        // TODO: Process the image for disease detection
-        // You can navigate to a result screen here or call your ML API
+        setState(() {
+          _isProcessing = true;
+        });
+
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   SnackBar(
+        //     content: Text('Processing image...'),
+        //     backgroundColor: AppColors.button,
+        //     duration: Duration(seconds: 1),
+        //   ),
+        // );
+
+        // Process the image for disease detection
+        final result = await AiService.detectDisease(File(image.path));
+
+        setState(() {
+          _isProcessing = false;
+        });
+
+        if (result['success']) {
+          final response = result['data'] as DiseaseDetectionResponse;
+          if (response.data != null) {
+            _showResultBottomSheet(response.data!);
+          } else {
+            _showErrorSnackBar('No disease data found.');
+          }
+        } else {
+          _showErrorSnackBar(result['message'] ?? 'Failed to detect disease.');
+        }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error taking picture: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        setState(() {
+          _isProcessing = false;
+        });
+        _showErrorSnackBar('Error taking picture: ${e.toString()}');
       }
     }
+  }
+
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: Colors.red),
+    );
+  }
+
+  void _showResultBottomSheet(DiseaseData data) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+      ),
+      builder: (context) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.6,
+          minChildSize: 0.4,
+          maxChildSize: 0.9,
+          expand: false,
+          builder: (context, scrollController) {
+            return SingleChildScrollView(
+              controller: scrollController,
+              padding: EdgeInsets.all(20.w),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header Indicator
+                  Center(
+                    child: Container(
+                      width: 40.w,
+                      height: 5.h,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(10.r),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 20.h),
+
+                  // Disease Name
+                  Text(
+                    'Detected Disease',
+                    style: TextFontStyle.textStyle16c8993A4EurostileW400
+                        .copyWith(fontSize: 14.sp, color: AppColors.c7E7E7E),
+                  ),
+                  SizedBox(height: 8.h),
+                  Text(
+                    data.disease?.replaceAll('__', ' ').replaceAll('_', ' ') ??
+                        'Unknown',
+                    style: TextFontStyle.textStyle24c3D4040EurostileW700
+                        .copyWith(color: AppColors.button, fontSize: 24.sp),
+                  ),
+
+                  // Confidence
+                  SizedBox(height: 8.h),
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 12.w,
+                      vertical: 6.h,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.button.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(20.r),
+                    ),
+                    child: Text(
+                      'Confidence: ${data.confidence?.toStringAsFixed(2)}%',
+                      style: TextStyle(
+                        color: AppColors.button,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12.sp,
+                      ),
+                    ),
+                  ),
+
+                  SizedBox(height: 24.h),
+                  Divider(),
+                  SizedBox(height: 16.h),
+
+                  // Products Header
+                  Text(
+                    'Recommended Products',
+                    style: TextFontStyle.textStyle20c3D4040EurostileW700Center
+                        .copyWith(
+                          fontSize: 18.sp,
+                          // textAlign: TextAlign.left,
+                        ),
+                  ),
+                  SizedBox(height: 16.h),
+
+                  // Products List
+                  if (data.products != null && data.products!.isNotEmpty)
+                    ListView.separated(
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      itemCount: data.products!.length,
+                      separatorBuilder: (context, index) =>
+                          SizedBox(height: 12.h),
+                      itemBuilder: (context, index) {
+                        final product = data.products![index];
+                        return Container(
+                          padding: EdgeInsets.all(12.w),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey[200]!),
+                            borderRadius: BorderRadius.circular(12.r),
+                          ),
+                          child: Row(
+                            children: [
+                              // Product Image
+                              if (product.thumbnail != null)
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(8.r),
+                                  child: Image.network(
+                                    // Handle if thumbnail already has full URL or needs base URL
+                                    product.thumbnail!.startsWith('http')
+                                        ? product.thumbnail!
+                                        : '$imageUrl${product.thumbnail}',
+                                    width: 60.w,
+                                    height: 60.w,
+                                    fit: BoxFit.cover,
+                                    errorBuilder:
+                                        (context, error, stackTrace) =>
+                                            Container(
+                                              width: 60.w,
+                                              height: 60.w,
+                                              color: Colors.grey[200],
+                                              child: Icon(
+                                                Icons.image_not_supported,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                  ),
+                                )
+                              else
+                                Container(
+                                  width: 60.w,
+                                  height: 60.w,
+                                  color: Colors.grey[200],
+                                  child: Icon(Icons.image, color: Colors.grey),
+                                ),
+
+                              SizedBox(width: 12.w),
+
+                              // Product Details
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      product.name ?? 'Unknown Product',
+                                      style: TextFontStyle
+                                          .textStyle16c3D4040EurostileW500
+                                          .copyWith(fontSize: 15.sp),
+                                    ),
+                                    SizedBox(height: 4.h),
+                                    Text(
+                                      'Price: ${product.price ?? 'N/A'}',
+                                      style: TextStyle(
+                                        color: AppColors.c7E7E7E,
+                                        fontSize: 13.sp,
+                                      ),
+                                    ),
+                                    if (product.discountPrice != null)
+                                      Text(
+                                        'Discount: ${product.discountPrice}',
+                                        style: TextStyle(
+                                          color: AppColors.button,
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 12.sp,
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                              Icon(
+                                Icons.arrow_forward_ios,
+                                size: 16.sp,
+                                color: Colors.grey,
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    )
+                  else
+                    Padding(
+                      padding: EdgeInsets.symmetric(vertical: 20.h),
+                      child: Center(
+                        child: Text("No recommended products found."),
+                      ),
+                    ),
+
+                  SizedBox(height: 20.h),
+                  // Action Button
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        // Optionally resume camera or reset state
+                        _initializeCamera();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.button,
+                        padding: EdgeInsets.symmetric(vertical: 14.h),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.r),
+                        ),
+                      ),
+                      child: Text('Done', style: TextStyle(fontSize: 16.sp)),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    ).whenComplete(() {
+      // Re-initialize camera when bottom sheet closes if needed to resume preview
+      // _initializeCamera();
+      // Note: Camera might still be active in background, but often previews pause.
+      // If preview freezes, we might need to resume it.
+    });
   }
 
   Future<void> _toggleFlash() async {
@@ -203,66 +458,92 @@ class _ScannerScreenState extends State<ScannerScreen> with WidgetsBindingObserv
               ),
             ),
 
-          // Top Bar
-          SafeArea(
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.5),
-                      shape: BoxShape.circle,
-                    ),
-                    child: IconButton(
-                      icon: Icon(Icons.arrow_back, color: Colors.white),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                  ),
-                  Text(
-                    'Scan Crop Leaf',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.bold,
-                      shadows: [
-                        Shadow(
-                          color: Colors.black.withOpacity(0.5),
-                          blurRadius: 8,
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.5),
-                      shape: BoxShape.circle,
-                    ),
-                    child: IconButton(
-                      icon: Icon(
-                        _isFlashOn ? Icons.flash_on : Icons.flash_off,
+          // Loading Overlay during processing
+          if (_isProcessing)
+            Container(
+              color: Colors.black.withOpacity(0.5),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(color: AppColors.button),
+                    SizedBox(height: 16.h),
+                    Text(
+                      'Analyzing Crop...',
+                      style: TextStyle(
                         color: Colors.white,
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.bold,
                       ),
-                      onPressed: _toggleFlash,
                     ),
-                  ),
-                ],
+                    SizedBox(height: 8.h),
+                    Text(
+                      'Please wait',
+                      style: TextStyle(color: Colors.white70, fontSize: 14.sp),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
+
+          // Top Bar
+          if (!_isProcessing)
+            SafeArea(
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.5),
+                        shape: BoxShape.circle,
+                      ),
+                      child: IconButton(
+                        icon: Icon(Icons.arrow_back, color: Colors.white),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ),
+                    Text(
+                      'Scan Crop Leaf',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.bold,
+                        shadows: [
+                          Shadow(
+                            color: Colors.black.withOpacity(0.5),
+                            blurRadius: 8,
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.5),
+                        shape: BoxShape.circle,
+                      ),
+                      child: IconButton(
+                        icon: Icon(
+                          _isFlashOn ? Icons.flash_on : Icons.flash_off,
+                          color: Colors.white,
+                        ),
+                        onPressed: _toggleFlash,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
 
           // Camera Frame/Guide
-          if (_isCameraInitialized)
+          if (_isCameraInitialized && !_isProcessing)
             Center(
               child: Container(
                 width: 300.w,
                 height: 300.w,
                 decoration: BoxDecoration(
-                  border: Border.all(
-                    color: AppColors.button,
-                    width: 3,
-                  ),
+                  border: Border.all(color: AppColors.button, width: 3),
                   borderRadius: BorderRadius.circular(20.r),
                 ),
                 child: Column(
@@ -279,98 +560,110 @@ class _ScannerScreenState extends State<ScannerScreen> with WidgetsBindingObserv
             ),
 
           // Bottom Instructions and Capture Button
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 24.h),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.bottomCenter,
-                  end: Alignment.topCenter,
-                  colors: [
-                    Colors.black.withOpacity(0.8),
-                    Colors.transparent,
-                  ],
+          if (!_isProcessing)
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 24.h),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.bottomCenter,
+                    end: Alignment.topCenter,
+                    colors: [Colors.black.withOpacity(0.8), Colors.transparent],
+                  ),
                 ),
-              ),
-              child: SafeArea(
-                child: Column(
-                  children: [
-                    Text(
-                      'Position the leaf within the frame',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 14.sp,
+                child: SafeArea(
+                  child: Column(
+                    children: [
+                      Text(
+                        'Position the leaf within the frame',
+                        style: TextStyle(color: Colors.white, fontSize: 14.sp),
+                        textAlign: TextAlign.center,
                       ),
-                      textAlign: TextAlign.center,
-                    ),
-                    SizedBox(height: 24.h),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        // Gallery Button
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.5),
-                            shape: BoxShape.circle,
-                          ),
-                          child: IconButton(
-                            icon: Icon(Icons.photo_library, color: Colors.white, size: 28.sp),
-                            onPressed: () {
-                              // TODO: Open gallery
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Gallery feature coming soon')),
-                              );
-                            },
-                          ),
-                        ),
-                        SizedBox(width: 40.w),
-                        // Capture Button
-                        GestureDetector(
-                          onTap: _isCameraInitialized ? _takePicture : null,
-                          child: Container(
-                            width: 70.w,
-                            height: 70.w,
+                      SizedBox(height: 24.h),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          // Gallery Button
+                          Container(
                             decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.5),
                               shape: BoxShape.circle,
-                              border: Border.all(color: Colors.white, width: 4),
-                              color: AppColors.button,
                             ),
-                            child: Center(
-                              child: Icon(
-                                Icons.camera,
+                            child: IconButton(
+                              icon: Icon(
+                                Icons.photo_library,
                                 color: Colors.white,
-                                size: 32.sp,
+                                size: 28.sp,
+                              ),
+                              onPressed: () {
+                                // TODO: Open gallery
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      'Gallery feature coming soon',
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          SizedBox(width: 40.w),
+                          // Capture Button
+                          GestureDetector(
+                            onTap: _isCameraInitialized ? _takePicture : null,
+                            child: Container(
+                              width: 70.w,
+                              height: 70.w,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: Colors.white,
+                                  width: 4,
+                                ),
+                                color: AppColors.button,
+                              ),
+                              child: Center(
+                                child: Icon(
+                                  Icons.camera,
+                                  color: Colors.white,
+                                  size: 32.sp,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        SizedBox(width: 40.w),
-                        // Switch Camera Button
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.5),
-                            shape: BoxShape.circle,
+                          SizedBox(width: 40.w),
+                          // Switch Camera Button
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.5),
+                              shape: BoxShape.circle,
+                            ),
+                            child: IconButton(
+                              icon: Icon(
+                                Icons.flip_camera_android,
+                                color: Colors.white,
+                                size: 28.sp,
+                              ),
+                              onPressed: () {
+                                // TODO: Switch camera
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Camera switch coming soon'),
+                                  ),
+                                );
+                              },
+                            ),
                           ),
-                          child: IconButton(
-                            icon: Icon(Icons.flip_camera_android, color: Colors.white, size: 28.sp),
-                            onPressed: () {
-                              // TODO: Switch camera
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Camera switch coming soon')),
-                              );
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
         ],
       ),
     );
