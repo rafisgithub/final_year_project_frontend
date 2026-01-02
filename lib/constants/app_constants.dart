@@ -4,13 +4,13 @@ import 'package:flutter/material.dart';
 
 final class AppRegExpText {
   AppRegExpText._();
-// Regular Expression
+  // Regular Expression
   static String kRegExpEmail =
       r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+";
   static String kRegExpPhone =
       // ignore: prefer_adjacent_string_concatenation
       "(\\+[0-9]+[\\- \\.]*)?(\\([0-9]+\\)[\\- \\.]*)?" +
-          "([0-9][0-9\\- \\.]+[0-9])";
+      "([0-9][0-9\\- \\.]+[0-9])";
 
   static String patternMail =
       r"^(([^<>()[\]\\.,;:\s@\']+(\.[^<>()[\]\\.,;:\s@\']+)*)|(\'.+\'))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$";
@@ -97,7 +97,7 @@ const String kKeyImage = 'image';
 const String kKeyDeviceID = 'device_id';
 const String kKeyUserID = 'user_id';
 const String kKeyRefreshToken = 'refresh_token';
-const String kKeyUserId = 'user_id';
+
 const String kKeyRole = 'role';
 const String kKeyShopID = 'shop_id';
 const String kKeycategoriesID = 'categoriesId';
@@ -109,18 +109,12 @@ const String kkeyUserType = 'user_type';
 const String kkeystafprofiledone = 'is_staff_profile_done';
 //order statuses
 
-const List<String> kLanguagesKey = [
-  kKeyEnglish,
-  kKeyBangla,
-];
+const List<String> kLanguagesKey = [kKeyEnglish, kKeyBangla];
 const Map languages = <String, String>{
   kKeyEnglish: "English",
   kKeyBangla: "Bangla",
 };
-const Map countriesCode = <String, String>{
-  kKeyEnglish: "US",
-  kKeyBangla: "BD",
-};
+const Map countriesCode = <String, String>{kKeyEnglish: "US", kKeyBangla: "BD"};
 
 class DefaultValue {
   static const bool kDefaultBoolean = false;

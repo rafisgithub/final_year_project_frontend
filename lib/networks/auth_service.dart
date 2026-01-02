@@ -37,21 +37,21 @@ class AuthService {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final responseData = response.data;
-        
+
         if (responseData['success'] == true && responseData['data'] != null) {
           // Save tokens and user data
           final userData = responseData['data'];
           await appData.write(kKeyAccessToken, userData['access_token']);
           await appData.write(kKeyRefreshToken, userData['refresh_token']);
-          await appData.write(kKeyUserId, userData['id'].toString());
+          await appData.write(kKeyUserID, userData['id'].toString());
           await appData.write(kKeyEmail, userData['email']);
           if (userData['role'] != null) {
             await appData.write(kKeyRole, userData['role']);
           }
-          
+
           // Update Dio with the new token
           DioSingleton.instance.update(userData['access_token']);
-          
+
           return {
             'success': true,
             'message': responseData['message'] ?? 'Sign up successful',
@@ -74,7 +74,7 @@ class AuthService {
         print('Sign Up DioException: ${e.message}');
         print('Response: ${e.response?.data}');
       }
-      
+
       if (e.response != null && e.response?.data != null) {
         final errorData = e.response!.data;
         return {
@@ -83,7 +83,7 @@ class AuthService {
           'errors': errorData['errors'],
         };
       }
-      
+
       return {
         'success': false,
         'message': e.message ?? 'Network error occurred',
@@ -92,10 +92,7 @@ class AuthService {
       if (kDebugMode) {
         print('Sign Up Error: $e');
       }
-      return {
-        'success': false,
-        'message': 'An unexpected error occurred',
-      };
+      return {'success': false, 'message': 'An unexpected error occurred'};
     }
   }
 
@@ -105,10 +102,7 @@ class AuthService {
     required String password,
   }) async {
     try {
-      final data = {
-        'email': email,
-        'password': password,
-      };
+      final data = {'email': email, 'password': password};
 
       if (kDebugMode) {
         print('Sign In Request: $data');
@@ -122,22 +116,22 @@ class AuthService {
 
       if (response.statusCode == 200) {
         final responseData = response.data;
-        
+
         if (responseData['success'] == true && responseData['data'] != null) {
           // Save tokens and user data
           final userData = responseData['data'];
           await appData.write(kKeyAccessToken, userData['access_token']);
           await appData.write(kKeyRefreshToken, userData['refresh_token']);
-          await appData.write(kKeyUserId, userData['id'].toString());
+          await appData.write(kKeyUserID, userData['id'].toString());
           await appData.write(kKeyEmail, userData['email']);
-          await appData.write(kKeyIsLoggedIn,true);
+          await appData.write(kKeyIsLoggedIn, true);
           if (userData['role'] != null) {
             await appData.write(kKeyRole, userData['role']);
           }
-          
+
           // Update Dio with the new token
           DioSingleton.instance.update(userData['access_token']);
-          
+
           return {
             'success': true,
             'message': responseData['message'] ?? 'Sign in successful',
@@ -160,7 +154,7 @@ class AuthService {
         print('Sign In DioException: ${e.message}');
         print('Response: ${e.response?.data}');
       }
-      
+
       if (e.response != null && e.response?.data != null) {
         final errorData = e.response!.data;
         return {
@@ -169,7 +163,7 @@ class AuthService {
           'errors': errorData['errors'],
         };
       }
-      
+
       return {
         'success': false,
         'message': e.message ?? 'Network error occurred',
@@ -178,10 +172,7 @@ class AuthService {
       if (kDebugMode) {
         print('Sign In Error: $e');
       }
-      return {
-        'success': false,
-        'message': 'An unexpected error occurred',
-      };
+      return {'success': false, 'message': 'An unexpected error occurred'};
     }
   }
 
@@ -191,10 +182,7 @@ class AuthService {
     required String purpose, // 'password_reset' or other purposes
   }) async {
     try {
-      final data = {
-        'email': email,
-        'purpose': purpose,
-      };
+      final data = {'email': email, 'purpose': purpose};
 
       if (kDebugMode) {
         print('Send OTP Request: $data');
@@ -208,7 +196,7 @@ class AuthService {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final responseData = response.data;
-        
+
         if (responseData['success'] == true) {
           return {
             'success': true,
@@ -232,7 +220,7 @@ class AuthService {
         print('Send OTP DioException: ${e.message}');
         print('Response: ${e.response?.data}');
       }
-      
+
       if (e.response != null && e.response?.data != null) {
         final errorData = e.response!.data;
         return {
@@ -241,7 +229,7 @@ class AuthService {
           'errors': errorData['errors'],
         };
       }
-      
+
       return {
         'success': false,
         'message': e.message ?? 'Network error occurred',
@@ -250,10 +238,7 @@ class AuthService {
       if (kDebugMode) {
         print('Send OTP Error: $e');
       }
-      return {
-        'success': false,
-        'message': 'An unexpected error occurred',
-      };
+      return {'success': false, 'message': 'An unexpected error occurred'};
     }
   }
 
@@ -263,10 +248,7 @@ class AuthService {
     required String purpose, // 'password_reset' or other purposes
   }) async {
     try {
-      final data = {
-        'email': email,
-        'purpose': purpose,
-      };
+      final data = {'email': email, 'purpose': purpose};
 
       if (kDebugMode) {
         print('Resend OTP Request: $data');
@@ -280,7 +262,7 @@ class AuthService {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final responseData = response.data;
-        
+
         if (responseData['success'] == true) {
           return {
             'success': true,
@@ -304,7 +286,7 @@ class AuthService {
         print('Resend OTP DioException: ${e.message}');
         print('Response: ${e.response?.data}');
       }
-      
+
       if (e.response != null && e.response?.data != null) {
         final errorData = e.response!.data;
         return {
@@ -313,7 +295,7 @@ class AuthService {
           'errors': errorData['errors'],
         };
       }
-      
+
       return {
         'success': false,
         'message': e.message ?? 'Network error occurred',
@@ -322,10 +304,7 @@ class AuthService {
       if (kDebugMode) {
         print('Resend OTP Error: $e');
       }
-      return {
-        'success': false,
-        'message': 'An unexpected error occurred',
-      };
+      return {'success': false, 'message': 'An unexpected error occurred'};
     }
   }
 
@@ -334,17 +313,12 @@ class AuthService {
     try {
       // Get refresh token from storage
       final refreshToken = appData.read(kKeyRefreshToken);
-      
+
       if (refreshToken == null) {
-        return {
-          'success': false,
-          'message': 'No refresh token found',
-        };
+        return {'success': false, 'message': 'No refresh token found'};
       }
 
-      final data = {
-        'refresh_token': refreshToken,
-      };
+      final data = {'refresh_token': refreshToken};
 
       if (kDebugMode) {
         print('Sign Out Request: $data');
@@ -356,66 +330,59 @@ class AuthService {
         print('Sign Out Response: ${response.data}');
       }
 
-      if (response.statusCode == 200 || response.statusCode == 201 || response.statusCode == 204) {
+      if (response.statusCode == 200 ||
+          response.statusCode == 201 ||
+          response.statusCode == 204) {
         // Clear all stored data
         await appData.remove(kKeyAccessToken);
         await appData.remove(kKeyRefreshToken);
-        await appData.remove(kKeyUserId);
+        await appData.remove(kKeyUserID);
         await appData.remove(kKeyEmail);
         await appData.remove(kKeyIsLoggedIn);
         await appData.remove(kKeyRole);
-        
+
         // Clear Dio token
         DioSingleton.instance.update('');
-        
+
         final responseData = response.data;
         return {
           'success': true,
           'message': responseData?['message'] ?? 'Signed out successfully',
         };
       } else {
-        return {
-          'success': false,
-          'message': 'Sign out failed',
-        };
+        return {'success': false, 'message': 'Sign out failed'};
       }
     } on DioException catch (e) {
       if (kDebugMode) {
         print('Sign Out DioException: ${e.message}');
         print('Response: ${e.response?.data}');
       }
-      
+
       // Even if API call fails, clear local data
       await appData.remove(kKeyAccessToken);
       await appData.remove(kKeyRefreshToken);
-      await appData.remove(kKeyUserId);
+      await appData.remove(kKeyUserID);
       await appData.remove(kKeyEmail);
       await appData.remove(kKeyIsLoggedIn);
       await appData.remove(kKeyRole);
       DioSingleton.instance.update('');
-      
-      return {
-        'success': true,
-        'message': 'Signed out successfully',
-      };
+
+      return {'success': true, 'message': 'Signed out successfully'};
     } catch (e) {
       if (kDebugMode) {
         print('Sign Out Error: $e');
       }
-      
+
       // Even if error occurs, clear local data
       await appData.remove(kKeyAccessToken);
       await appData.remove(kKeyRefreshToken);
-      await appData.remove(kKeyUserId);
+      await appData.remove(kKeyUserID);
       await appData.remove(kKeyEmail);
       await appData.remove(kKeyIsLoggedIn);
       await appData.remove(kKeyRole);
       DioSingleton.instance.update('');
-      
-      return {
-        'success': true,
-        'message': 'Signed out successfully',
-      };
+
+      return {'success': true, 'message': 'Signed out successfully'};
     }
   }
 
@@ -445,7 +412,7 @@ class AuthService {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final responseData = response.data;
-        
+
         if (responseData['success'] == true) {
           return {
             'success': true,
@@ -469,7 +436,7 @@ class AuthService {
         print('Reset Password DioException: ${e.message}');
         print('Response: ${e.response?.data}');
       }
-      
+
       if (e.response != null && e.response?.data != null) {
         final errorData = e.response!.data;
         return {
@@ -478,7 +445,7 @@ class AuthService {
           'errors': errorData['errors'],
         };
       }
-      
+
       return {
         'success': false,
         'message': e.message ?? 'Network error occurred',
@@ -487,10 +454,7 @@ class AuthService {
       if (kDebugMode) {
         print('Reset Password Error: $e');
       }
-      return {
-        'success': false,
-        'message': 'An unexpected error occurred',
-      };
+      return {'success': false, 'message': 'An unexpected error occurred'};
     }
   }
 }
