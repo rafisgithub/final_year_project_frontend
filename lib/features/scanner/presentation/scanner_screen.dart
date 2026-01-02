@@ -8,6 +8,7 @@ import 'package:final_year_project_frontend/features/scanner/data/ai_service.dar
 import 'package:final_year_project_frontend/features/scanner/data/disease_response_model.dart';
 import 'package:final_year_project_frontend/constants/text_font_style.dart';
 import 'package:final_year_project_frontend/networks/endpoints.dart'; // For imageUrl
+import 'package:final_year_project_frontend/features/product/presentation/product_details_screen.dart';
 
 class ScannerScreen extends StatefulWidget {
   const ScannerScreen({super.key});
@@ -247,86 +248,104 @@ class _ScannerScreenState extends State<ScannerScreen>
                           SizedBox(height: 12.h),
                       itemBuilder: (context, index) {
                         final product = data.products![index];
-                        return Container(
-                          padding: EdgeInsets.all(12.w),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey[200]!),
-                            borderRadius: BorderRadius.circular(12.r),
-                          ),
-                          child: Row(
-                            children: [
-                              // Product Image
-                              if (product.thumbnail != null)
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(8.r),
-                                  child: Image.network(
-                                    // Handle if thumbnail already has full URL or needs base URL
-                                    product.thumbnail!.startsWith('http')
-                                        ? product.thumbnail!
-                                        : '$imageUrl${product.thumbnail}',
+                        return GestureDetector(
+                          onTap: () {
+                            if (product.id != null) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ProductDetailsScreen(
+                                    productId: product.id!,
+                                  ),
+                                ),
+                              );
+                            }
+                          },
+                          child: Container(
+                            padding: EdgeInsets.all(12.w),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey[200]!),
+                              borderRadius: BorderRadius.circular(12.r),
+                            ),
+                            child: Row(
+                              children: [
+                                // Product Image
+                                if (product.thumbnail != null)
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(8.r),
+                                    child: Image.network(
+                                      // Handle if thumbnail already has full URL or needs base URL
+                                      product.thumbnail!.startsWith('http')
+                                          ? product.thumbnail!
+                                          : '$imageUrl${product.thumbnail}',
+                                      width: 60.w,
+                                      height: 60.w,
+                                      fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (context, error, stackTrace) =>
+                                              Container(
+                                                width: 60.w,
+                                                height: 60.w,
+                                                color: Colors.grey[200],
+                                                child: Icon(
+                                                  Icons.image_not_supported,
+                                                  color: Colors.grey,
+                                                ),
+                                              ),
+                                    ),
+                                  )
+                                else
+                                  Container(
                                     width: 60.w,
                                     height: 60.w,
-                                    fit: BoxFit.cover,
-                                    errorBuilder:
-                                        (context, error, stackTrace) =>
-                                            Container(
-                                              width: 60.w,
-                                              height: 60.w,
-                                              color: Colors.grey[200],
-                                              child: Icon(
-                                                Icons.image_not_supported,
-                                                color: Colors.grey,
-                                              ),
-                                            ),
+                                    color: Colors.grey[200],
+                                    child: Icon(
+                                      Icons.image,
+                                      color: Colors.grey,
+                                    ),
                                   ),
-                                )
-                              else
-                                Container(
-                                  width: 60.w,
-                                  height: 60.w,
-                                  color: Colors.grey[200],
-                                  child: Icon(Icons.image, color: Colors.grey),
-                                ),
 
-                              SizedBox(width: 12.w),
+                                SizedBox(width: 12.w),
 
-                              // Product Details
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      product.name ?? 'Unknown Product',
-                                      style: TextFontStyle
-                                          .textStyle16c3D4040EurostileW500
-                                          .copyWith(fontSize: 15.sp),
-                                    ),
-                                    SizedBox(height: 4.h),
-                                    Text(
-                                      'Price: ${product.price ?? 'N/A'}',
-                                      style: TextStyle(
-                                        color: AppColors.c7E7E7E,
-                                        fontSize: 13.sp,
-                                      ),
-                                    ),
-                                    if (product.discountPrice != null)
+                                // Product Details
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
                                       Text(
-                                        'Discount: ${product.discountPrice}',
+                                        product.name ?? 'Unknown Product',
+                                        style: TextFontStyle
+                                            .textStyle16c3D4040EurostileW500
+                                            .copyWith(fontSize: 15.sp),
+                                      ),
+                                      SizedBox(height: 4.h),
+                                      Text(
+                                        'Price: ${product.price ?? 'N/A'}',
                                         style: TextStyle(
-                                          color: AppColors.button,
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: 12.sp,
+                                          color: AppColors.c7E7E7E,
+                                          fontSize: 13.sp,
                                         ),
                                       ),
-                                  ],
+                                      if (product.discountPrice != null)
+                                        Text(
+                                          'Discount: ${product.discountPrice}',
+                                          style: TextStyle(
+                                            color: AppColors.button,
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 12.sp,
+                                          ),
+                                        ),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                              Icon(
-                                Icons.arrow_forward_ios,
-                                size: 16.sp,
-                                color: Colors.grey,
-                              ),
-                            ],
+                                Icon(
+                                  Icons.arrow_forward_ios,
+                                  size: 16.sp,
+                                  color: Colors.grey,
+                                ),
+                              ],
+                            ),
                           ),
                         );
                       },
