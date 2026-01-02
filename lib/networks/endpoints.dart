@@ -1,16 +1,15 @@
 // ignore_for_file: constant_identifier_names, unnecessary_string_interpolations
 
 // Live setup
-// const String url = "https://test.drinkwithme.click/api/";
-// const String imageUrl = "https://test.drinkwithme.click";
-// const String websocketUrl = "wss://test.drinkwithme.click/ws/chat/";
+const String url = "https://test.drinkwithme.click/api/";
+const String imageUrl = "https://test.drinkwithme.click";
+const String websocketUrl = "wss://test.drinkwithme.click/ws/chat/";
 
 // Local setup
 
-const String url = "http://172.16.200.94:8000/api/";
-const String imageUrl = "http://172.16.200.94:8000/";
-const String websocketUrl = "ws://172.16.200.94:8000/ws/chat/";
-
+// const String url = "http://172.16.200.94:8000/api/";
+// const String imageUrl = "http://172.16.200.94:8000/";
+// const String websocketUrl = "ws://172.16.200.94:8000/ws/chat/";
 
 final class NetworkConstants {
   NetworkConstants._();
@@ -87,6 +86,7 @@ final class Endpoints {
   static const String chatSendFile = "messages/send-file/";
   static const String chatMarkRead = "messages/mark-read/";
   static const String allUnreadMessagesCount = "all-unread-new-messages-count/";
+  static const String getSingleUser = "get-single-user/";
 
   // cart
   static const String addToCart = "add-to-cart/";

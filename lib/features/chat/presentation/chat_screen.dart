@@ -82,12 +82,9 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   }
 
   void _connectWebSocket() {
-    if (_currentUserId == 0) {
-      print('❌ [ChatScreen] Cannot connect - current user ID is 0');
-      return;
-    }
-
     print('🔌 [ChatScreen] Connecting WebSocket...');
+
+    // User requested to allow connection even if not authenticated/ID is 0
     print(
       '🔌 [ChatScreen] Current User: $_currentUserId, Other User: ${widget.otherUser.id}',
     );
@@ -159,6 +156,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     final text = _messageController.text.trim();
     if (text.isEmpty) return;
 
+    print('🚀 [ChatScreen] Sending message via WebSocket: $text');
     _webSocketService.sendMessage(text);
     _messageController.clear();
   }
