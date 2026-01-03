@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="final_year_project_frontend"
+        android:label="Krishi Officer"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
