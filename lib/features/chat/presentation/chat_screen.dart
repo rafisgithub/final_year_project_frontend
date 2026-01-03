@@ -228,10 +228,10 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
           child: AppBar(
             backgroundColor: Colors.transparent,
             elevation: 0,
-            leading: IconButton(
-              icon: Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () => Navigator.pop(context),
-            ),
+            // leading: IconButton(
+            //   icon: Icon(Icons.arrow_back, color: Colors.white),
+            //   onPressed: () => Navigator.pop(context),
+            // ),
             title: Row(
               children: [
                 Stack(

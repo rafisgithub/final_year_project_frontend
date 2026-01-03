@@ -12,10 +12,12 @@ class PasswordUpdateSuccessScreen extends StatefulWidget {
   const PasswordUpdateSuccessScreen({super.key});
 
   @override
-  State<PasswordUpdateSuccessScreen> createState() => _PasswordUpdateSuccessScreenState();
+  State<PasswordUpdateSuccessScreen> createState() =>
+      _PasswordUpdateSuccessScreenState();
 }
 
-class _PasswordUpdateSuccessScreenState extends State<PasswordUpdateSuccessScreen> {
+class _PasswordUpdateSuccessScreenState
+    extends State<PasswordUpdateSuccessScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,7 +28,7 @@ class _PasswordUpdateSuccessScreenState extends State<PasswordUpdateSuccessScree
           child: Column(
             children: [
               Spacer(),
-              
+
               // Success Icon
               Container(
                 padding: EdgeInsets.all(24.w),
@@ -40,9 +42,9 @@ class _PasswordUpdateSuccessScreenState extends State<PasswordUpdateSuccessScree
                   color: AppColors.button,
                 ),
               ),
-              
+
               UIHelper.verticalSpace(32.h),
-              
+
               Text(
                 "Password Updated".tr,
                 style: TextFontStyle.textStyle18c231F20poppins700.copyWith(
@@ -52,9 +54,9 @@ class _PasswordUpdateSuccessScreenState extends State<PasswordUpdateSuccessScree
                 ),
                 textAlign: TextAlign.center,
               ),
-              
+
               UIHelper.verticalSpace(8.h),
-              
+
               Text(
                 "Successfully".tr,
                 style: TextFontStyle.textStyle18c231F20poppins700.copyWith(
@@ -64,9 +66,9 @@ class _PasswordUpdateSuccessScreenState extends State<PasswordUpdateSuccessScree
                 ),
                 textAlign: TextAlign.center,
               ),
-              
+
               UIHelper.verticalSpace(16.h),
-              
+
               Text(
                 "Your password has been successfully updated. Please log in first",
                 style: TextStyle(
@@ -76,9 +78,9 @@ class _PasswordUpdateSuccessScreenState extends State<PasswordUpdateSuccessScree
                 ),
                 textAlign: TextAlign.center,
               ),
-              
+
               Spacer(),
-              
+
               // Login Button
               Container(
                 height: 56.h,
@@ -97,21 +99,17 @@ class _PasswordUpdateSuccessScreenState extends State<PasswordUpdateSuccessScree
                   bgColor1: AppColors.button,
                   bgColor2: AppColors.c28B446,
                   name: 'Login Now'.tr,
-                  textStyle: TextFontStyle.textStyle18c231F20poppins700.copyWith(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w700,
-                  ),
+                  textStyle: TextFontStyle.textStyle18c231F20poppins700
+                      .copyWith(fontSize: 16.sp, fontWeight: FontWeight.w700),
                   callback: () {
-                    NavigationService.navigateToWithArgs(
+                    NavigationService.navigateToReplacementUntilWithObject(
                       Routes.mainNavigationBar,
-                      {
-                        'pageNum': 0,
-                      },
+                      {'pageNum': 0},
                     );
                   },
                 ),
               ),
-              
+
               UIHelper.verticalSpace(32.h),
             ],
           ),

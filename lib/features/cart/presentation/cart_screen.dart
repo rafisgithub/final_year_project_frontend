@@ -348,7 +348,7 @@ class _CartScreenState extends State<CartScreen> {
           ),
         ],
       ),
-      body: _buildBody(),
+      body: SafeArea(child: _buildBody()),
       bottomNavigationBar: _buildBottomBar(),
     );
   }

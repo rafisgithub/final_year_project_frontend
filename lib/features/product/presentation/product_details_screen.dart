@@ -162,342 +162,353 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
           ),
         ),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Product Images Carousel
-            if (productImages.isNotEmpty)
-              Column(
-                children: [
-                  CarouselSlider(
-                    options: CarouselOptions(
-                      height: 300.h,
-                      viewportFraction: 1.0,
-                      enlargeCenterPage: false,
-                      onPageChanged: (index, reason) {
-                        setState(() {
-                          _currentImageIndex = index;
-                        });
-                      },
-                    ),
-                    items: productImages.map((imageData) {
-                      return Builder(
-                        builder: (BuildContext context) {
-                          return Container(
-                            width: MediaQuery.of(context).size.width,
-                            decoration: BoxDecoration(color: Colors.grey[100]),
-                            child: Image.network(
-                              '$imageUrl${imageData['image']}',
-                              fit: BoxFit.contain,
-                              errorBuilder: (context, error, stackTrace) {
-                                return Center(
-                                  child: Icon(
-                                    Icons.image_not_supported,
-                                    size: 80.sp,
-                                    color: Colors.grey,
-                                  ),
-                                );
-                              },
-                            ),
-                          );
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Product Images Carousel
+              if (productImages.isNotEmpty)
+                Column(
+                  children: [
+                    CarouselSlider(
+                      options: CarouselOptions(
+                        height: 300.h,
+                        viewportFraction: 1.0,
+                        enlargeCenterPage: false,
+                        onPageChanged: (index, reason) {
+                          setState(() {
+                            _currentImageIndex = index;
+                          });
                         },
-                      );
-                    }).toList(),
-                  ),
-                  SizedBox(height: 12.h),
-                  // Image indicators
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: productImages.asMap().entries.map((entry) {
-                      return Container(
-                        width: _currentImageIndex == entry.key ? 24.w : 8.w,
-                        height: 8.h,
-                        margin: EdgeInsets.symmetric(horizontal: 4.w),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(4.r),
-                          color: _currentImageIndex == entry.key
-                              ? AppColors.button
-                              : Colors.grey[300],
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                ],
-              )
-            else
-              Container(
-                height: 300.h,
-                width: double.infinity,
-                color: Colors.grey[100],
-                child: Center(
-                  child: Icon(
-                    Icons.image_not_supported,
-                    size: 80.sp,
-                    color: Colors.grey,
+                      ),
+                      items: productImages.map((imageData) {
+                        return Builder(
+                          builder: (BuildContext context) {
+                            return Container(
+                              width: MediaQuery.of(context).size.width,
+                              decoration: BoxDecoration(
+                                color: Colors.grey[100],
+                              ),
+                              child: Image.network(
+                                '$imageUrl${imageData['image']}',
+                                fit: BoxFit.contain,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Center(
+                                    child: Icon(
+                                      Icons.image_not_supported,
+                                      size: 80.sp,
+                                      color: Colors.grey,
+                                    ),
+                                  );
+                                },
+                              ),
+                            );
+                          },
+                        );
+                      }).toList(),
+                    ),
+                    SizedBox(height: 12.h),
+                    // Image indicators
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: productImages.asMap().entries.map((entry) {
+                        return Container(
+                          width: _currentImageIndex == entry.key ? 24.w : 8.w,
+                          height: 8.h,
+                          margin: EdgeInsets.symmetric(horizontal: 4.w),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(4.r),
+                            color: _currentImageIndex == entry.key
+                                ? AppColors.button
+                                : Colors.grey[300],
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                )
+              else
+                Container(
+                  height: 300.h,
+                  width: double.infinity,
+                  color: Colors.grey[100],
+                  child: Center(
+                    child: Icon(
+                      Icons.image_not_supported,
+                      size: 80.sp,
+                      color: Colors.grey,
+                    ),
                   ),
                 ),
-              ),
 
-            SizedBox(height: 20.h),
+              SizedBox(height: 20.h),
 
-            // Product Information
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20.w),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Product Name
-                  Text(
-                    product['name'] ?? '',
-                    style: TextStyle(
-                      fontSize: 24.sp,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+              // Product Information
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20.w),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Product Name
+                    Text(
+                      product['name'] ?? '',
+                      style: TextStyle(
+                        fontSize: 24.sp,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 12.h),
+                    SizedBox(height: 12.h),
 
-                  // Category and Stock
-                  Row(
-                    children: [
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 12.w,
-                          vertical: 6.h,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.button.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(8.r),
-                        ),
-                        child: Text(
-                          product['product_category']
-                                  ?.toString()
-                                  .toUpperCase() ??
-                              '',
-                          style: TextStyle(
-                            fontSize: 12.sp,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.button,
+                    // Category and Stock
+                    Row(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 12.w,
+                            vertical: 6.h,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.button.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8.r),
+                          ),
+                          child: Text(
+                            product['product_category']
+                                    ?.toString()
+                                    .toUpperCase() ??
+                                '',
+                            style: TextStyle(
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.button,
+                            ),
                           ),
                         ),
-                      ),
-                      SizedBox(width: 12.w),
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 12.w,
-                          vertical: 6.h,
-                        ),
-                        decoration: BoxDecoration(
-                          color: product['stock'] > 0
-                              ? Colors.green.withOpacity(0.1)
-                              : Colors.red.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(8.r),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.inventory_2,
-                              size: 14.sp,
-                              color: product['stock'] > 0
-                                  ? Colors.green
-                                  : Colors.red,
-                            ),
-                            SizedBox(width: 4.w),
-                            Text(
-                              product['stock'] > 0
-                                  ? _translate(
-                                      'In Stock (${product['stock']})',
-                                      'স্টকে আছে (${product['stock']})',
-                                    )
-                                  : _translate('Out of Stock', 'স্টক শেষ'),
-                              style: TextStyle(
-                                fontSize: 12.sp,
-                                fontWeight: FontWeight.bold,
+                        SizedBox(width: 12.w),
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 12.w,
+                            vertical: 6.h,
+                          ),
+                          decoration: BoxDecoration(
+                            color: product['stock'] > 0
+                                ? Colors.green.withOpacity(0.1)
+                                : Colors.red.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8.r),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.inventory_2,
+                                size: 14.sp,
                                 color: product['stock'] > 0
                                     ? Colors.green
                                     : Colors.red,
+                              ),
+                              SizedBox(width: 4.w),
+                              Text(
+                                product['stock'] > 0
+                                    ? _translate(
+                                        'In Stock (${product['stock']})',
+                                        'স্টকে আছে (${product['stock']})',
+                                      )
+                                    : _translate('Out of Stock', 'স্টক শেষ'),
+                                style: TextStyle(
+                                  fontSize: 12.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: product['stock'] > 0
+                                      ? Colors.green
+                                      : Colors.red,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    SizedBox(height: 20.h),
+
+                    // Price Section
+                    Container(
+                      padding: EdgeInsets.all(16.w),
+                      decoration: BoxDecoration(
+                        color: AppColors.button.withOpacity(0.05),
+                        borderRadius: BorderRadius.circular(12.r),
+                        border: Border.all(
+                          color: AppColors.button.withOpacity(0.2),
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  _translate('Price', 'মূল্য'),
+                                  style: TextStyle(
+                                    fontSize: 14.sp,
+                                    color: Colors.grey[600],
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                SizedBox(height: 8.h),
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Text(
+                                      '৳${product['discount_price'] ?? product['price']}',
+                                      style: TextStyle(
+                                        fontSize: 28.sp,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.button,
+                                      ),
+                                    ),
+                                    if (product['discount_price'] != null) ...[
+                                      SizedBox(width: 12.w),
+                                      Text(
+                                        '৳${product['price']}',
+                                        style: TextStyle(
+                                          fontSize: 18.sp,
+                                          color: Colors.grey,
+                                          decoration:
+                                              TextDecoration.lineThrough,
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          if (product['discount'] != null &&
+                              product['discount'] != '0.00')
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 16.w,
+                                vertical: 8.h,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.red,
+                                borderRadius: BorderRadius.circular(8.r),
+                              ),
+                              child: Text(
+                                '-${product['discount']}%',
+                                style: TextStyle(
+                                  fontSize: 18.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+
+                    SizedBox(height: 24.h),
+
+                    // Description
+                    if (product['description'] != null) ...[
+                      Text(
+                        _translate('Description', 'বিবরণ'),
+                        style: TextStyle(
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      SizedBox(height: 12.h),
+                      Text(
+                        product['description'],
+                        style: TextStyle(
+                          fontSize: 15.sp,
+                          color: Colors.black87,
+                          height: 1.6,
+                        ),
+                      ),
+                      SizedBox(height: 24.h),
+                    ],
+
+                    // Seller Information
+                    if (product['seller'] != null) ...[
+                      Text(
+                        _translate('Seller Information', 'বিক্রেতার তথ্য'),
+                        style: TextStyle(
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      SizedBox(height: 12.h),
+                      Container(
+                        padding: EdgeInsets.all(16.w),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[50],
+                          borderRadius: BorderRadius.circular(12.r),
+                          border: Border.all(
+                            color: Colors.grey[200]!,
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 30.r,
+                              backgroundColor: AppColors.button.withOpacity(
+                                0.1,
+                              ),
+                              backgroundImage:
+                                  product['seller']['avatar'] != null
+                                  ? NetworkImage(
+                                      '$imageUrl${product['seller']['avatar']}',
+                                    )
+                                  : null,
+                              child: product['seller']['avatar'] == null
+                                  ? Icon(
+                                      Icons.person,
+                                      size: 30.sp,
+                                      color: AppColors.button,
+                                    )
+                                  : null,
+                            ),
+                            SizedBox(width: 16.w),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    product['seller']['name'] ?? '',
+                                    style: TextStyle(
+                                      fontSize: 16.sp,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                  SizedBox(height: 4.h),
+                                  Text(
+                                    product['seller']['email'] ?? '',
+                                    style: TextStyle(
+                                      fontSize: 14.sp,
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ],
                         ),
                       ),
                     ],
-                  ),
 
-                  SizedBox(height: 20.h),
-
-                  // Price Section
-                  Container(
-                    padding: EdgeInsets.all(16.w),
-                    decoration: BoxDecoration(
-                      color: AppColors.button.withOpacity(0.05),
-                      borderRadius: BorderRadius.circular(12.r),
-                      border: Border.all(
-                        color: AppColors.button.withOpacity(0.2),
-                        width: 1,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                _translate('Price', 'মূল্য'),
-                                style: TextStyle(
-                                  fontSize: 14.sp,
-                                  color: Colors.grey[600],
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              SizedBox(height: 8.h),
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  Text(
-                                    '৳${product['discount_price'] ?? product['price']}',
-                                    style: TextStyle(
-                                      fontSize: 28.sp,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColors.button,
-                                    ),
-                                  ),
-                                  if (product['discount_price'] != null) ...[
-                                    SizedBox(width: 12.w),
-                                    Text(
-                                      '৳${product['price']}',
-                                      style: TextStyle(
-                                        fontSize: 18.sp,
-                                        color: Colors.grey,
-                                        decoration: TextDecoration.lineThrough,
-                                      ),
-                                    ),
-                                  ],
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                        if (product['discount'] != null &&
-                            product['discount'] != '0.00')
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 16.w,
-                              vertical: 8.h,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.red,
-                              borderRadius: BorderRadius.circular(8.r),
-                            ),
-                            child: Text(
-                              '-${product['discount']}%',
-                              style: TextStyle(
-                                fontSize: 18.sp,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-
-                  SizedBox(height: 24.h),
-
-                  // Description
-                  if (product['description'] != null) ...[
-                    Text(
-                      _translate('Description', 'বিবরণ'),
-                      style: TextStyle(
-                        fontSize: 18.sp,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    SizedBox(height: 12.h),
-                    Text(
-                      product['description'],
-                      style: TextStyle(
-                        fontSize: 15.sp,
-                        color: Colors.black87,
-                        height: 1.6,
-                      ),
-                    ),
-                    SizedBox(height: 24.h),
+                    SizedBox(height: 100.h),
                   ],
-
-                  // Seller Information
-                  if (product['seller'] != null) ...[
-                    Text(
-                      _translate('Seller Information', 'বিক্রেতার তথ্য'),
-                      style: TextStyle(
-                        fontSize: 18.sp,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    SizedBox(height: 12.h),
-                    Container(
-                      padding: EdgeInsets.all(16.w),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[50],
-                        borderRadius: BorderRadius.circular(12.r),
-                        border: Border.all(color: Colors.grey[200]!, width: 1),
-                      ),
-                      child: Row(
-                        children: [
-                          CircleAvatar(
-                            radius: 30.r,
-                            backgroundColor: AppColors.button.withOpacity(0.1),
-                            backgroundImage: product['seller']['avatar'] != null
-                                ? NetworkImage(
-                                    '$imageUrl${product['seller']['avatar']}',
-                                  )
-                                : null,
-                            child: product['seller']['avatar'] == null
-                                ? Icon(
-                                    Icons.person,
-                                    size: 30.sp,
-                                    color: AppColors.button,
-                                  )
-                                : null,
-                          ),
-                          SizedBox(width: 16.w),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  product['seller']['name'] ?? '',
-                                  style: TextStyle(
-                                    fontSize: 16.sp,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black87,
-                                  ),
-                                ),
-                                SizedBox(height: 4.h),
-                                Text(
-                                  product['seller']['email'] ?? '',
-                                  style: TextStyle(
-                                    fontSize: 14.sp,
-                                    color: Colors.grey[600],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-
-                  SizedBox(height: 100.h),
-                ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
       // Bottom Action Buttons

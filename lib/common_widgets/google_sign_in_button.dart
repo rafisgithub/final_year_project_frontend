@@ -39,9 +39,10 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
           );
 
           // Navigate to home page
-          NavigationService.navigateToWithArgs(Routes.mainNavigationBar, {
-            'pageNum': 0,
-          });
+          NavigationService.navigateToReplacementUntilWithObject(
+            Routes.mainNavigationBar,
+            {'pageNum': 0},
+          );
         } else {
           // Show error message
           ScaffoldMessenger.of(context).showSnackBar(

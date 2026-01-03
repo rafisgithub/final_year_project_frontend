@@ -15,8 +15,10 @@ final class NavigationService {
       navigatorKey.currentState!.pushReplacementNamed(routeName);
 
   static Future<dynamic> navigateToUntilReplacement(String routeName) =>
-      navigatorKey.currentState!
-          .pushNamedAndRemoveUntil(routeName, (route) => false);
+      navigatorKey.currentState!.pushNamedAndRemoveUntil(
+        routeName,
+        (route) => false,
+      );
 
   static Future<dynamic> popAndReplace(String routeName) async {
     return await navigatorKey.currentState!.popAndPushNamed(routeName);
@@ -25,22 +27,17 @@ final class NavigationService {
   static Future<dynamic> navigateToWithArgs(
     String routeName,
     Map<String, dynamic>? map,
-  ) =>
-      navigatorKey.currentState!.pushNamed(routeName, arguments: map);
+  ) => navigatorKey.currentState!.pushNamed(routeName, arguments: map);
 
   static Future<dynamic> popAndReplaceWihArgs(
-          String routeName, Map<String, dynamic>? map) =>
-      navigatorKey.currentState!.popAndPushNamed(routeName, arguments: map);
-
-  static Future<dynamic> navigateToWithObject(
     String routeName,
-    Object? obj,
-  ) =>
+    Map<String, dynamic>? map,
+  ) => navigatorKey.currentState!.popAndPushNamed(routeName, arguments: map);
+
+  static Future<dynamic> navigateToWithObject(String routeName, Object? obj) =>
       navigatorKey.currentState!.pushNamed(routeName, arguments: obj);
 
-  static Future<dynamic> navigateToReplacementUntil(
-    String routeName,
-  ) =>
+  static Future<dynamic> navigateToReplacementUntil(String routeName) =>
       navigatorKey.currentState!.pushNamedAndRemoveUntil(
         routeName,
         (Route<dynamic> route) => false,
@@ -49,9 +46,19 @@ final class NavigationService {
   static Future<dynamic> navigateToReplacementWithObject(
     String routeName,
     Object? obj,
-  ) =>
-      navigatorKey.currentState!
-          .pushReplacementNamed(routeName, arguments: obj);
+  ) => navigatorKey.currentState!.pushReplacementNamed(
+    routeName,
+    arguments: obj,
+  );
+
+  static Future<dynamic> navigateToReplacementUntilWithObject(
+    String routeName,
+    Object? obj,
+  ) => navigatorKey.currentState!.pushNamedAndRemoveUntil(
+    routeName,
+    (Route<dynamic> route) => false,
+    arguments: obj,
+  );
 
   static void get goBack => navigatorKey.currentState!.pop();
 

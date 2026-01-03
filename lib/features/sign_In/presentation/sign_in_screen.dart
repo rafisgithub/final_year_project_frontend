@@ -60,9 +60,10 @@ class _SignInScreenState extends State<SignInScreen> {
             );
 
             // Navigate to home page
-            NavigationService.navigateToWithArgs(Routes.mainNavigationBar, {
-              'pageNum': 0,
-            });
+            NavigationService.navigateToReplacementUntilWithObject(
+              Routes.mainNavigationBar,
+              {'pageNum': 0},
+            );
           } else {
             // Show error message
             ScaffoldMessenger.of(context).showSnackBar(

@@ -122,28 +122,33 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
             ),
         ],
       ),
-      body: _isLoading
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(
-                    color: AppColors.button,
-                    strokeWidth: 2.5,
-                  ),
-                  SizedBox(height: 16.h),
-                  Text(
-                    _translate('Searching...', 'খুঁজছি...'),
-                    style: TextStyle(color: Colors.grey[600], fontSize: 14.sp),
-                  ),
-                ],
-              ),
-            )
-          : _error.isNotEmpty
-          ? _buildErrorState()
-          : _searchResults.isEmpty
-          ? _buildEmptyState()
-          : _buildSearchResults(),
+      body: SafeArea(
+        child: _isLoading
+            ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(
+                      color: AppColors.button,
+                      strokeWidth: 2.5,
+                    ),
+                    SizedBox(height: 16.h),
+                    Text(
+                      _translate('Searching...', 'খুঁজছি...'),
+                      style: TextStyle(
+                        color: Colors.grey[600],
+                        fontSize: 14.sp,
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            : _error.isNotEmpty
+            ? _buildErrorState()
+            : _searchResults.isEmpty
+            ? _buildEmptyState()
+            : _buildSearchResults(),
+      ),
     );
   }
 

@@ -226,190 +226,198 @@ class _ProfileScreenState extends State<ProfileScreen> {
           // 3. Main Content
           Padding(
             padding: EdgeInsets.only(top: 100.h),
-            child: SingleChildScrollView(
-              padding: EdgeInsets.symmetric(horizontal: 16.w),
-              physics: BouncingScrollPhysics(),
-              child: Column(
-                children: [
-                  // Avatar Section (Overlapping)
-                  SizedBox(height: 20.h),
-                  Center(
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        // Glow effect
-                        Container(
-                          width: 130.r,
-                          height: 130.r,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.2),
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        // Avatar
-                        Container(
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white, width: 4.w),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.1),
-                                blurRadius: 10,
-                                spreadRadius: 5,
-                              ),
-                            ],
-                          ),
-                          child: CircleAvatar(
-                            radius: 60.r,
-                            backgroundColor: Colors.white,
-                            backgroundImage: avatarUrl != null
-                                ? NetworkImage(avatarUrl)
-                                : null,
-                            child: avatarUrl == null
-                                ? Icon(
-                                    Icons.person,
-                                    size: 60.sp,
-                                    color: AppColors.button,
-                                  )
-                                : null,
-                          ),
-                        ),
-                        if (_isEditing)
-                          Positioned(
-                            bottom: 0,
-                            right: 0,
-                            child: Container(
-                              padding: EdgeInsets.all(8.w),
-                              decoration: BoxDecoration(
-                                color: AppColors.button,
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: Colors.white,
-                                  width: 3.w,
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.2),
-                                    blurRadius: 4,
-                                    offset: Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: Icon(
-                                Icons.camera_alt,
-                                color: Colors.white,
-                                size: 16.sp,
-                              ),
+            child: SafeArea(
+              top: false,
+              child: SingleChildScrollView(
+                padding: EdgeInsets.symmetric(horizontal: 16.w),
+                physics: BouncingScrollPhysics(),
+                child: Column(
+                  children: [
+                    // Avatar Section (Overlapping)
+                    SizedBox(height: 20.h),
+                    Center(
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          // Glow effect
+                          Container(
+                            width: 130.r,
+                            height: 130.r,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.2),
+                              shape: BoxShape.circle,
                             ),
                           ),
-                      ],
+                          // Avatar
+                          Container(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Colors.white,
+                                width: 4.w,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.1),
+                                  blurRadius: 10,
+                                  spreadRadius: 5,
+                                ),
+                              ],
+                            ),
+                            child: CircleAvatar(
+                              radius: 60.r,
+                              backgroundColor: Colors.white,
+                              backgroundImage: avatarUrl != null
+                                  ? NetworkImage(avatarUrl)
+                                  : null,
+                              child: avatarUrl == null
+                                  ? Icon(
+                                      Icons.person,
+                                      size: 60.sp,
+                                      color: AppColors.button,
+                                    )
+                                  : null,
+                            ),
+                          ),
+                          if (_isEditing)
+                            Positioned(
+                              bottom: 0,
+                              right: 0,
+                              child: Container(
+                                padding: EdgeInsets.all(8.w),
+                                decoration: BoxDecoration(
+                                  color: AppColors.button,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: Colors.white,
+                                    width: 3.w,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withValues(
+                                        alpha: 0.2,
+                                      ),
+                                      blurRadius: 4,
+                                      offset: Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: Icon(
+                                  Icons.camera_alt,
+                                  color: Colors.white,
+                                  size: 16.sp,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
                     ),
-                  ),
 
-                  SizedBox(height: 16.h),
-                  // User Name Display (Non-editable view)
-                  if (!_isEditing) ...[
-                    Text(
-                      _nameController.text,
-                      style: TextStyle(
-                        fontSize: 24.sp,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white, // Still on header bg
+                    SizedBox(height: 16.h),
+                    // User Name Display (Non-editable view)
+                    if (!_isEditing) ...[
+                      Text(
+                        _nameController.text,
+                        style: TextStyle(
+                          fontSize: 24.sp,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white, // Still on header bg
+                        ),
                       ),
-                    ),
-                    Text(
-                      widget.role.toUpperCase(),
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white.withValues(alpha: 0.9),
-                        letterSpacing: 1.5,
-                      ),
-                    ),
-                  ],
-
-                  SizedBox(height: 40.h), // Push content down past header
-                  // Sections
-                  _buildSectionCard(
-                    title: 'Personal Information',
-                    icon: Icons.person_outline,
-                    children: [
-                      _buildModernTextField(
-                        'Full Name',
-                        _nameController,
-                        Icons.badge_outlined,
-                      ),
-                      _buildModernTextField(
-                        'Father Name',
-                        _fatherNameController,
-                        Icons.family_restroom,
-                      ),
-                      _buildModernTextField(
-                        'Email',
-                        _emailController,
-                        Icons.email_outlined,
-                        readOnly: true,
-                      ),
-                      _buildModernTextField(
-                        'Phone',
-                        _phoneController,
-                        Icons.phone_outlined,
-                        readOnly: true,
+                      Text(
+                        widget.role.toUpperCase(),
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white.withValues(alpha: 0.9),
+                          letterSpacing: 1.5,
+                        ),
                       ),
                     ],
-                  ),
 
-                  if (widget.role == 'customer')
+                    SizedBox(height: 40.h), // Push content down past header
+                    // Sections
                     _buildSectionCard(
-                      title: 'Address & Details',
-                      icon: Icons.home_outlined,
+                      title: 'Personal Information',
+                      icon: Icons.person_outline,
                       children: [
                         _buildModernTextField(
-                          'Date of Birth',
-                          _dobController,
-                          Icons.cake_outlined,
+                          'Full Name',
+                          _nameController,
+                          Icons.badge_outlined,
                         ),
                         _buildModernTextField(
-                          'Address',
-                          _addressController,
-                          Icons.location_on_outlined,
-                          maxLines: 2,
+                          'Father Name',
+                          _fatherNameController,
+                          Icons.family_restroom,
+                        ),
+                        _buildModernTextField(
+                          'Email',
+                          _emailController,
+                          Icons.email_outlined,
+                          readOnly: true,
+                        ),
+                        _buildModernTextField(
+                          'Phone',
+                          _phoneController,
+                          Icons.phone_outlined,
+                          readOnly: true,
                         ),
                       ],
                     ),
 
-                  if (widget.role == 'seller')
-                    _buildSectionCard(
-                      title: 'Store Information',
-                      icon: Icons.storefront_outlined,
-                      children: [
-                        _buildModernTextField(
-                          'Store Name',
-                          _storeNameController,
-                          Icons.store,
-                        ),
-                        _buildModernTextField(
-                          'Store Contact',
-                          _storeContactController,
-                          Icons.contact_phone_outlined,
-                        ),
-                        _buildModernTextField(
-                          'Store Address',
-                          _storeAddressController,
-                          Icons.map_outlined,
-                          maxLines: 2,
-                        ),
-                        _buildModernTextField(
-                          'Description',
-                          _storeDescriptionController,
-                          Icons.description_outlined,
-                          maxLines: 3,
-                        ),
-                      ],
-                    ),
+                    if (widget.role == 'customer')
+                      _buildSectionCard(
+                        title: 'Address & Details',
+                        icon: Icons.home_outlined,
+                        children: [
+                          _buildModernTextField(
+                            'Date of Birth',
+                            _dobController,
+                            Icons.cake_outlined,
+                          ),
+                          _buildModernTextField(
+                            'Address',
+                            _addressController,
+                            Icons.location_on_outlined,
+                            maxLines: 2,
+                          ),
+                        ],
+                      ),
 
-                  SizedBox(height: 30.h),
-                ],
+                    if (widget.role == 'seller')
+                      _buildSectionCard(
+                        title: 'Store Information',
+                        icon: Icons.storefront_outlined,
+                        children: [
+                          _buildModernTextField(
+                            'Store Name',
+                            _storeNameController,
+                            Icons.store,
+                          ),
+                          _buildModernTextField(
+                            'Store Contact',
+                            _storeContactController,
+                            Icons.contact_phone_outlined,
+                          ),
+                          _buildModernTextField(
+                            'Store Address',
+                            _storeAddressController,
+                            Icons.map_outlined,
+                            maxLines: 2,
+                          ),
+                          _buildModernTextField(
+                            'Description',
+                            _storeDescriptionController,
+                            Icons.description_outlined,
+                            maxLines: 3,
+                          ),
+                        ],
+                      ),
+
+                    SizedBox(height: 30.h),
+                  ],
+                ),
               ),
             ),
           ),

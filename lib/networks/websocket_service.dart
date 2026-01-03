@@ -79,7 +79,7 @@ class WebSocketService {
   void disconnect() {
     if (_channel != null) {
       print('🔌 [WebSocket] Disconnecting...');
-      _channel!.sink.close(status.goingAway);
+      _channel!.sink.close(status.normalClosure);
       _channel = null;
     }
   }

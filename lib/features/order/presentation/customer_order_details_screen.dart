@@ -70,30 +70,32 @@ class _CustomerOrderDetailsScreenState
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: _isLoading
-          ? Center(child: CircularProgressIndicator(color: AppColors.button))
-          : _errorMessage.isNotEmpty
-          ? Center(
-              child: Text(
-                _errorMessage,
-                style: TextStyle(color: Colors.red, fontSize: 14.sp),
+      body: SafeArea(
+        child: _isLoading
+            ? Center(child: CircularProgressIndicator(color: AppColors.button))
+            : _errorMessage.isNotEmpty
+            ? Center(
+                child: Text(
+                  _errorMessage,
+                  style: TextStyle(color: Colors.red, fontSize: 14.sp),
+                ),
+              )
+            : SingleChildScrollView(
+                padding: EdgeInsets.all(16.w),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildHeaderSection(),
+                    SizedBox(height: 16.h),
+                    _buildStoreSection(),
+                    SizedBox(height: 16.h),
+                    _buildItemsSection(),
+                    SizedBox(height: 16.h),
+                    _buildSummarySection(),
+                  ],
+                ),
               ),
-            )
-          : SingleChildScrollView(
-              padding: EdgeInsets.all(16.w),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildHeaderSection(),
-                  SizedBox(height: 16.h),
-                  _buildStoreSection(),
-                  SizedBox(height: 16.h),
-                  _buildItemsSection(),
-                  SizedBox(height: 16.h),
-                  _buildSummarySection(),
-                ],
-              ),
-            ),
+      ),
     );
   }
 

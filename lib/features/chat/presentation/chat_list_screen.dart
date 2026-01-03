@@ -112,36 +112,41 @@ class _ChatListScreenState extends State<ChatListScreen>
           ),
         ),
       ),
-      body: _isLoading
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(
-                    color: AppColors.button,
-                    strokeWidth: 2.5,
-                  ),
-                  SizedBox(height: 16.h),
-                  Text(
-                    _translate('Loading chats...', 'চ্যাট লোড হচ্ছে...'),
-                    style: TextStyle(color: Colors.grey[600], fontSize: 14.sp),
-                  ),
-                ],
+      body: SafeArea(
+        child: _isLoading
+            ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(
+                      color: AppColors.button,
+                      strokeWidth: 2.5,
+                    ),
+                    SizedBox(height: 16.h),
+                    Text(
+                      _translate('Loading chats...', 'চ্যাট লোড হচ্ছে...'),
+                      style: TextStyle(
+                        color: Colors.grey[600],
+                        fontSize: 14.sp,
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            : _users.isEmpty
+            ? _buildEmptyState()
+            : RefreshIndicator(
+                onRefresh: _loadChats,
+                color: AppColors.button,
+                child: ListView.builder(
+                  physics: BouncingScrollPhysics(),
+                  itemCount: _users.length,
+                  itemBuilder: (context, index) {
+                    return _buildChatTile(_users[index], index);
+                  },
+                ),
               ),
-            )
-          : _users.isEmpty
-          ? _buildEmptyState()
-          : RefreshIndicator(
-              onRefresh: _loadChats,
-              color: AppColors.button,
-              child: ListView.builder(
-                physics: BouncingScrollPhysics(),
-                itemCount: _users.length,
-                itemBuilder: (context, index) {
-                  return _buildChatTile(_users[index], index);
-                },
-              ),
-            ),
+      ),
     );
   }
 
