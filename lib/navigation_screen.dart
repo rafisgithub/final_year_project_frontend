@@ -96,112 +96,117 @@ class _MainNavigationBarState extends State<MainNavigationBar> {
               ),
             ],
           ),
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(16.r),
-                  topRight: Radius.circular(16.r),
+          child: SafeArea(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(16.r),
+                    topRight: Radius.circular(16.r),
+                  ),
                 ),
-              ),
-              child: GNav(
-                rippleColor: AppColors.button.withOpacity(0.2),
-                hoverColor: AppColors.button.withOpacity(0.1),
-                haptic: true,
-                tabBorderRadius: 16.r,
+                child: GNav(
+                  rippleColor: AppColors.button.withOpacity(0.2),
+                  hoverColor: AppColors.button.withOpacity(0.1),
+                  haptic: true,
+                  tabBorderRadius: 16.r,
 
-                curve: Curves.easeOutCubic,
-                duration: const Duration(milliseconds: 400),
-                gap: 10.w,
-                color: Colors.grey[500],
-                activeColor: Colors.white,
-                iconSize: 26.sp,
-                textStyle: TextStyle(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
-                tabBackgroundColor: AppColors.button,
-                tabBackgroundGradient: LinearGradient(
-                  colors: [AppColors.button, AppColors.c28B446],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 14.h),
-                tabMargin: EdgeInsets.symmetric(horizontal: 4.w),
-                selectedIndex: currentTab,
-                onTabChange: (index) {
-                  setState(() {
-                    currentTab = index;
-                  });
-                  // Refresh count if switching to tabs other than Chat,
-                  // or maybe just refresh periodically.
-                  // For now, let's refresh when tab changes.
-                  _loadUnreadMessages();
-                },
-                tabs: [
-                  GButton(
-                    icon: Icons.home_rounded,
-                    text: 'Home',
-                    iconActiveColor: Colors.white,
-                    iconColor: Colors.grey[500],
+                  curve: Curves.easeOutCubic,
+                  duration: const Duration(milliseconds: 400),
+                  gap: 10.w,
+                  color: Colors.grey[500],
+                  activeColor: Colors.white,
+                  iconSize: 26.sp,
+                  textStyle: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
                   ),
-                  GButton(
-                    icon: Icons.camera_alt_rounded,
-                    text: 'Scan',
-                    iconActiveColor: Colors.white,
-                    iconColor: Colors.grey[500],
+                  tabBackgroundColor: AppColors.button,
+                  tabBackgroundGradient: LinearGradient(
+                    colors: [AppColors.button, AppColors.c28B446],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                  GButton(
-                    icon: Icons.chat,
-                    leading: _unreadMessageCount > 0
-                        ? Stack(
-                            clipBehavior: Clip.none,
-                            children: [
-                              Icon(
-                                Icons.chat,
-                                color: currentTab == 2
-                                    ? Colors.white
-                                    : Colors.grey[500],
-                                size: 26.sp,
-                              ),
-                              Positioned(
-                                top: -8,
-                                right: -8,
-                                child: Container(
-                                  padding: EdgeInsets.all(4),
-                                  decoration: BoxDecoration(
-                                    color: Colors.red,
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: Colors.white,
-                                      width: 1.5,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 20.w,
+                    vertical: 14.h,
+                  ),
+                  tabMargin: EdgeInsets.symmetric(horizontal: 4.w),
+                  selectedIndex: currentTab,
+                  onTabChange: (index) {
+                    setState(() {
+                      currentTab = index;
+                    });
+                    // Refresh count if switching to tabs other than Chat,
+                    // or maybe just refresh periodically.
+                    // For now, let's refresh when tab changes.
+                    _loadUnreadMessages();
+                  },
+                  tabs: [
+                    GButton(
+                      icon: Icons.home_rounded,
+                      text: 'Home',
+                      iconActiveColor: Colors.white,
+                      iconColor: Colors.grey[500],
+                    ),
+                    GButton(
+                      icon: Icons.camera_alt_rounded,
+                      text: 'Scan',
+                      iconActiveColor: Colors.white,
+                      iconColor: Colors.grey[500],
+                    ),
+                    GButton(
+                      icon: Icons.chat,
+                      leading: _unreadMessageCount > 0
+                          ? Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                Icon(
+                                  Icons.chat,
+                                  color: currentTab == 2
+                                      ? Colors.white
+                                      : Colors.grey[500],
+                                  size: 26.sp,
+                                ),
+                                Positioned(
+                                  top: -8,
+                                  right: -8,
+                                  child: Container(
+                                    padding: EdgeInsets.all(4),
+                                    decoration: BoxDecoration(
+                                      color: Colors.red,
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: Colors.white,
+                                        width: 1.5,
+                                      ),
                                     ),
-                                  ),
-                                  constraints: BoxConstraints(
-                                    minWidth: 18,
-                                    minHeight: 18,
-                                  ),
-                                  child: Text(
-                                    '$_unreadMessageCount',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 10.sp,
-                                      fontWeight: FontWeight.bold,
+                                    constraints: BoxConstraints(
+                                      minWidth: 18,
+                                      minHeight: 18,
                                     ),
-                                    textAlign: TextAlign.center,
+                                    child: Text(
+                                      '$_unreadMessageCount',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 10.sp,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ],
-                          )
-                        : null,
-                    text: 'Chat',
-                    iconActiveColor: Colors.white,
-                    iconColor: Colors.grey[500],
-                  ),
-                ],
+                              ],
+                            )
+                          : null,
+                      text: 'Chat',
+                      iconActiveColor: Colors.white,
+                      iconColor: Colors.grey[500],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
