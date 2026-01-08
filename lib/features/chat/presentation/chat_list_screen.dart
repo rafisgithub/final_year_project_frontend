@@ -377,7 +377,7 @@ class _ChatListScreenState extends State<ChatListScreen>
   Widget _buildAvatarFallback(ChatUser user) {
     return Center(
       child: Text(
-        user.name[0].toUpperCase(),
+        (user.name.isNotEmpty) ? user.name[0].toUpperCase() : '?',
         style: TextStyle(
           color: Colors.white,
           fontWeight: FontWeight.bold,
